@@ -123,6 +123,20 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true
     ),
+    Seerr(
+        resource = MR.strings.seerr_description,
+        github = "https://github.com/seerr-team/seerr",
+        website = "https://docs.seerr.dev/",
+        icon = MR.images.seerr,
+        tabIcon = MR.images.seerr_tab,
+        defaultPort = 5055,
+        supportsActivityQueue = false,
+        apiBase = "api/v1",
+        testEndpoint = "auth/me",
+        includeTopLevelAutomaticSearchOption = false,
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = false
+    ),
     Prowlarr(
         resource = MR.strings.prowlarr_description,
         github = "https://github.com/Prowlarr/Prowlarr",
@@ -137,16 +151,4 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = false
     )
-//    Seerr(
-//        resource = MR.strings.seerr_description,
-//        github = "https://github.com/seerr-team/seerr",
-//        website = "https://docs.seerr.dev/",
-//        iconKey = "seerr",
-//        defaultPort = 5055,
-//        supportsActivityQueue = false,
-//        apiBase = "api/v1",
-//        testEndpoint = "auth/me",
-//        includeTopLevelAutomaticSearchOption = false,
-//        aspectRatio = AspectRatio.Poster
-//    )
 }

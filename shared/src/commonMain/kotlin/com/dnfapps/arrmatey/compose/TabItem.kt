@@ -4,11 +4,9 @@ import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.StringResource
-
 sealed interface TabItem {
     val iosIcon: String
     val resource: StringResource
-//    val drawerOnly: Boolean
     val isDisabled: Boolean
     val associatedType: InstanceType?
 
@@ -30,7 +28,6 @@ sealed interface TabItem {
     enum class Standard(
         override val iosIcon: String,
         override val resource: StringResource,
-//        override val drawerOnly: Boolean = false,
         override val isDisabled: Boolean = false,
         override val associatedType: InstanceType? = null
     ) : TabItem {
@@ -40,7 +37,7 @@ sealed interface TabItem {
         ACTIVITY("square.and.arrow.down", MR.strings.activity),
         DOWNLOADS("arrow.down.circle", MR.strings.downloads),
         CALENDAR("calendar", MR.strings.schedule),
-        REQUESTS("tray.fill", MR.strings.requests, isDisabled = true),
+        REQUESTS("tray.fill", MR.strings.requests),
         PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr);
 //        SETTINGS("gear", MR.strings.settings, drawerOnly = true);
 

@@ -58,8 +58,8 @@ class PreferencesStore(
         InstanceType.Sonarr -> sonarrInfoCardKey
         InstanceType.Radarr -> radarrInfoCardKey
         InstanceType.Lidarr -> lidarrInfoCardKey
+        InstanceType.Seerr -> seerrInfoCardKey
         InstanceType.Prowlarr -> prowlarrInfoCardKey
-//        InstanceType.Seerr -> seerrInfoCardKey
     }
 
     private val scope = CoroutineScope(Dispatchers.IO)

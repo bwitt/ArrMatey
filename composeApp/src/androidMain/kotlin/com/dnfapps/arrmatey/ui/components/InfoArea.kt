@@ -39,14 +39,18 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun InfoArea(
     infoItems: List<InfoItem>,
-    title: StringResource = MR.strings.information
+    modifier: Modifier = Modifier,
+    title: StringResource = MR.strings.information,
+    header: (@Composable () -> Unit)? = null,
+    footer: (@Composable () -> Unit)? = null,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = mokoString(title),
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.titleLarge
         )
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -55,6 +59,10 @@ fun InfoArea(
             Column (
                 modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp)
             ) {
+                header?.invoke()
+                if (header != null) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                }
                 infoItems.forEachIndexed { index, (key, value) ->
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -65,17 +73,17 @@ fun InfoArea(
                         Text(
                             text = value,
                             color = MaterialTheme.colorScheme.primary,
-                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             textAlign = TextAlign.End,
                             fontSize = 14.sp,
                             modifier = Modifier.widthIn(max = 200.dp)
                         )
                     }
-                    if (index < infoItems.size - 1) {
+                    if (index < infoItems.size - 1 || footer != null) {
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     }
                 }
+                footer?.invoke()
             }
         }
     }

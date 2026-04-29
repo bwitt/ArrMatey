@@ -51,9 +51,9 @@ import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.tabs.ActivityTab
 import com.dnfapps.arrmatey.ui.tabs.ArrTab
 import com.dnfapps.arrmatey.ui.tabs.CalendarTab
+import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
-import com.dnfapps.arrmatey.ui.tabs.RequestsTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
@@ -314,7 +314,7 @@ private fun StandardTabContent(tab: TabItem.Standard) {
         TabItem.Standard.ACTIVITY -> ActivityTab()
         TabItem.Standard.DOWNLOADS -> DownloadsTab()
         TabItem.Standard.CALENDAR -> CalendarTab()
-        TabItem.Standard.REQUESTS -> RequestsTab()
+        TabItem.Standard.REQUESTS -> SeerrTab()
         TabItem.Standard.PROWLARR -> ProwlarrTab()
     }
 }

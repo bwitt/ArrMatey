@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 
 sealed interface HomeTab : NavKey {
     data object SeriesTab : HomeTab
@@ -22,7 +23,14 @@ sealed interface ArrScreen : NavKey {
     data class EpisodeDetails(val series: ArrSeries, val episode: Episode): ArrScreen
     data class SeriesRelease(val seriesId: Long? = null, val seasonNumber: Int? = null, val episodeId: Long? = null): ArrScreen
     data class AlbumRelease(val albumId: Long, val artistId: Long? = null): ArrScreen
+}
 
+sealed interface SeerrScreen: NavKey {
+    data object Home: SeerrScreen
+    data class Details(
+        val tmdbId: Long,
+        val requestType: RequestType
+    ): SeerrScreen
 }
 
 sealed interface SettingsScreen : NavKey {

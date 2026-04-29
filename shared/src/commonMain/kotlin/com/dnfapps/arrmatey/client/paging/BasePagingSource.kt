@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.client.NetworkResult
 
 class BasePagingSource<T : Any, R : Any>(
     private val fetcher: suspend (page: Int) -> NetworkResult<R>,
-    private val processor: (R) -> PageResult<T>
+    private val processor: suspend (R) -> PageResult<T>
 ) : PagingSource<T>() {
 
     override suspend fun load(page: Int): LoadResult<T> {
@@ -19,7 +19,8 @@ class BasePagingSource<T : Any, R : Any>(
                     LoadResult.Page(
                         data = pageResult.items,
                         currentPage = page,
-                        hasNextPage = pageResult.hasNextPage
+                        hasNextPage = pageResult.hasNextPage,
+                        totalItemCount = pageResult.totalItemCount
                     )
                 } catch (e: Exception) {
                     LoadResult.Error(e)
