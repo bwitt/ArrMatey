@@ -107,15 +107,11 @@ fun <T: ArrMedia> MediaItem(
                     .padding(12.dp)
                     .fillMaxWidth()
             ) {
-                val posterUrl = item.getPoster()?.remoteUrl
-                AsyncImage(
-                    model = rememberRemoteImageData(posterUrl),
-                    contentDescription = null,
+                PosterItem(
+                    item = item,
+                    aspectRatio = aspectRatio,
                     modifier = Modifier
                         .height(defaultHeight)
-                        .aspectRatio(aspectRatio.ratio, true)
-                        .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Fit
                 )
 
                 Column(
@@ -135,7 +131,7 @@ fun <T: ArrMedia> MediaItem(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                     MediaDetails(item, isActive)
@@ -149,9 +145,9 @@ fun <T: ArrMedia> MediaItem(
 private fun ColumnScope.MediaDetails(item: ArrMedia, isActive: Boolean) {
     when (item) {
         is ArrSeries -> SeriesDetails(item, isActive)
-        is ArrMovie -> MovieDetails(item)
+        is ArrMovie -> MovieDetails(item, isActive)
         is Arrtist -> ArtistDetails(item, isActive)
-        is Author -> AuthorDetails(item)
+        is Author -> AuthorDetails(item, isActive)
     }
 }
 
@@ -199,7 +195,7 @@ private fun ColumnScope.SeriesDetails(
 
 @OptIn(ExperimentalTime::class)
 @Composable
-private fun ColumnScope.MovieDetails(item: ArrMovie) {
+private fun ColumnScope.MovieDetails(item: ArrMovie, isActive: Boolean) {
     item.releaseDate?.format()?.let {
         Text(it, color = Color.White, fontSize = 14.sp, lineHeight = 18.sp)
     }
@@ -214,11 +210,11 @@ private fun ColumnScope.MovieDetails(item: ArrMovie) {
     if (item.id != null) {
         Spacer(modifier = Modifier.weight(1f))
         LinearProgressIndicator(
-            progress = { item.statusProgress },
+            progress = { if (isActive) 1f else item.statusProgress },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp),
-            color = item.statusColor,
+            color = if (isActive) ArrPurple else item.statusColor,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
     }
@@ -267,13 +263,41 @@ private fun ColumnScope.ArtistDetails(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ColumnScope.AuthorDetails(
-    item: Author
+    item: Author,
+    isActive: Boolean
 ) {
-    Text(
-        text = "TODO",
-        style = MaterialTheme.typography.headlineLargeEmphasized,
-        color = Color.Red
-    )
+    val bookCountString = mokoPlural(MR.plurals.books_count, item.totalBookCount)
+    val fileSizeString = item.fileSize.bytesAsFileSizeString()
+
+    val firstLine = listOfNotNull(bookCountString, fileSizeString)
+        .joinToString(Bullet)
+    Text(firstLine, color = Color.White, fontSize = 14.sp, lineHeight = 18.sp)
+
+    val statusStr = when (item.status) {
+        MediaStatus.Continuing -> item.nextBook?.releaseDate?.format()
+            ?: "${mokoString(item.status.resource)} - ${mokoString(MR.strings.unknown)}"
+        else -> mokoString(item.status.resource)
+    }
+    Text(statusStr, color = Color.White, fontSize = 14.sp, lineHeight = 18.sp)
+
+    if (item.id != null) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 1.dp)
+        ) {
+            Text(text = (item.bookFileCount).toString(), fontSize = 12.sp, color = Color.White)
+            Text(text = "/${item.bookCount}", fontSize = 12.sp, color = Color.White)
+        }
+        LinearProgressIndicator(
+            progress = { item.statusProgress },
+            color = if (isActive) ArrPurple else item.statusColor,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    }
 }
 
 @Composable

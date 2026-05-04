@@ -16,7 +16,11 @@ struct MediaDetailsView: View {
         if let series = item as? ArrSeries {
             SeriesDetailsView(item: series, isActive: isActive)
         } else if let movie = item as? ArrMovie {
-            MovieDetailsView(item: movie)
+            MovieDetailsView(item: movie, isActive: isActive)
+        } else if let artist = item as? Arrtist {
+            ArtistDetailsView(item: artist, isActive: isActive)
+        } else if let author = item as? Author {
+            AuthorDetailsView(item: author, isActive: isActive)
         }
     }
 }

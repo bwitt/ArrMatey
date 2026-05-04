@@ -89,7 +89,7 @@ struct PosterItem<Content: View>: View {
             Image(systemName: "photo.badge.exclamationmark")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 64, height: 64)
+                .frame(width: 48, height: 48)
                 .foregroundColor(.red)
             Text(item.title ?? MR.strings().unknown.localized())
                 .font(.system(size: 14, weight: .semibold))

@@ -128,6 +128,18 @@ struct MediaPreviewScreen: View {
             )
             .presentationDetents([.medium])
             .presentationBackground(.ultraThinMaterial)
+        case let author as Author:
+            AddAuthorForm(
+                author: author,
+                addItemStatus: addItemStatus,
+                qualityProfiles: qualityProfiles,
+                rootFolders: rootFolders,
+                tags: tags,
+                onAddItem: { item, searchOnAdd in
+                    viewModel.addItem(item, searchOnAdd)
+                },
+                onDismiss: { sheetPresented = false }
+            )
         default: EmptyView()
         }
     }

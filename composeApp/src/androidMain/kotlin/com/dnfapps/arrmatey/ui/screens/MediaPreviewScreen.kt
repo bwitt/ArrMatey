@@ -207,7 +207,13 @@ private fun AddMediaSheet(
             onDismiss
         )
         is Author -> AddAuthorSheet(
-
+            item,
+            qualityProfiles,
+            rootFolders,
+            tags,
+            addInProgress,
+            onAddItem,
+            onDismiss
         )
     }
 }

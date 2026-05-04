@@ -11,9 +11,11 @@ import Shared
 struct MediaItemView<T: ArrMedia>: View {
     let item: T
     let isActive: Bool
+    let aspectRatio: AspectRatio
     
-    init(item: T, isActive: Bool = false) {
+    init(item: T, aspectRatio: AspectRatio, isActive: Bool = false) {
         self.item = item
+        self.aspectRatio = aspectRatio
         self.isActive = isActive
     }
     
@@ -35,17 +37,8 @@ struct MediaItemView<T: ArrMedia>: View {
             Color.black.opacity(0.5)
             
             HStack(spacing: 18) {
-                AsyncImage(url: URL(string:item.getPoster()?.remoteUrl ?? "")) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(0.675, contentMode: .fit)
-                } placeholder: {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .aspectRatio(0.675, contentMode: .fit)
-                }
-                .frame(height: 75)
-                .cornerRadius(12)
+                PosterItem(item: item, aspectRatio: aspectRatio)
+                    .frame(height: 75)
                 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(itemTitle)
@@ -56,6 +49,7 @@ struct MediaItemView<T: ArrMedia>: View {
                     MediaDetailsView(item: item, isActive: isActive)
                 }
             }
+            .frame(maxWidth: .infinity)
             .padding(12)
         }
         .frame(maxWidth: .infinity)

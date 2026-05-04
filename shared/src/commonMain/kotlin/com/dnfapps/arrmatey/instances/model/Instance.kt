@@ -79,7 +79,8 @@ enum class InstanceType(
     val testEndpoint: String,
     val includeTopLevelAutomaticSearchOption: Boolean,
     val aspectRatio: AspectRatio,
-    val supportsNotifications: Boolean
+    val supportsNotifications: Boolean,
+    val mockCover: ImageResource? = null
 ) {
     Sonarr(
         resource = MR.strings.sonarr_description,
@@ -93,7 +94,8 @@ enum class InstanceType(
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Poster,
-        supportsNotifications = true
+        supportsNotifications = true,
+        mockCover = MR.images.sonarr_mock_poster
     ),
     Radarr(
         resource = MR.strings.radarr_description,
@@ -107,7 +109,8 @@ enum class InstanceType(
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
-        supportsNotifications = true
+        supportsNotifications = true,
+        mockCover = MR.images.radarr_mock_poster
     ),
     Lidarr(
         resource = MR.strings.lidarr_description,
@@ -121,7 +124,8 @@ enum class InstanceType(
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Cover,
-        supportsNotifications = true
+        supportsNotifications = true,
+        mockCover = MR.images.lidarr_mock_cover
     ),
     Booksehelf(
         resource = MR.strings.bookshelf_description,
@@ -135,7 +139,8 @@ enum class InstanceType(
         testEndpoint = "system/status",
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Cover,
-        supportsNotifications = true
+        supportsNotifications = true,
+        mockCover = MR.images.readarr_mock_cover
     ),
     Seerr(
         resource = MR.strings.seerr_description,

@@ -101,7 +101,7 @@ struct ArrLibraryView: View {
             } else {
                 LazyVStack(spacing: 12) {
                     ForEach(items, id: \.id) { item in
-                        MediaItemView(item: item, isActive: itemIsActive(item))
+                        MediaItemView(item: item, aspectRatio: aspectRatio, isActive: itemIsActive(item))
                             .onTapGesture {
                                 onItemClicked(item)
                             }

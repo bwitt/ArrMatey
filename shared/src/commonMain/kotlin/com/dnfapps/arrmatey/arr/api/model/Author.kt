@@ -79,8 +79,11 @@ data class Author(
     val bookFileCount: Int
         get() = statistics?.bookFileCount ?: 0
 
-    val trackCount: Int
+    val bookCount: Int
         get() = statistics?.bookCount ?: 0
+
+    val totalBookCount: Int
+        get() = statistics?.totalBookCount ?: 0
 
     override val statusProgress: Float
         get() = statistics?.percentOfBooks?.div(100f) ?: 0f

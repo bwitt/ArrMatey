@@ -1,30 +1,30 @@
 //
-//  ArrArtistForm.swift
+//  AddAuthorForm.swift
 //  iosApp
 //
-//  Created by Owen LeJeune on 2026-03-01.
+//  Created by Owen LeJeune on 2026-05-04.
 //
 
-import Shared
 import SwiftUI
+import Shared
 
-struct AddArtistForm: View {
-    let artist: Arrtist
+struct AddAuthorForm: View {
+    let author: Author
     let addItemStatus: OperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
-    let onAddItem: (Arrtist, Bool) -> Void
+    let onAddItem: (Author, Bool) -> Void
     let onDismiss: () -> Void
     
-    @State private var monitor: ArtistMonitorType = .all
-    @State private var monitorNew: ArtistMonitorType = .none
+    @State private var monitor: AuthorMonitorType = .all
+    @State private var monitorNewBooks: AuthorMonitorType = .all
     @State private var selectedQualityProfileId: Int32? = nil
     @State private var selectedRootFolderId: Int32? = nil
     @State private var selectedTags: Set<Int> = Set()
     @State private var searchOnAdd: Bool = false
     
-    private let selectedStatuses: [ArtistMonitorType] = [.all, .none, .future]
+    private let selectedStatuses: [AuthorMonitorType] = [.all, .none, .future]
     
     private var selectedRootFolderPath: String? {
         rootFolders.first { $0.id == selectedRootFolderId }?.path
@@ -58,7 +58,13 @@ struct AddArtistForm: View {
         Form {
             Section {
                 Picker(MR.strings().monitor.localized(), selection: $monitor) {
-                    ForEach(ArtistMonitorType.allCases, id: \.self) { status in
+                    ForEach(AuthorMonitorType.allCases, id: \.self) { status in
+                        Text(status.resource.localized()).tag(status)
+                    }
+                }
+                
+                Picker(MR.strings().monitor_new_books.localized(), selection: $monitorNewBooks) {
+                    ForEach(selectedStatuses, id: \.self) { status in
                         Text(status.resource.localized()).tag(status)
                     }
                 }
@@ -67,16 +73,9 @@ struct AddArtistForm: View {
                     Picker(MR.strings().quality_profile.localized(), selection: $selectedQualityProfileId) {
                         ForEach(qualityProfiles, id: \.self) { qualityProfile in
                             if let name = qualityProfile.name {
-                                Text(name)
-                                    .tag(qualityProfile.id)
+                                Text(name).tag(qualityProfile.id)
                             }
                         }
-                    }
-                }
-                
-                Picker(MR.strings().monitor_new_albums.localized(), selection: $monitorNew) {
-                    ForEach(selectedStatuses, id: \.self) { status in
-                        Text(status.resource.localized()).tag(status)
                     }
                 }
                 
@@ -122,14 +121,14 @@ struct AddArtistForm: View {
             Button {
                 Task {
                     if let profileId = selectedQualityProfileId, let path = selectedRootFolderPath {
-                        let newArtist = artist.doCopyForCreation(
+                        let newAuthor = author.doCopyForCreation(
                             monitor: monitor,
-                            monitorNew: monitorNew,
+                            monitorNew: monitorNewBooks,
                             qualityProfileId: profileId,
                             rootFolderPath: path,
                             tags: Array(selectedTags.map { $0.asKotlinInt })
                         )
-                        onAddItem(newArtist, searchOnAdd)
+                        onAddItem(newAuthor, searchOnAdd)
                     }
                 }
             } label: {

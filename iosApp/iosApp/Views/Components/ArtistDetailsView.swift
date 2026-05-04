@@ -1,24 +1,19 @@
 //
-//  SeriesDetailsView.swift
+//  ArtistDetailsView.swift
 //  iosApp
 //
-//  Created by Owen LeJeune on 2026-02-10.
+//  Created by Owen LeJeune on 2026-05-04.
 //
 
 import SwiftUI
 import Shared
 
-struct SeriesDetailsView: View {
-    let item: ArrSeries
+struct ArtistDetailsView: View {
+    let item: Arrtist
     let isActive: Bool
     
-    private var countString: String {
-        let progress = Int(item.statusProgress)
-        return "\(item.episodeFileCount)/\(item.episodeCount) (\(progress)%)"
-    }
-    
-    private var seasonString: String {
-        return MR.plurals().seasons.localized(item.seasonCount)
+    private var albumCountString: String {
+        return MR.plurals().albums.localized(item.albumCount)
     }
     
     private var fileSizeString: String {
@@ -26,7 +21,7 @@ struct SeriesDetailsView: View {
     }
     
     private var firstLine: String {
-        [item.network, seasonString, fileSizeString]
+        [albumCountString, fileSizeString]
             .compactMap { $0 }
             .joined(separator: " • ")
     }
@@ -34,8 +29,8 @@ struct SeriesDetailsView: View {
     private var statusString: String {
         switch item.status {
         case .continuing:
-            if let nextAiring = item.nextAiring {
-                return formatDate(nextAiring)
+            if let nextRelease = item.nextAlbum?.releaseDate {
+                return formatDate(nextRelease)
             } else {
                 return "\(item.status.name) - \(MR.strings().unknown.localized())"
             }
@@ -78,13 +73,13 @@ struct SeriesDetailsView: View {
             Spacer()
             
             HStack {
-                Text("\(item.episodeFileCount)")
+                Text("\(item.trackFileCount)")
                     .font(.system(size: 12))
                     .foregroundColor(.white)
                 
                 Spacer()
                 
-                Text("/\(item.episodeCount)")
+                Text("/\(item.trackCount)")
                     .font(.system(size: 12))
                     .foregroundColor(.white)
             }

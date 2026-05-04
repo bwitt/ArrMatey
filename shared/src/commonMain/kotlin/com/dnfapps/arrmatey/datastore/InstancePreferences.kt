@@ -10,7 +10,11 @@ data class InstancePreferences(
     val sortBy: SortBy = SortBy.Title,
     val sortOrder: SortOrder = SortOrder.Asc,
     val filterBy: FilterBy = FilterBy.All,
-    val viewType: ViewType = ViewType.Grid
+    val viewType: ViewType = ViewType.Grid,
+    val showFullDetails: Boolean = false,
+    val showOverlay: Boolean = true,
+    val showBannerBackground: Boolean = true,
+    val includeOverview: Boolean = false
 ) {
-    constructor(): this(SortBy.Title, SortOrder.Asc, FilterBy.All, ViewType.Grid)
+    constructor(): this(SortBy.Title)
 }
