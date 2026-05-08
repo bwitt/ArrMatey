@@ -31,10 +31,10 @@ struct iOSApp: App {
                 )) {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(latestUpdate.title)
+                            Text(latestUpdate.title.localized())
                                 .font(.title.bold())
                             
-                            MarkdownView(latestUpdate.contentFile.readText())
+                            MarkdownView(latestUpdate.iosContentFile.readText())
                         }
                         .padding(.horizontal, 12)
                         .padding()

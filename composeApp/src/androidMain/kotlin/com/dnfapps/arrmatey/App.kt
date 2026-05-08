@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.features.ReleaseNotes
 import com.dnfapps.arrmatey.ui.screens.HomeScreen
 import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
+import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.readTextAsState
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.koin.compose.koinInject
@@ -43,7 +44,7 @@ fun App(
                 onDismissRequest = { preferences.markReleaseNotesAsSeen() }
             ) {
                 val update = ReleaseNotes.latestUpdate
-                val releaseNotes by update.contentFile.readTextAsState()
+                val releaseNotes by update.androidContentFile.readTextAsState()
 
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -53,7 +54,7 @@ fun App(
                         .padding(bottom = 24.dp)
                 ) {
                     Text(
-                        text = update.title,
+                        text = mokoString(update.title),
                         style = MaterialTheme.typography.headlineMediumEmphasized
                     )
                     MarkdownText(
