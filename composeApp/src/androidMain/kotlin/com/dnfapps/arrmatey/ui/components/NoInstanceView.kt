@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -45,9 +46,13 @@ fun NoInstanceView(
         Text(
             text = mokoString(MR.strings.no_type_instances, type.name),
             fontSize = 20.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
         )
-        Text(text = mokoString(MR.strings.no_type_instances_message, type.name))
+        Text(
+            text = mokoString(MR.strings.no_type_instances_message, type.name),
+            textAlign = TextAlign.Center
+        )
 
         Spacer(modifier = Modifier.height(4.dp))
 

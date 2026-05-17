@@ -92,8 +92,8 @@ android {
         applicationId = "com.dnfapps.arrmatey"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 18
-        versionName = "0.4.0"
+        versionCode = 19
+        versionName = "0.4.1"
     }
     packaging {
         resources {
