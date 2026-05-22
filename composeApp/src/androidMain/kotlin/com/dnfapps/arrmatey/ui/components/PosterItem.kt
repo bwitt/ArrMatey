@@ -195,20 +195,19 @@ fun BasePosterItem(
     Card(
         shape = RoundedCornerShape(radius.radius),
         elevation = CardDefaults.cardElevation(elevation.elevation),
-        modifier = modifier.then(if (posterHeight == null) Modifier.fillMaxWidth() else Modifier),
+        modifier = modifier,
         onClick = {
             onClick?.invoke()
         },
         enabled = enabled && (onClick != null)
     ) {
         val isFixedSize = posterHeight != null
-        Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier.fillMaxWidth()) {
+        Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier) {
             Box(
                 modifier = Modifier
-                    .then(if (isFixedSize) Modifier.height(posterHeight) else Modifier.fillMaxWidth())
+                    .then(if (isFixedSize) Modifier.height(posterHeight) else Modifier)
                     .aspectRatio(aspectRatio.ratio, isFixedSize)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .fillMaxWidth()
             ) {
                 when (model) {
                     is Painter -> Image(

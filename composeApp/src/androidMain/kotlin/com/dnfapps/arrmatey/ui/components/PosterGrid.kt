@@ -65,7 +65,9 @@ fun PosterGrid(
                 elevation = posterElevation,
                 item = item,
                 onItemClick = onItemClick,
-                modifier = Modifier.padding(gridSpacing.spacing),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(gridSpacing.spacing),
                 additionalContent = {
                     if (showOverlay && item.id != null) {
                         PosterGridItemOverlay(
