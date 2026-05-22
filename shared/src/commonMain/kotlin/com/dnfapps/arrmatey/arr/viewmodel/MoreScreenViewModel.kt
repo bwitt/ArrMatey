@@ -35,6 +35,13 @@ class MoreScreenViewModel(
             initialValue = false
         )
 
+    val hideInstanceSwitcher = preferencesStore.hideInstanceSwitcher
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
 
@@ -124,6 +131,10 @@ class MoreScreenViewModel(
 
     fun toggleUseServiceNavLogos() {
         preferencesStore.toggleUseServiceNavLogos()
+    }
+
+    fun toggleInstanceSwitcher() {
+        preferencesStore.toggleInstanceSwitcher()
     }
 
 }

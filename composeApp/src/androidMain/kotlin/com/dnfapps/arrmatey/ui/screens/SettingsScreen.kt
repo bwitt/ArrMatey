@@ -93,6 +93,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import androidx.core.net.toUri
+import com.dnfapps.arrmatey.ui.icons.Hard_drive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,6 +114,7 @@ fun SettingsScreen(
     var confirmShareLastLog by remember { mutableStateOf(false) }
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
+    val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
 
     BackHandler {
         navigationManager.openDrawer()
@@ -271,6 +273,18 @@ fun SettingsScreen(
                             )
                         },
                         onClick = { viewModel.toggleUseServiceNavLogos() }
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Hard_drive),
+                        title = mokoString(MR.strings.instance_switcher_toggle_title),
+                        subtitle = mokoString(MR.strings.instance_switcher_toggle_description),
+                        trailingContent = {
+                            Switch(
+                                checked = hideInstanceSwitcher,
+                                onCheckedChange = { viewModel.toggleInstanceSwitcher() }
+                            )
+                        },
+                        onClick = { viewModel.toggleInstanceSwitcher() }
                     )
                 )
             )

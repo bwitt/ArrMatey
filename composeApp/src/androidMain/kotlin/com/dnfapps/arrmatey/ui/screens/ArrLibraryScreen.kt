@@ -46,6 +46,7 @@ import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.ArrScreen
 import com.dnfapps.arrmatey.navigation.Navigation
@@ -72,6 +73,7 @@ fun ArrLibraryScreen(
     arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject(),
+    globalPreferencesStore: PreferencesStore = koinInject(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigation<ArrScreen> = navigationManager.arr(type)
 ) {
@@ -81,6 +83,8 @@ fun ArrLibraryScreen(
     val uiState by arrMediaViewModel.uiState.collectAsStateWithLifecycle()
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val preferences by arrMediaViewModel.preferences.collectAsStateWithLifecycle()
+
+    val hideInstancePicker by globalPreferencesStore.hideInstanceSwitcher.collectAsStateWithLifecycle(false)
 
     val errorMessage by arrMediaViewModel.errorMessage.collectAsStateWithLifecycle()
 
@@ -123,12 +127,14 @@ fun ArrLibraryScreen(
                 },
                 navigationIcon = { NavigationDrawerButton() },
                 actions = {
-                    InstancePicker(
-                        type = type,
-                        currentInstance = instancesState.selectedInstance,
-                        typeInstances = instancesState.instances,
-                        onInstanceSelected = { instancesViewModel.setInstanceActive(it) }
-                    )
+                    if (!hideInstancePicker || instancesState.instances.size > 1) {
+                        InstancePicker(
+                            type = type,
+                            currentInstance = instancesState.selectedInstance,
+                            typeInstances = instancesState.instances,
+                            onInstanceSelected = { instancesViewModel.setInstanceActive(it) }
+                        )
+                    }
                     LibraryFilterMenu(
                         type = type,
                         filterBy = preferences.filterBy,

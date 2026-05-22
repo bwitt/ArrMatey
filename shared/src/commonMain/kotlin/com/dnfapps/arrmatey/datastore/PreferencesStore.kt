@@ -55,6 +55,7 @@ class PreferencesStore(
     private val useDynamicThemeKey = booleanPreferencesKey("useDynamicTheme")
     private val useClearLogoKey = booleanPreferencesKey("useClearLogo")
     private val useServiceNavLogosKey = booleanPreferencesKey("useServiceNavLogos")
+    private val hideInstanceSwitcherKey = booleanPreferencesKey("hideInstanceSwitcher")
     private val tabPreferencesKey = stringPreferencesKey("tabPreferences")
     private val lastReleaseNotesKey = intPreferencesKey("lastReleaseNotes")
     private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
@@ -345,6 +346,20 @@ class PreferencesStore(
             dataStore.edit { preferences ->
                 val current = preferences[useServiceNavLogosKey] ?: false
                 preferences[useServiceNavLogosKey] = !current
+            }
+        }
+    }
+
+    val hideInstanceSwitcher: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[hideInstanceSwitcherKey] ?: false
+        }
+
+    fun toggleInstanceSwitcher() {
+        scope.launch {
+            dataStore.edit { preferences ->
+                val current = preferences[hideInstanceSwitcherKey] ?: false
+                preferences[hideInstanceSwitcherKey] = !current
             }
         }
     }
