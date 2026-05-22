@@ -81,6 +81,7 @@ enum class InstanceType(
     val includeTopLevelAutomaticSearchOption: Boolean,
     val aspectRatio: AspectRatio,
     val supportsNotifications: Boolean,
+    val getApiKeyEndpoint: String? = null,
     val mockCover: ImageResource? = null,
     val mockMedia: MockMedia = MockMedia.Default
 ) {
@@ -94,6 +95,7 @@ enum class InstanceType(
         supportsActivityQueue = true,
         apiBase = "api/v3",
         testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = true,
@@ -110,6 +112,7 @@ enum class InstanceType(
         supportsActivityQueue = true,
         apiBase = "api/v3",
         testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = true,
@@ -126,6 +129,7 @@ enum class InstanceType(
         supportsActivityQueue = true,
         apiBase = "api/v1",
         testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
@@ -142,6 +146,7 @@ enum class InstanceType(
         supportsActivityQueue = true,
         apiBase = "api/v1",
         testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
         includeTopLevelAutomaticSearchOption = true,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
@@ -158,6 +163,7 @@ enum class InstanceType(
         supportsActivityQueue = false,
         apiBase = "api/v1",
         testEndpoint = "auth/me",
+        getApiKeyEndpoint = "settings/main",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false
@@ -172,6 +178,7 @@ enum class InstanceType(
         supportsActivityQueue = false,
         apiBase = "api/v1",
         testEndpoint = "system/status",
+        getApiKeyEndpoint = "settings/general",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = false

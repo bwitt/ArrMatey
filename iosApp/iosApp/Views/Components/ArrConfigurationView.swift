@@ -229,6 +229,26 @@ struct ArrConfigurationView: View {
                 .multilineTextAlignment(.trailing)
                 .textInputAutocapitalization(.never)
             }
+            
+            if let getApiKey = instanceType.getApiKeyEndpoint {
+                let enabled = !uiState.apiEndpoint.isValidUrl()
+                Button(action: {
+                    if let url = URL(string: "\(uiState.apiEndpoint)/\(getApiKey)") {
+                        openURL(url)
+                    }
+                }) {
+                    HStack(spacing: 4) {
+                        Text(MR.strings().api_key_in_browser.localized())
+                            .underline()
+                            .font(.caption)
+                        Image(systemName: "safari")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(enabled ? Color.accentColor : Color.secondary)
+                }
+                .disabled(!enabled)
+                .buttonStyle(.plain)
+            }
         } footer: {
             Text(MR.strings().host_description.formatted(args: [instanceType.name]))
         }

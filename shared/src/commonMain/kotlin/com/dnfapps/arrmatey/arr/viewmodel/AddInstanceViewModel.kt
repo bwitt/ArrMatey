@@ -172,7 +172,7 @@ class AddInstanceViewModel(
         val instance = Instance(
             type = type,
             label = s.instanceLabel,
-            url = s.apiEndpoint,
+            url = s.apiEndpoint.trimEnd('/'),
             apiKey = s.apiKey,
             noApiKeyRequired = s.noApiKeyRequired,
             slowInstance = s.isSlowInstance,

@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
@@ -52,11 +54,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.client.DEFAULT_SLOW_TIMEOUT
 import com.dnfapps.arrmatey.database.dao.ConflictField
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.entensions.openAppSettings
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.HeaderRestrictionType
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -70,6 +74,7 @@ import com.dnfapps.arrmatey.ui.components.LabelledCheckbox
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.getNetworkUtils
+import com.dnfapps.arrmatey.utils.isValidUrl
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.thenGet
 import org.koin.compose.koinInject
@@ -93,6 +98,8 @@ fun ArrConfigurationScreen(
     onTestLocalConnection: () -> Unit,
     onToggleNotificationsEnabled: () -> Unit
 ) {
+    val context = LocalContext.current
+
     val apiEndpoint = uiState.apiEndpoint
     val apiKey = uiState.apiKey
     val instanceLabel = uiState.instanceLabel
@@ -172,6 +179,34 @@ fun ArrConfigurationScreen(
             singleLine = true,
             enabled = !uiState.noApiKeyRequired
         )
+
+        instanceType.getApiKeyEndpoint?.let { getApiKey ->
+            val enabled = uiState.apiEndpoint.isValidUrl()
+            val color = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.clickable(
+                    enabled = enabled
+                ) {
+                    val fullUrl = "${uiState.apiEndpoint}/$getApiKey"
+                    context.openLink(fullUrl)
+                }
+            ) {
+                Text(
+                    text = mokoString(MR.strings.api_key_in_browser),
+                    textDecoration = TextDecoration.Underline,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = color
+                )
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = color
+                )
+            }
+        }
 
         if (instanceType.supportsNotifications) {
             Section {
