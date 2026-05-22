@@ -21,6 +21,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -104,16 +105,25 @@ fun ArrViewCustomizationSheet(
                     }
                 }
             }
-            SingleChoiceSegmentedButtonRow {
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 ViewType.entries.forEachIndexed { index, viewType ->
                     SegmentedButton(
+                        modifier = Modifier.weight(1f),
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index,
                             count = ViewType.entries.size
                         ),
                         onClick = { onViewTypeChanged(viewType) },
                         selected = viewType == preferences.viewType,
-                        label = { Text(mokoString(viewType.resource)) }
+                        label = {
+                            Text(
+                                text = mokoString(viewType.resource),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     )
                 }
             }
@@ -176,13 +186,20 @@ fun ListTypeOptions(
             ) {
                 Blur.entries.forEachIndexed { index, blur ->
                     SegmentedButton(
+                        modifier = Modifier.weight(1f),
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index,
                             count = Blur.entries.size
                         ),
                         onClick = { onBannerBlurChanged(blur) },
                         selected = blur == preferences.bannerBlur,
-                        label = { Text(mokoString(blur.label)) },
+                        label = {
+                            Text(
+                                text = mokoString(blur.label),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
                         enabled = preferences.showBannerBackground
                     )
                 }
@@ -229,13 +246,20 @@ fun GridTypeOptions(
             ) {
                 GridDensity.entries.forEachIndexed { index, density ->
                     SegmentedButton(
+                        modifier = Modifier.weight(1f),
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index,
                             count = GridDensity.entries.size
                         ),
                         onClick = { onGridDensityChanged(density) },
                         selected = density == preferences.gridDensity,
-                        label = { Text(mokoString(density.label)) }
+                        label = {
+                            Text(
+                                text = mokoString(density.label),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     )
                 }
             }
@@ -250,13 +274,20 @@ fun GridTypeOptions(
             ) {
                 GridSpacing.entries.forEachIndexed { index, spacing ->
                     SegmentedButton(
+                        modifier = Modifier.weight(1f),
                         shape = SegmentedButtonDefaults.itemShape(
                             index = index,
                             count = GridSpacing.entries.size
                         ),
                         onClick = { onGridSpacingChanged(spacing) },
                         selected = spacing == preferences.gridSpacing,
-                        label = { Text(mokoString(spacing.label)) }
+                        label = {
+                            Text(
+                                text = mokoString(spacing.label),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     )
                 }
             }
@@ -285,13 +316,20 @@ fun PosterOptions(
         ) {
             PosterElevation.entries.forEachIndexed { index, elevation ->
                 SegmentedButton(
+                    modifier = Modifier.weight(1f),
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index,
                         count = PosterElevation.entries.size
                     ),
                     onClick = { onPosterElevationChanged(elevation) },
                     selected = elevation == preferences.posterElevation,
-                    label = { Text(mokoString(elevation.label)) }
+                    label = {
+                        Text(
+                            text = mokoString(elevation.label),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 )
             }
         }
@@ -306,13 +344,20 @@ fun PosterOptions(
         ) {
             PosterRadius.entries.forEachIndexed { index, radius ->
                 SegmentedButton(
+                    modifier = Modifier.weight(1f),
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index,
                         count = PosterRadius.entries.size
                     ),
                     onClick = { onPosterRadiusChanged(radius) },
                     selected = radius == preferences.posterRadius,
-                    label = { Text(mokoString(radius.label)) }
+                    label = {
+                        Text(
+                            text = mokoString(radius.label),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 )
             }
         }
