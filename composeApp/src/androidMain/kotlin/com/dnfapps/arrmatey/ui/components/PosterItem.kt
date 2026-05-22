@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -58,9 +61,9 @@ fun PosterItem(
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
     posterModel: Any? = null,
-    additionalContent: @Composable BoxScope.() -> Unit = {}
+    additionalContent: @Composable BoxScope.() -> Unit = {},
 ) {
-    var imageLoadError by remember { mutableStateOf(false) }
+    var imageLoadError by remember { mutableStateOf(value = false) }
 
     val model = posterModel ?: rememberRemoteImageData(
         url = item.getPoster()?.remoteUrl,
@@ -192,17 +195,20 @@ fun BasePosterItem(
     Card(
         shape = RoundedCornerShape(radius.radius),
         elevation = CardDefaults.cardElevation(elevation.elevation),
-        modifier = modifier,
+        modifier = modifier.then(if (posterHeight == null) Modifier.fillMaxWidth() else Modifier),
         onClick = {
             onClick?.invoke()
         },
-        enabled = enabled && onClick != null
+        enabled = enabled && (onClick != null)
     ) {
-        Column {
+        val isFixedSize = posterHeight != null
+        Column(modifier = if (isFixedSize) Modifier.width(IntrinsicSize.Min) else Modifier.fillMaxWidth()) {
             Box(
                 modifier = Modifier
-                    .then(posterHeight?.let { Modifier.height(it) } ?: Modifier)
-                    .aspectRatio(aspectRatio.ratio, true)
+                    .then(if (isFixedSize) Modifier.height(posterHeight) else Modifier.fillMaxWidth())
+                    .aspectRatio(aspectRatio.ratio, isFixedSize)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .fillMaxWidth()
             ) {
                 when (model) {
                     is Painter -> Image(
@@ -253,6 +259,7 @@ fun BasePosterItem(
             ) {
                 Column(
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(horizontal = 8.dp)
                         .padding(bottom = 8.dp)
                         .padding(top = 16.dp)
