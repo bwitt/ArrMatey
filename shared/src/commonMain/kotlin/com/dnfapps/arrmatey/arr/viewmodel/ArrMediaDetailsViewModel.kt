@@ -13,6 +13,7 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetMediaDetailsUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
@@ -42,6 +43,7 @@ class ArrMediaDetailsViewModel(
     private val performAutomaticSearchUseCase: PerformAutomaticSearchUseCase,
     private val updateMediaUseCase: UpdateMediaUseCase,
     private val deleteMediaUseCase: DeleteMediaUseCase,
+    private val deleteMovieFileUseCase: DeleteMovieFileUseCase,
     private val deleteSeasonFilesUseCase: DeleteSeasonFilesUseCase,
     private val deleteAlbumFilesUseCase: DeleteAlbumFilesUseCase,
     private val performRefreshUseCase: PerformRefreshUseCase
@@ -76,6 +78,9 @@ class ArrMediaDetailsViewModel(
 
     private val _deleteAlbumStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val deleteAlbumStatus: StateFlow<OperationStatus> = _deleteAlbumStatus.asStateFlow()
+
+    private val _deleteMovieFileStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val deleteMovieFileStatus: StateFlow<OperationStatus> = _deleteMovieFileStatus.asStateFlow()
 
 
     private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
@@ -246,6 +251,16 @@ class ArrMediaDetailsViewModel(
             deleteAlbumFilesUseCase(mediaId, albumId, repository)
                 .collect { status ->
                     _deleteAlbumStatus.value = status
+                }
+        }
+    }
+
+    fun deleteMovieFile() {
+        viewModelScope.launch {
+            val repository = currentRepository ?: return@launch
+            deleteMovieFileUseCase(mediaId, repository)
+                .collect { status ->
+                    _deleteMovieFileStatus.value = status
                 }
         }
     }

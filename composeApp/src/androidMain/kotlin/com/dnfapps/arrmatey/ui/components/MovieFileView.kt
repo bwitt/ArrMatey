@@ -32,6 +32,7 @@ fun MovieFileView(
     movieExtraFiles: List<ExtraFile>,
     searchIds: Set<Long>,
     onAutomaticSearch: () -> Unit,
+    onDeleteFile: () -> Unit,
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigation<ArrScreen> = navigationManager.movies()
 ) {
@@ -71,7 +72,7 @@ fun MovieFileView(
             )
         }
         movie.movieFile?.let { file ->
-            FileCard(file)
+            FileCard(file, onDelete = onDeleteFile)
         }
         movieExtraFiles.takeUnless { it.isEmpty() }?.forEach { extraFile ->
             ExtraFileCard(extraFile)

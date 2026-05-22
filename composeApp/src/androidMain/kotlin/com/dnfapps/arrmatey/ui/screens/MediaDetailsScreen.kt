@@ -150,6 +150,7 @@ fun MediaDetailsScreen(
     var moveFilesItem by remember { mutableStateOf<ArrMedia?>(null) }
     var confirmDeleteSeasonNumber by remember { mutableStateOf<Int?>(null) }
     var confirmDeleteAlbum by remember { mutableStateOf<Long?>(null) }
+    var confirmDeleteMovie by remember { mutableStateOf(false) }
 
     LaunchedEffect(editStatus) {
         when (val status = editStatus) {
@@ -274,6 +275,9 @@ fun MediaDetailsScreen(
                                         searchIds = automaticSearchIds,
                                         onAutomaticSearch = {
                                             mediaDetailsViewModel.performAutomaticLookup()
+                                        },
+                                        onDeleteFile = {
+                                            mediaDetailsViewModel.deleteMovieFile()
                                         }
                                     )
                                     is Arrtist -> AlbumsArea(
@@ -332,6 +336,27 @@ fun MediaDetailsScreen(
                     onDismiss = { confirmDelete = false },
                     onDelete = { deleteFiles, addExclusion ->
                         mediaDetailsViewModel.deleteMedia(deleteFiles, addExclusion)
+                    }
+                )
+            }
+
+            if (confirmDeleteMovie) {
+                AlertDialog(
+                    onDismissRequest = { confirmDeleteMovie = false },
+                    title = { Text(mokoString(MR.strings.confirm_delete)) },
+                    text = { Text(text = mokoString(MR.strings.confirm_delete_movie)) },
+                    dismissButton = {
+                        TextButton(onClick = { confirmDeleteMovie = false  }) {
+                            Text(mokoString(MR.strings.cancel))
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            confirmDeleteMovie = false
+                            mediaDetailsViewModel.deleteMovieFile()
+                        }) {
+                            Text(mokoString(MR.strings.confirm))
+                        }
                     }
                 )
             }

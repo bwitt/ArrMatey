@@ -730,6 +730,11 @@ class ArrInstanceRepository(
                 }
         }
 
+    suspend fun deleteMovieFile(movieId: Long): NetworkResult<Unit> =
+        safePerformRadarr { client ->
+            client.deleteMovieFile(movieId)
+        }
+
     // Lidarr-specific
     suspend fun getArtistAlbums(artistId: Long): NetworkResult<List<ArrAlbum>> =
         safePerformLidarr { client ->

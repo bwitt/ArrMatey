@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteAlbumFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteBookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteEpisodeFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
@@ -281,6 +282,7 @@ val useCaseModule = module {
     factory { NotificationCleanupUseCase(get()) }
     factory { ScheduleNotificationUseCase(get(), get()) }
     factory { DeleteBookFilesUseCase() }
+    factory { DeleteMovieFileUseCase() }
     factory { GetAuthorFilesUseCase(get()) }
     factory { GetBookEditionUseCase() }
     factory { GetBookHistoryUseCase() }
@@ -294,7 +296,7 @@ val viewModelModule = module {
         ArrMediaViewModel(type, get(), get(), get())
     }
     factory { (id: Long, type: InstanceType) ->
-        ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get())
+        ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())

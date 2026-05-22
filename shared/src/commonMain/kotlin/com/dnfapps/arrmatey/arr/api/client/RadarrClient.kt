@@ -143,4 +143,7 @@ class RadarrClient(
     suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> =
         get("extrafile", mapOf("movieId" to id))
 
+    suspend fun deleteMovieFile(id: Long): NetworkResult<Unit> =
+        delete("movieFile/$id")
+
 }
