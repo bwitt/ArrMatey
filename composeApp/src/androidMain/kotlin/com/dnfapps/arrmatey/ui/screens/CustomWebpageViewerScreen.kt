@@ -1,18 +1,27 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.DropdownMenuGroup
@@ -22,6 +31,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,16 +40,20 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -56,6 +71,10 @@ fun CustomWebpageViewerScreen(
     var canGoBack by remember { mutableStateOf(false) }
     var canGoForward by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
+
+    var progress by remember { mutableFloatStateOf(0f) }
+    var currentUrl by remember { mutableStateOf("") }
+    var currentTitle by remember { mutableStateOf("") }
 
     val lifecyclerOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
@@ -110,7 +129,25 @@ fun CustomWebpageViewerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(webpage?.name ?: "") },
+                title = {
+                    Column {
+                        Text(
+                            text = currentTitle.ifEmpty { webpage?.name ?: "" },
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        if (currentUrl.isNotEmpty()) {
+                            Text(
+                                text = currentUrl,
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                },
                 navigationIcon = { NavigationDrawerButton() },
                 actions = {
                     IconButton(
@@ -141,7 +178,7 @@ fun CustomWebpageViewerScreen(
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.refresh)) },
                                     selected = false,
-                                    shapes = MenuDefaults.itemShape(0, 2),
+                                    shapes = MenuDefaults.itemShape(0, 4),
                                     leadingIcon = { Icon(Icons.Default.Refresh, null) },
                                     onClick = {
                                         menuExpanded = false
@@ -151,15 +188,47 @@ fun CustomWebpageViewerScreen(
                                 DropdownMenuItem(
                                     text = { Text(mokoString(MR.strings.share)) },
                                     selected = false,
-                                    shapes = MenuDefaults.itemShape(1, 2),
+                                    shapes = MenuDefaults.itemShape(1, 4),
                                     leadingIcon = { Icon(Icons.Default.Share, null) },
                                     onClick = {
                                         menuExpanded = false
                                         val intent = Intent(Intent.ACTION_SEND).apply {
                                             type = "text/plain"
-                                            putExtra(Intent.EXTRA_TEXT, webpage?.url)
+                                            putExtra(Intent.EXTRA_TEXT, currentUrl.ifEmpty { webpage?.url ?: "" })
                                         }
                                         context.startActivity(Intent.createChooser(intent, null))
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(mokoString(MR.strings.open_in_browser)) },
+                                    selected = false,
+                                    shapes = MenuDefaults.itemShape(2, 5),
+                                    leadingIcon = { Icon(Icons.Default.OpenInBrowser, null) },
+                                    onClick = {
+                                        menuExpanded = false
+                                        context.openLink(currentUrl.ifEmpty { webpage?.url ?: "" })
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(mokoString(MR.strings.copy_link)) },
+                                    selected = false,
+                                    shapes = MenuDefaults.itemShape(3, 5),
+                                    leadingIcon = { Icon(Icons.Default.ContentCopy, null) },
+                                    onClick = {
+                                        menuExpanded = false
+                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                        val clip = ClipData.newPlainText("URL", currentUrl.ifEmpty { webpage?.url ?: "" })
+                                        clipboard.setPrimaryClip(clip)
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(mokoString(MR.strings.replace_url_with_current)) },
+                                    selected = false,
+                                    shapes = MenuDefaults.itemShape(4, 5),
+                                    leadingIcon = { Icon(Icons.Default.Link, null) },
+                                    onClick = {
+                                        menuExpanded = false
+                                        customWebpageViewModel.updateUrl(currentUrl)
                                     }
                                 )
                             }
@@ -168,9 +237,13 @@ fun CustomWebpageViewerScreen(
                 }
             )
         },
-        contentWindowInsets = WindowInsets.systemBars
+        contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             webpage?.let { webpage ->
                 AndroidView(
                     factory = { context ->
@@ -184,6 +257,17 @@ fun CustomWebpageViewerScreen(
                                     super.doUpdateVisitedHistory(view, url, isReload)
                                     canGoBack = view?.canGoBack() == true
                                     canGoForward = view?.canGoForward() == true
+                                    currentUrl = url ?: ""
+                                }
+                            }
+
+                            webChromeClient = object : WebChromeClient() {
+                                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                                    progress = newProgress / 100f
+                                }
+
+                                override fun onReceivedTitle(view: WebView?, title: String?) {
+                                    currentTitle = title ?: ""
                                 }
                             }
 
@@ -215,6 +299,15 @@ fun CustomWebpageViewerScreen(
                         view.destroyDrawingCache()
                         view.destroy()
                     }
+                )
+            }
+
+            if (progress > 0f && progress < 1f) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
                 )
             }
         }

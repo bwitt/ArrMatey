@@ -17,6 +17,9 @@ interface CustomWebpageDao {
     @Query("SELECT * FROM custom_webpages WHERE id = :id")
     suspend fun getWebpageById(id: Long): CustomWebpage?
 
+    @Query("SELECT * FROM custom_webpages WHERE id = :id")
+    fun observeWebpageById(id: Long): Flow<CustomWebpage?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(webpage: CustomWebpage): Long
 

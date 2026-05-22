@@ -74,6 +74,7 @@
     <string name="manual_import">Manual Import</string>
     <string name="refresh">Refresh</string>
     <string name="search_monitored">Search monitored</string>
+    <string name="copy_link">Copy Link</string>
 
     <!-- Labels -->
     <string name="label">Label</string>
@@ -256,6 +257,8 @@
     <string name="books_area_series_tab">Series (%1$d)</string>
     <string name="instance_switcher_toggle_title">Smart instance switcher</string>
     <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one instance is configured</string>
+    <string name="open_in_browser">Open in Browser</string>
+    <string name="replace_url_with_current">Replace saved URL with current</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>

@@ -17,6 +17,9 @@ class CustomWebpageRepository(
         return dao.getWebpageById(id)
     }
 
+    fun observeWebpageById(id: Long): Flow<CustomWebpage?> =
+        dao.observeWebpageById(id)
+
     suspend fun addWebpage(webpage: CustomWebpage): InsertResult {
         return try {
             val id = dao.insert(webpage)

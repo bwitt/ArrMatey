@@ -128,6 +128,7 @@ import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
+import com.dnfapps.arrmatey.webpage.usecase.GetCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.usecase.UpdateCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageConfigurationViewModel
 import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
@@ -275,6 +276,7 @@ val useCaseModule = module {
     factory { AddCustomWebpageUseCase(get()) }
     factory { UpdateCustomWebpageUseCase(get()) }
     factory { DeleteCustomWebpageUseCase(get()) }
+    factory { GetCustomWebpageUseCase(get()) }
     factory { CloseIssueUseCase(get()) }
     factory { NotificationCleanupUseCase(get()) }
     factory { ScheduleNotificationUseCase(get(), get()) }
@@ -335,7 +337,7 @@ val viewModelModule = module {
         CustomWebpageConfigurationViewModel(webpageId, get(), get(), get(), get())
     }
     factory { (webpageId: Long) ->
-        CustomWebpageViewerViewModel(webpageId, get())
+        CustomWebpageViewerViewModel(webpageId, get(), get())
     }
     factory { (issuePackage: MediaIssuePackage) ->
         IssueDetailsViewModel(issuePackage, get(), get(), get())
