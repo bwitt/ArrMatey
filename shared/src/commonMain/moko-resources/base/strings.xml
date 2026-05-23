@@ -407,6 +407,7 @@
     <string name="navigation_bar_configuration">Navigation bar configuration</string>
     <string name="navigation_items_selected">Navigation Bar</string>
     <string name="navigation_items_drawer">Drawer</string>
+    <string name="navigation_items_hidden">Hidden</string>
     <string name="customize_navigation">Customize Navigation</string>
     <string name="customize_navigation_description">Drag items to reorder your navigation bar. Items moved to the 'Drawer' section will be accessible via the drawer menu. You can have at most five items in the navigation bar, and must have at least one item. If there is only one item in the navigation bar section, the navigation bar will be hidden.</string>
 

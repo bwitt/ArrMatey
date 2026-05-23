@@ -23,7 +23,8 @@ class TabManager(
 
     data class TabConfiguration(
         val visibleTabs: List<TabItem> = TabItem.defaultStandardEntries(),
-        val drawerTabs: List<TabItem> = TabItem.defaultHiddenStandard()
+        val drawerTabs: List<TabItem> = TabItem.defaultHiddenStandard(),
+        val hiddenTabs: List<TabItem> = emptyList()
     ) {
         constructor(): this(TabItem.defaultStandardEntries()) // empty ios constructor
     }
@@ -34,7 +35,8 @@ class TabManager(
     ) { prefs, webpages ->
         TabConfiguration(
             visibleTabs = buildVisibleTabs(prefs, webpages),
-            drawerTabs = buildDrawerTabs(prefs, webpages)
+            drawerTabs = buildDrawerTabs(prefs, webpages),
+            hiddenTabs = buildHiddenTabs(prefs, webpages)
         )
     }
         .stateIn(
@@ -83,10 +85,21 @@ class TabManager(
         return buildList {
             prefs.orderedHiddenKeys.mapNotNull { key -> allItems[key] }.forEach { add(it) }
 
-            val tracked = (prefs.orderedVisibleKeys + prefs.orderedHiddenKeys).toSet()
+            val tracked = (prefs.orderedVisibleKeys + prefs.orderedHiddenKeys + prefs.orderedRemovedKeys).toSet()
             webpages.filter { "webpage_${it.id}" !in tracked }.forEach {
                 add(TabItem.CustomWebpage(it.id, it.name, it.url, it.headers))
             }
         }
+    }
+
+    private fun buildHiddenTabs(
+        prefs: TabPreferences,
+        webpages: List<CustomWebpage>
+    ): List<TabItem> {
+        val standardItems = TabItem.Standard.entries.associateBy { it.key }
+        val webpageItems = webpages.associate { "webpage_${it.id}" to TabItem.CustomWebpage(it.id, it.name, it.url, it.headers) }
+        val allItems = standardItems + webpageItems
+
+        return prefs.orderedRemovedKeys.mapNotNull { key -> allItems[key] }
     }
 }

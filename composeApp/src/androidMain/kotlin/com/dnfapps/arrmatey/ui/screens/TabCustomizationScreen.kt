@@ -97,6 +97,7 @@ fun TabCustomizationScreen(
                 useServiceNavLogos = useServiceNavLogos,
                 visibleTabs = tabConfig.visibleTabs,
                 drawerTabs = tabConfig.drawerTabs,
+                hiddenTabs = tabConfig.hiddenTabs,
                 updatePreferences = { preferenceStore.updateTabPreferences(it) }
             )
         }
@@ -108,16 +109,17 @@ fun TabCustomizationContent(
     useServiceNavLogos: Boolean,
     visibleTabs: List<TabItem>,
     drawerTabs: List<TabItem>,
+    hiddenTabs: List<TabItem>,
     updatePreferences: (TabPreferences) -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
 
     var combinedList by remember {
-        mutableStateOf(TabRow.buildList(visibleTabs, drawerTabs))
+        mutableStateOf(TabRow.buildList(visibleTabs, drawerTabs, hiddenTabs))
     }
 
-    LaunchedEffect(visibleTabs, drawerTabs) {
-        combinedList = TabRow.buildList(visibleTabs, drawerTabs)
+    LaunchedEffect(visibleTabs, drawerTabs, hiddenTabs) {
+        combinedList = TabRow.buildList(visibleTabs, drawerTabs, hiddenTabs)
     }
 
     val lazyListState = rememberLazyListState()
@@ -133,28 +135,33 @@ fun TabCustomizationContent(
                 val movedItem = newList.removeAt(fromIndex)
                 newList.add(toIndex, movedItem)
 
-                val dividerIndex = newList.indexOfFirst { it is TabRow.Divider }
-                val tabsAbove = newList.subList(0, dividerIndex).filterIsInstance<TabRow.Tab>()
+                val divider1Index = newList.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_drawer }
+                val tabsAbove = newList.subList(0, divider1Index).filterIsInstance<TabRow.Tab>()
                 if (tabsAbove.size > MAX_TABS) {
-                    val overflowItem = newList.removeAt(dividerIndex - 1)
-                    newList.add(dividerIndex, overflowItem)
+                    val overflowItem = newList.removeAt(divider1Index - 1)
+                    newList.add(divider1Index, overflowItem)
                 }
 
                 combinedList = newList
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
                 val filtered = combinedList.filter { it !is TabRow.Placeholder }
-                val finalDividerIndex = filtered.indexOfFirst { it is TabRow.Divider }
+                val finalDivider1Index = filtered.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_drawer }
+                val finalDivider2Index = filtered.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_hidden }
 
-                val newNav = filtered.subList(0, finalDividerIndex)
+                val newNav = filtered.subList(0, finalDivider1Index)
                     .filterIsInstance<TabRow.Tab>()
                     .map { it.item.key }
 
-                val newHidden = filtered.subList(finalDividerIndex + 1, filtered.size)
+                val newDrawer = filtered.subList(finalDivider1Index + 1, finalDivider2Index)
                     .filterIsInstance<TabRow.Tab>()
                     .map { it.item.key }
 
-                updatePreferences(TabPreferences(newNav, newHidden))
+                val newHidden = filtered.subList(finalDivider2Index + 1, filtered.size)
+                    .filterIsInstance<TabRow.Tab>()
+                    .map { it.item.key }
+
+                updatePreferences(TabPreferences(newNav, newDrawer, newHidden))
             }
         }
     )
@@ -196,9 +203,8 @@ fun TabCustomizationContent(
                         ) {
                             HorizontalDivider(Modifier.padding(vertical = 8.dp))
                             Text(
-                                text = mokoString(row.text),
-
-                                )
+                                text = mokoString(row.text)
+                            )
                         }
                     }
                     is TabRow.Placeholder -> {
@@ -209,9 +215,10 @@ fun TabCustomizationContent(
                     is TabRow.Tab -> {
                         val elevation by animateDpAsState(if (isDragging) 8.dp else 0.dp)
 
-                        val dividerIndex = combinedList.indexOfFirst { it is TabRow.Divider }
+                        val divider1Index = combinedList.indexOfFirst { it is TabRow.Divider && it.text == MR.strings.navigation_items_drawer }
+                        
                         val currentIndex = index
-                        val isBelowDivider = currentIndex > dividerIndex
+                        val isBelowDivider = currentIndex > divider1Index
 
                         val ghostAlpha by animateFloatAsState(if (isBelowDivider) 0.6f else 1f)
 
@@ -327,10 +334,13 @@ sealed class TabRow(val key: String) {
     companion object {
         fun buildList(
             visibleTabs: List<TabItem>,
+            drawerTabs: List<TabItem>,
             hiddenTabs: List<TabItem>
         ) = buildList {
             addAll(visibleTabs.map { Tab(it, isActive = true) })
             add(Divider(MR.strings.navigation_items_drawer))
+            addAll(drawerTabs.map { Tab(it, isActive = false) })
+            add(Divider(MR.strings.navigation_items_hidden))
 
             if (hiddenTabs.isEmpty()) {
                 add(Placeholder)
