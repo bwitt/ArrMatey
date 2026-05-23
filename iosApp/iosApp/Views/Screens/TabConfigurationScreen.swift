@@ -18,15 +18,8 @@ struct TabConfigurationScreen: View {
     @State private var draggedTab: AnyTabItem?
     @State private var dropTargetID: String?
     
-    private var initialHiddenCount: Int
-    private var hiddenTabCount: Int {
-        viewModel.hiddenTabs.count
-    }
-    
     init() {
-        let vm = PreferencesViewModel()
-        self.viewModel = vm
-        self.initialHiddenCount = vm.hiddenTabs.count
+        self.viewModel = PreferencesViewModel()
     }
 
     var body: some View {
@@ -40,6 +33,10 @@ struct TabConfigurationScreen: View {
                 Divider().padding(.vertical, 8)
 
                 drawerItemsSection
+                
+                Divider().padding(.vertical, 8)
+                
+                hiddenItemsSection
             }
             .padding(.vertical)
         }
@@ -70,12 +67,10 @@ struct TabConfigurationScreen: View {
                             return NSItemProvider(object: tab.key as NSString)
                         }
                         .onDrop(of: [.text], delegate: TabDropDelegate(
-                            isBottomSection: true,
+                            section: .bottomBar,
                             targetTab: tab,
                             navigationManager: navigationManager,
                             viewModel: viewModel,
-                            bottomBarTabs: viewModel.bottomTabItems,
-                            hiddenTabs: viewModel.hiddenTabs,
                             draggedTab: $draggedTab,
                             dropTargetID: $dropTargetID
                         ))
@@ -85,12 +80,10 @@ struct TabConfigurationScreen: View {
             .padding(.horizontal)
             .background(Color.black.opacity(0.001))
             .onDrop(of: [.text], delegate: TabDropDelegate(
-                isBottomSection: true,
+                section: .bottomBar,
                 targetTab: nil,
                 navigationManager: navigationManager,
                 viewModel: viewModel,
-                bottomBarTabs: viewModel.bottomTabItems,
-                hiddenTabs: viewModel.hiddenTabs,
                 draggedTab: $draggedTab,
                 dropTargetID: $dropTargetID
             ))
@@ -104,36 +97,32 @@ struct TabConfigurationScreen: View {
                 .padding(.horizontal)
 
             VStack(spacing: 8) {
-                if viewModel.hiddenTabs.isEmpty {
+                if viewModel.drawerTabs.isEmpty {
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5]))
                         .foregroundColor(.secondary.opacity(0.5))
                         .frame(height: 60)
                         .overlay(Text("Drop here").foregroundColor(.secondary))
                         .onDrop(of: [.text], delegate: TabDropDelegate(
-                            isBottomSection: false,
+                            section: .drawer,
                             targetTab: nil,
                             navigationManager: navigationManager,
                             viewModel: viewModel,
-                            bottomBarTabs: viewModel.bottomTabItems,
-                            hiddenTabs: viewModel.hiddenTabs,
                             draggedTab: $draggedTab,
                             dropTargetID: $dropTargetID
                         ))
                 } else {
-                    ForEach(viewModel.hiddenTabs, id: \.key) { tab in
+                    ForEach(viewModel.drawerTabs, id: \.key) { tab in
                         DraggableTabCard(tab: tab.item, isDropTarget: dropTargetID == tab.key, isHidden: true, useServiceNavIcons: viewModel.useServiceNavLogos)
                             .onDrag {
                                 draggedTab = tab
                                 return NSItemProvider(object: tab.key as NSString)
                             }
                             .onDrop(of: [.text], delegate: TabDropDelegate(
-                                isBottomSection: false,
+                                section: .drawer,
                                 targetTab: tab,
                                 navigationManager: navigationManager,
                                 viewModel: viewModel,
-                                bottomBarTabs: viewModel.bottomTabItems,
-                                hiddenTabs: viewModel.hiddenTabs,
                                 draggedTab: $draggedTab,
                                 dropTargetID: $dropTargetID
                             ))
@@ -142,23 +131,100 @@ struct TabConfigurationScreen: View {
             }
             .frame(minHeight: 100, alignment: .top)
             .padding(.horizontal)
-            .contentShape((Rectangle()))
+            .contentShape(Rectangle())
+            .onDrop(of: [.text], delegate: TabDropDelegate(
+                section: .drawer,
+                targetTab: nil,
+                navigationManager: navigationManager,
+                viewModel: viewModel,
+                draggedTab: $draggedTab,
+                dropTargetID: $dropTargetID
+            ))
+        }
+    }
+    
+    private var hiddenItemsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(MR.strings().navigation_items_hidden.localized())
+                .font(.headline)
+                .padding(.horizontal)
+
+            VStack(spacing: 8) {
+                if viewModel.removedTabs.isEmpty {
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [5]))
+                        .foregroundColor(.secondary.opacity(0.5))
+                        .frame(height: 60)
+                        .overlay(Text("Drop here").foregroundColor(.secondary))
+                        .onDrop(of: [.text], delegate: TabDropDelegate(
+                            section: .hidden,
+                            targetTab: nil,
+                            navigationManager: navigationManager,
+                            viewModel: viewModel,
+                            draggedTab: $draggedTab,
+                            dropTargetID: $dropTargetID
+                        ))
+                } else {
+                    ForEach(viewModel.removedTabs, id: \.key) { tab in
+                        DraggableTabCard(tab: tab.item, isDropTarget: dropTargetID == tab.key, isHidden: true, useServiceNavIcons: viewModel.useServiceNavLogos)
+                            .onDrag {
+                                draggedTab = tab
+                                return NSItemProvider(object: tab.key as NSString)
+                            }
+                            .onDrop(of: [.text], delegate: TabDropDelegate(
+                                section: .hidden,
+                                targetTab: tab,
+                                navigationManager: navigationManager,
+                                viewModel: viewModel,
+                                draggedTab: $draggedTab,
+                                dropTargetID: $dropTargetID
+                            ))
+                    }
+                }
+            }
+            .frame(minHeight: 100, alignment: .top)
+            .padding(.horizontal)
+            .contentShape(Rectangle())
+            .onDrop(of: [.text], delegate: TabDropDelegate(
+                section: .hidden,
+                targetTab: nil,
+                navigationManager: navigationManager,
+                viewModel: viewModel,
+                draggedTab: $draggedTab,
+                dropTargetID: $dropTargetID
+            ))
         }
     }
 }
 
 // MARK: - Unified Drop Delegate
 
+enum TabSection {
+    case bottomBar
+    case drawer
+    case hidden
+}
+
 struct TabDropDelegate: DropDelegate {
-    let isBottomSection: Bool
+    let section: TabSection
     let targetTab: AnyTabItem?
     let navigationManager: NavigationManager
     var viewModel: PreferencesViewModel
     
-    var bottomBarTabs: [AnyTabItem]
-    var hiddenTabs: [AnyTabItem]
     @Binding var draggedTab: AnyTabItem?
     @Binding var dropTargetID: String?
+
+    func dropEntered(info: DropInfo) {
+        if let target = targetTab {
+            dropTargetID = target.key
+        }
+    }
+    
+    func dropExited(info: DropInfo) {
+        if dropTargetID == targetTab?.key {
+            dropTargetID = nil
+        }
+    }
 
     func dropUpdated(info: DropInfo) -> DropProposal? {
         return DropProposal(operation: .move)
@@ -167,36 +233,50 @@ struct TabDropDelegate: DropDelegate {
     func performDrop(info: DropInfo) -> Bool {
         guard let dragged = draggedTab else { return false }
         
-        var mutBottomTabs = bottomBarTabs
-        var mutHiddenTabs = hiddenTabs
+        var mutBottomTabs = viewModel.bottomTabItems
+        var mutDrawerTabs = viewModel.drawerTabs
+        var mutRemovedTabs = viewModel.removedTabs
 
         mutBottomTabs.removeAll { $0.key == dragged.key }
-        mutHiddenTabs.removeAll { $0.key == dragged.key }
+        mutDrawerTabs.removeAll { $0.key == dragged.key }
+        mutRemovedTabs.removeAll { $0.key == dragged.key }
 
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            if isBottomSection {
+            switch section {
+            case .bottomBar:
                 if let target = targetTab,
                    let index = mutBottomTabs.firstIndex(where: { $0.key == target.key }) {
                     mutBottomTabs.insert(dragged, at: index)
                 } else {
                     mutBottomTabs.append(dragged)
                 }
-            } else {
+            case .drawer:
                 if let target = targetTab,
-                   let index = mutHiddenTabs.firstIndex(where: { $0.key == target.key }) {
-                    mutHiddenTabs.insert(dragged, at: index)
+                   let index = mutDrawerTabs.firstIndex(where: { $0.key == target.key }) {
+                    mutDrawerTabs.insert(dragged, at: index)
                 } else {
-                    mutHiddenTabs.append(dragged)
+                    mutDrawerTabs.append(dragged)
+                }
+            case .hidden:
+                if let target = targetTab,
+                   let index = mutRemovedTabs.firstIndex(where: { $0.key == target.key }) {
+                    mutRemovedTabs.insert(dragged, at: index)
+                } else {
+                    mutRemovedTabs.append(dragged)
                 }
             }
             
             if mutBottomTabs.count > 5 {
                 let extra = mutBottomTabs.removeLast()
-                mutHiddenTabs.insert(extra, at: 0)
+                mutDrawerTabs.insert(extra, at: 0)
             }
         }
 
-        viewModel.updateTabPreferences(TabPreferences(orderedVisibleKeys: mutBottomTabs.map(\.key), orderedHiddenKeys: mutHiddenTabs.map(\.key)))
+        viewModel.updateTabPreferences(TabPreferences(
+            orderedVisibleKeys: mutBottomTabs.map(\.key),
+            orderedHiddenKeys: mutDrawerTabs.map(\.key),
+            orderedRemovedKeys: mutRemovedTabs.map(\.key)
+        ))
         
         draggedTab = nil
         dropTargetID = nil
@@ -236,11 +316,14 @@ struct DraggableTabCard: View {
         .padding(16)
         .background(Color(UIColor.systemBackground))
         .cornerRadius(12)
+        .opacity(isHidden ? 0.6 : 1.0)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(isDropTarget ? Color.accentColor : Color(UIColor.systemGray4), lineWidth: 1)
         )
-        .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
+        .shadow(color: .black.opacity(isDropTarget ? 0.15 : 0.05), radius: isDropTarget ? 5 : 2, y: isDropTarget ? 2 : 1)
+        .animation(.easeInOut, value: isHidden)
+        .animation(.easeInOut, value: isDropTarget)
     }
 
     private var tabName: String {

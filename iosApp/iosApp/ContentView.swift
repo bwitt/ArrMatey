@@ -124,14 +124,14 @@ struct AppLauncherGrid: View {
     
     private var launcherContent: some View {
         LazyVGrid(columns: columns, spacing: 25) {
-            ForEach(preferences.hiddenTabs, id: \.key) { item in
+            ForEach(preferences.drawerTabs, id: \.key) { item in
                 Button {
                     navigationManager.launcherPath.append(item)
                 } label: {
                     VStack(spacing: 12) {
                         launcherIcon(for: item.item)
                         
-                        Text(item.item is TabItemCustomWebpage ? (item.item as! TabItemCustomWebpage).name : item.item.resource.localized())
+                        Text(tabName(for: item.item))
                             .font(.caption)
                             .lineLimit(1)
                             .foregroundColor(.themeOnPrimaryContainer)
@@ -156,6 +156,13 @@ struct AppLauncherGrid: View {
                 .font(.system(size: 30))
                 .foregroundColor(.themeOnPrimaryContainer)
         }
+    }
+
+    private func tabName(for item: TabItem) -> String {
+        if let custom = item as? TabItemCustomWebpage {
+            return custom.name
+        }
+        return item.resource.localized()
     }
 }
 

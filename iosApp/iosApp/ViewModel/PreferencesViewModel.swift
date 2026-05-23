@@ -22,7 +22,8 @@ class PreferencesViewModel: ObservableObject {
     @Published var hideInstanceSwitcher: Bool = false
     
     @Published var bottomTabItems: [AnyTabItem] = []
-    @Published var hiddenTabs: [AnyTabItem] = []
+    @Published var drawerTabs: [AnyTabItem] = []
+    @Published var removedTabs: [AnyTabItem] = []
     
     init() {
         self.preferenceStore = KoinBridge.shared.getPreferencesStore()
@@ -45,7 +46,8 @@ class PreferencesViewModel: ObservableObject {
         
         tabManager.tabConfiguration.observeAsync { [weak self] config in
             self?.bottomTabItems = config.visibleTabs.map({ AnyTabItem(item: $0) })
-            self?.hiddenTabs = config.drawerTabs.map({ AnyTabItem(item: $0) })
+            self?.drawerTabs = config.drawerTabs.map({ AnyTabItem(item: $0) })
+            self?.removedTabs = config.hiddenTabs.map({ AnyTabItem(item: $0) })
         }
     }
     
@@ -73,10 +75,11 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.updateTabPreferences(tabPreferences: preferences)
     }
     
-    func saveNavigationLayout(visible: [TabItem], hidden: [TabItem]) {
+    func saveNavigationLayout(visible: [TabItem], hidden: [TabItem], removed: [TabItem]) {
         let newPrefs = TabPreferences(
             orderedVisibleKeys: visible.map { $0.key },
-            orderedHiddenKeys: hidden.map { $0.key }
+            orderedHiddenKeys: hidden.map { $0.key },
+            orderedRemovedKeys: removed.map { $0.key }
         )
         preferenceStore.updateTabPreferences(tabPreferences: newPrefs)
     }
