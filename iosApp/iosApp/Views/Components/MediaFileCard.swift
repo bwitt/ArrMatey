@@ -10,6 +10,12 @@ import SwiftUI
 
 struct MediaFileCard: View {
     let file: MediaFile
+    let onDelete: () -> Void
+    
+    init(file: MediaFile, onDelete: @escaping () -> Void = {}) {
+        self.file = file
+        self.onDelete = onDelete
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -31,6 +37,13 @@ struct MediaFileCard: View {
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color(.systemGroupedBackground))
         )
+        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Delete", systemImage: "trash.fill")
+            }
+        }
     }
     
     private func fileInfoLine(file: MediaFile) -> String {

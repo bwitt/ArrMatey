@@ -21,6 +21,7 @@ struct MediaDetailsScreen: View {
     @State private var showEditSheet: Bool = false
     @State private var confirmDeleteSeason: Int32? = nil
     @State private var confirmDeleteAlbum: ArrAlbum? = nil
+    @State private var confirmDeleteMovie: Bool = false
     
     init(id: Int64, type: InstanceType) {
         self.id = id
@@ -63,6 +64,14 @@ struct MediaDetailsScreen: View {
                     action: { viewModel.deleteAlbumFiles(album.id) }
                 )
             }
+            .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteMovie) {
+                Button(MR.strings().cancel.localized(), role: .cancel) { }
+                Button(MR.strings().confirm.localized(), role: .destructive) {
+                    viewModel.deleteMovieFile()
+                }
+            } message: {
+                Text(MR.strings().confirm_delete_movie.localized())
+            }
     }
     
     @ViewBuilder
@@ -80,11 +89,16 @@ struct MediaDetailsScreen: View {
         case let state as MediaDetailsUiStateSuccess:
             let item = state.item
             
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0){
+            List {
+                Section {
                     MediaDetailsHeader(item: item, type: type)
                         .frame(height: 400)
-                    
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                
+                Section {
                     VStack(alignment: .leading, spacing: 12) {
                         if let airingString = makeAiringString(for: item) {
                             Text(airingString)
@@ -93,18 +107,25 @@ struct MediaDetailsScreen: View {
                         }
                         
                         ItemDescriptionCard(overview: item.overview)
-                        
-                        filesArea(for: item, state.extraFiles, state.episodes, state.albums, state.tracks, state.trackFiles, state.bookFiles, state.bookSeries, state.books)
-                        
-                        MediaInfoArea(item: item, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
-                        
-                        Spacer()
-                            .frame(height: 12)
                     }
-                    .padding(.horizontal, 24)
                     .padding(.top, 12)
                 }
+                .listRowInsets(EdgeInsets(top: 0, leading: 24, bottom: 0, trailing: 24))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                
+                filesArea(for: item, state.extraFiles, state.episodes, state.albums, state.tracks, state.trackFiles, state.bookFiles, state.bookSeries, state.books)
+                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 0, trailing: 24))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                
+                MediaInfoArea(item: item, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
+                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 12, trailing: 24))
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
             }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
             .ignoresSafeArea(edges: .top)
         case _ as MediaDetailsUiStateError:
             VStack{}
@@ -178,6 +199,9 @@ struct MediaDetailsScreen: View {
                 searchResult: viewModel.lastSearchResult,
                 onAutomaticSearch: {
                     viewModel.performAutomaticLookup()
+                },
+                onDeleteFile: {
+                    confirmDeleteMovie = true
                 }
             )
         } else if let artist = item as? Arrtist {

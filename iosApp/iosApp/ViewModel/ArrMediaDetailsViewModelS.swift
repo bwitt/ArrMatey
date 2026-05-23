@@ -158,4 +158,8 @@ class ArrMediaDetailsViewModelS: ObservableObject {
     func delete(_ addExclusion: Bool, _ deleteFiles: Bool) {
         viewModel.deleteMedia(deleteFiles: deleteFiles, addImportExclusion: addExclusion)
     }
+    
+    func deleteMovieFile() {
+        viewModel.deleteMovieFile()
+    }
 }

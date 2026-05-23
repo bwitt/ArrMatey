@@ -14,6 +14,7 @@ struct MovieFilesView: View {
     let searchIds: Set<Int64>
     let searchResult: Bool?
     let onAutomaticSearch: () -> Void
+    let onDeleteFile: () -> Void
     
     @EnvironmentObject private var navigation: NavigationManager
     
@@ -26,7 +27,7 @@ struct MovieFilesView: View {
             }, automaticSearchEnabled: movie.monitored, onAutomaticClicked: onAutomaticSearch, automaticSearchInProgress: searchIds.contains(movie.id as! Int64))
             
             if let file = movie.movieFile {
-                MediaFileCard(file: file)
+                MediaFileCard(file: file, onDelete: onDeleteFile)
             }
             
             MovieExtraFilesView(extraFiles: movieExtraFiles)
