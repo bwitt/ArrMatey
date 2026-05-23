@@ -96,6 +96,13 @@ struct SettingsScreen: View {
                 )) {
                     Text(MR.strings().service_icons_title.localized())
                 }
+                Toggle(isOn: Binding(
+                    get: { viewModel.hideInstanceSwitcher },
+                    set: { _ in viewModel.toggleInstanceSwitcher() }
+                )) {
+                    Text(MR.strings().instance_switcher_toggle_title.localized())
+                    Text(MR.strings().instance_switcher_toggle_description.localized())
+                }
             }
             
             AboutCard(

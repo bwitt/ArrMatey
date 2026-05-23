@@ -16,6 +16,7 @@ struct ArrTab: View {
     @ObservedObject private var instancesViewModel: InstancesViewModelS
     @ObservedObject private var activityQueueViewModel: ActivityQueueViewModelS = ActivityQueueViewModelS()
     @ObservedObject private var networkViewModel: NetworkConnectivityViewModel = NetworkConnectivityViewModel()
+    @ObservedObject private var globalPreferences = PreferencesViewModel()
     
     @EnvironmentObject private var navigation: NavigationManager
     
@@ -114,13 +115,15 @@ struct ArrTab: View {
             toolbarViewOptions
         }
         
-        ToolbarItem(placement: .topBarLeading) {
-            InstancePickerMenu(
-                instances: instanceState.instances,
-                onChangeInstance: { instancesViewModel.setInstanceActive($0) },
-                onAddNewInstance: { navigation.goToNewInstance(of: type) }
-            )
-            .menuIndicator(.hidden)
+        if !globalPreferences.hideInstanceSwitcher || instanceState.instances.count > 1 {
+            ToolbarItem(placement: .topBarLeading) {
+                InstancePickerMenu(
+                    instances: instanceState.instances,
+                    onChangeInstance: { instancesViewModel.setInstanceActive($0) },
+                    onAddNewInstance: { navigation.goToNewInstance(of: type) }
+                )
+                .menuIndicator(.hidden)
+            }
         }
     }
     

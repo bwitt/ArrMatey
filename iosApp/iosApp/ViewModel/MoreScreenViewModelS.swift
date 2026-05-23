@@ -17,6 +17,7 @@ class MoreScreenViewModelS: ObservableObject {
     @Published private(set) var customWebpages: [CustomWebpage] = []
     @Published private(set) var connectionStatuses: [KotlinLong:OperationStatus] = [:]
     @Published private(set) var useServiceNavLogos: Bool = false
+    @Published private(set) var hideInstanceSwitcher: Bool = false
     
     init() {
         self.viewModel = KoinBridge.shared.getMoreScreenViewModel()
@@ -26,9 +27,14 @@ class MoreScreenViewModelS: ObservableObject {
         viewModel.customWebpages.observeAsync { self.customWebpages = $0 }
         viewModel.testingStatus.observeAsync { self.connectionStatuses = $0 }
         viewModel.useServiceNavLogos.observeAsync { self.useServiceNavLogos = $0.boolValue }
+        viewModel.hideInstanceSwitcher.observeAsync { self.hideInstanceSwitcher = $0.boolValue }
     }
     
     func toggleUseServiceNavLogos() {
         viewModel.toggleUseServiceNavLogos()
+    }
+    
+    func toggleInstanceSwitcher() {
+        viewModel.toggleInstanceSwitcher()
     }
 }

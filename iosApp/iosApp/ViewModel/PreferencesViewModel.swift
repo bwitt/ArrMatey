@@ -19,6 +19,7 @@ class PreferencesViewModel: ObservableObject {
     @Published var tabPreferences: TabPreferences = TabPreferences()
     @Published var shouldShowReleaseNotes: Bool = false
     @Published var useServiceNavLogos: Bool = false
+    @Published var hideInstanceSwitcher: Bool = false
     
     @Published var bottomTabItems: [AnyTabItem] = []
     @Published var hiddenTabs: [AnyTabItem] = []
@@ -40,6 +41,7 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.tabPreferences.observeAsync { self.tabPreferences = $0 }
         preferenceStore.shouldShowReleaseNotes.observeAsync { self.shouldShowReleaseNotes = $0.boolValue }
         preferenceStore.useServiceNavLogos.observeAsync { self.useServiceNavLogos = $0.boolValue }
+        preferenceStore.hideInstanceSwitcher.observeAsync { self.hideInstanceSwitcher = $0.boolValue }
         
         tabManager.tabConfiguration.observeAsync { [weak self] config in
             self?.bottomTabItems = config.visibleTabs.map({ AnyTabItem(item: $0) })
