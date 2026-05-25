@@ -2,24 +2,23 @@ package com.dnfapps.arrmatey.arr.service
 
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
 import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
-import com.dnfapps.arrmatey.utils.format
-import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.format
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -40,25 +38,12 @@ import kotlin.time.Instant
 class CalendarService(
     private val instanceManager: InstanceManager,
     private val notificationCleanupUseCase: NotificationCleanupUseCase,
-    private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-    private val logger: Logger
+    private val scheduleNotificationUseCase: ScheduleNotificationUseCase
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    private val _movies = MutableStateFlow<Map<LocalDate, List<ArrMovie>>>(emptyMap())
-    val movies: StateFlow<Map<LocalDate, List<ArrMovie>>> = _movies.asStateFlow()
-
-    private val _episodes = MutableStateFlow<Map<LocalDate, List<Episode>>>(emptyMap())
-    val episodes: StateFlow<Map<LocalDate, List<Episode>>> = _episodes.asStateFlow()
-
-    private val _episodeGroups = MutableStateFlow<Map<LocalDate, List<EpisodeGroup>>>(emptyMap())
-    val episodeGroups: StateFlow<Map<LocalDate, List<EpisodeGroup>>> = _episodeGroups.asStateFlow()
-
-    private val _albums = MutableStateFlow<Map<LocalDate, List<ArrAlbum>>>(emptyMap())
-    val albums: StateFlow<Map<LocalDate, List<ArrAlbum>>> = _albums.asStateFlow()
-
-    private val _books = MutableStateFlow<Map<LocalDate, List<Book>>>(emptyMap())
-    val books: StateFlow<Map<LocalDate, List<Book>>> = _books.asStateFlow()
+    private val _items = MutableStateFlow<Map<LocalDate, List<CalendarItem>>>(emptyMap())
+    val items: StateFlow<Map<LocalDate, List<CalendarItem>>> = _items.asStateFlow()
 
     private val _dates = MutableStateFlow<List<LocalDate>>(emptyList())
     val dates: StateFlow<List<LocalDate>> = _dates.asStateFlow()
@@ -113,13 +98,13 @@ class CalendarService(
         coroutineScope {
             repositories.forEach { repository ->
                 launch {
-                    when (repository.instance.type) {
-                        InstanceType.Radarr -> fetchMovies(repository, start, end)
-                        InstanceType.Sonarr -> fetchEpisodes(repository, start, end)
-                        InstanceType.Lidarr -> fetchAlbums(repository, start, end)
-                        InstanceType.Booksehelf -> fetchBooks(repository, start, end)
-                        else -> {}
-                    }
+                    repository.client.getCalendar(start, end)
+                        .onSuccess { items ->
+                            handleCalendarItems(repository, items)
+                        }
+                        .onError { _, message, _ ->
+                            _error.value = message
+                        }
                 }
             }
         }
@@ -127,305 +112,148 @@ class CalendarService(
         insertDates(start, end)
     }
 
-    private suspend fun fetchMovies(
+    private fun handleCalendarItems(
         repository: ArrInstanceRepository,
-        start: LocalDate,
-        end: LocalDate
+        items: List<CalendarItem>
     ) {
-        repository.client.getMovieCalendar(start, end)
-            .onSuccess { fetchedMovies ->
-                val fetchedIds = fetchedMovies.map { it.tmdbId.toInt() }.toSet()
-                
-                // Offload notification work
-                val snapshot = _movies.value.values.flatten()
-                scope.launch {
-                    notificationCleanupUseCase.cleanup(
-                        instanceId = repository.instance.id,
-                        currentItems = snapshot,
-                        fetchedIds = fetchedIds,
-                        getId = { it.tmdbId.toInt() },
-                        getInstanceId = { it.instanceId }
-                    )
+        val type = repository.instance.type
+        val instance = repository.instance
 
-                    fetchedMovies.forEach { movie ->
-                        movie.closestFutureRelease?.let { (releaseType, instant) ->
-                            scheduleNotificationUseCase(
-                                instance = repository.instance,
-                                message = movie.title ?: "Unknown Movie",
-                                scheduledTime = instant,
-                                notificationId = movie.tmdbId.toInt(),
-                                releaseType = releaseType
-                            )
-                        }
-                    }
-                }
-
-                _movies.update { current ->
-                    val next = current.toMutableMap()
-                    fetchedMovies.forEach { movie ->
-                        movie.digitalRelease?.let { instant ->
-                            upsertMovie(next, movie, instant.toLocalDate())
-                        }
-                        movie.physicalRelease?.let { instant ->
-                            upsertMovie(next, movie, instant.toLocalDate())
-                        }
-                        movie.inCinemas?.let { instant ->
-                            upsertMovie(next, movie, instant.toLocalDate())
-                        }
-                    }
-                    next
-                }
-            }
-            .onError { _, message, _ ->
-                _error.value = message
-            }
-    }
-
-    private fun upsertMovie(
-        map: MutableMap<LocalDate, List<ArrMovie>>,
-        movie: ArrMovie,
-        date: LocalDate
-    ) {
-        val currentList = map[date]?.toMutableList() ?: mutableListOf()
-
-        // Use tmdbId for deduplication (same across Radarr instances)
-        val existingIndex = currentList.indexOfFirst { it.tmdbId == movie.tmdbId }
-        if (existingIndex >= 0) {
-            currentList[existingIndex] = movie
-        } else {
-            currentList.add(movie)
-        }
-
-        map[date] = currentList
-    }
-
-    private suspend fun fetchEpisodes(
-        repository: ArrInstanceRepository,
-        start: LocalDate,
-        end: LocalDate
-    ) {
-        repository.client.getEpisodeCalendar(start, end)
-            .onSuccess { fetchedEpisodes ->
-                val fetchedIds = fetchedEpisodes.map { it.tvdbId?.toInt() ?: it.id.toInt() }.toSet()
-                
-                val snapshot = _episodes.value.values.flatten()
-                scope.launch {
-                    notificationCleanupUseCase.cleanup(
-                        instanceId = repository.instance.id,
-                        currentItems = snapshot,
-                        fetchedIds = fetchedIds,
-                        getId = { it.tvdbId?.toInt() ?: it.id.toInt() },
-                        getInstanceId = { it.instanceId }
-                    )
-
-                    fetchedEpisodes.forEach { episode ->
-                        episode.airDateUtc?.let { instant ->
-                            scheduleNotificationUseCase(
-                                instance = repository.instance,
-                                message = "${episode.series?.title ?: "Unknown Series"} - S${episode.seasonNumber}E${episode.episodeNumber} - ${instant.format("HH:mm")}",
-                                scheduledTime = instant,
-                                notificationId = episode.tvdbId?.toInt() ?: episode.id.toInt()
-                            )
-                        }
-                    }
-                }
-
-                _episodes.update { current ->
-                    val next = current.toMutableMap()
-                    fetchedEpisodes.forEach { episode ->
-                        episode.airDateUtc?.let { instant ->
-                            upsertEpisode(next, episode, instant.toLocalDate())
-                        }
-                    }
-                    next
-                }
-                updateEpisodeGroups()
-            }
-            .onError { _, message, cause ->
-                _error.value = message
-            }
-    }
-
-    private fun upsertEpisode(
-        map: MutableMap<LocalDate, List<Episode>>,
-        episode: Episode,
-        date: LocalDate
-    ) {
-        val currentList = map[date]?.toMutableList() ?: mutableListOf()
-
-        // Use tvdbId for deduplication (same across Sonarr instances)
-        // Fallback to series tvdbId + season + episode if tvdbId is null
-        val existingIndex = currentList.indexOfFirst { existing ->
-            when {
-                existing.tvdbId != null && episode.tvdbId != null -> existing.tvdbId == episode.tvdbId
-                existing.series?.tvdbId != null && episode.series?.tvdbId != null ->
-                    existing.series.tvdbId == episode.series.tvdbId &&
-                    existing.seasonNumber == episode.seasonNumber &&
-                    existing.episodeNumber == episode.episodeNumber
-                else -> existing.id == episode.id && existing.instanceId == episode.instanceId
-            }
-        }
-        if (existingIndex >= 0) {
-            currentList[existingIndex] = episode
-        } else {
-            currentList.add(episode)
-        }
-
-        map[date] = currentList
-    }
-
-    private fun updateEpisodeGroups() {
-        val grouped = _episodes.value.mapValues { (_, episodes) ->
-            episodes
-                .groupBy { it.series?.id }
-                .mapNotNull { (_, episodeList) ->
-                    if (episodeList.isEmpty()) return@mapNotNull null
-
-                    val sorted = episodeList.sortedWith(
-                        compareBy<Episode> { it.seasonNumber }
-                            .thenBy { it.episodeNumber }
-                    )
-
-                    EpisodeGroup(
-                        first = sorted.first(),
-                        additional = sorted.drop(1),
-                        totalCount = sorted.size
-                    )
-                }
-                .sortedBy { it.first.series?.title }
-        }
-
-        _episodeGroups.value = grouped
-    }
-
-    private suspend fun fetchAlbums(
-        repository: ArrInstanceRepository,
-        start: LocalDate,
-        end: LocalDate
-    ) {
-        repository.client.getAlbumCalendar(start, end)
-            .onSuccess { fetchedAlbums ->
-                val fetchedIds = fetchedAlbums.map { it.id.toInt() }.toSet()
-                
-                val snapshot = _albums.value.values.flatten()
-                scope.launch {
-                    notificationCleanupUseCase.cleanup(
-                        instanceId = repository.instance.id,
-                        currentItems = snapshot,
-                        fetchedIds = fetchedIds,
-                        getId = { it.id.toInt() },
-                        getInstanceId = { it.instanceId }
-                    )
-
-                    fetchedAlbums.forEach { album ->
-                        album.releaseDate?.let { instant ->
-                            scheduleNotificationUseCase(
-                                instance = repository.instance,
-                                message = "${album.artist?.title ?: "Unknown Artist"} - ${album.title ?: "Unknown Album"}",
-                                scheduledTime = instant,
-                                notificationId = album.id.toInt()
-                            )
-                        }
-                    }
-                }
-
-                _albums.update { current ->
-                    val next = current.toMutableMap()
-                    fetchedAlbums.forEach { album ->
-                        album.releaseDate?.let { instant ->
-                            upsertAlbum(next, album, instant.toLocalDate())
-                        }
-                    }
-                    next
-                }
-            }
-            .onError { _, message, cause ->
-                _error.value = message
-            }
-    }
-
-    private fun upsertAlbum(
-        map: MutableMap<LocalDate, List<ArrAlbum>>,
-        album: ArrAlbum,
-        date: LocalDate
-    ) {
-        val currentList = map[date]?.toMutableList() ?: mutableListOf()
-
-        // Use foreignAlbumId (MusicBrainz ID) for deduplication (same across Lidarr instances)
-        val existingIndex = currentList.indexOfFirst { it.foreignAlbumId == album.foreignAlbumId }
-        if (existingIndex >= 0) {
-            currentList[existingIndex] = album
-        } else {
-            currentList.add(album)
-        }
-
-        map[date] = currentList
-    }
-
-    private suspend fun fetchBooks(
-        repository: ArrInstanceRepository,
-        start: LocalDate,
-        end: LocalDate
-    ) {
-        val authors = (repository.client.getLibrary() as? NetworkResult.Success)?.data?.filterIsInstance<Author>()?.associateBy { it.id } ?: emptyMap()
-
-        repository.client.getBookCalendar(start, end)
-            .onSuccess { fetchedBooks ->
-                val updatedBooks = fetchedBooks.map { book ->
+        // Notifications
+        scope.launch {
+            val enrichedItems = if (type == InstanceType.Booksehelf) {
+                val authors = (repository.client.getLibrary() as? NetworkResult.Success)?.data
+                    ?.filterIsInstance<Author>()?.associateBy { it.id } ?: emptyMap()
+                items.filterIsInstance<Book>().map { book ->
                     authors[book.authorId]?.let { author ->
                         book.copy(authorTitle = author.title)
                     } ?: book
                 }
+            } else items
 
-                val fetchedIds = updatedBooks.map { it.id.toInt() }.toSet()
+            val fetchedIds = enrichedItems.map { it.calendarId.toInt() }.toSet()
 
-                val snapshot = _books.value.values.flatten()
-                scope.launch {
-                    notificationCleanupUseCase.cleanup(
-                        instanceId = repository.instance.id,
-                        currentItems = snapshot,
-                        fetchedIds = fetchedIds,
-                        getId = { it.id.toInt() },
-                        getInstanceId = { it.instanceId }
+            val snapshot: List<CalendarItem> = _items.value.values.flatten().filter {
+                isItemOfInstanceType(it, type)
+            }
+
+            notificationCleanupUseCase.cleanup(
+                instanceId = instance.id,
+                currentItems = snapshot,
+                fetchedIds = fetchedIds,
+                getId = { it.calendarId.toInt() },
+                getInstanceId = { it.instanceId }
+            )
+
+            enrichedItems.forEach { item ->
+                item.notificationScheduledTime?.let { scheduledTime ->
+                    scheduleNotificationUseCase(
+                        instance = instance,
+                        message = item.notificationMessage,
+                        scheduledTime = scheduledTime,
+                        notificationId = item.calendarId.toInt(),
+                        releaseType = item.notificationReleaseType
                     )
-
-                    _books.update { current ->
-                        val next = current.toMutableMap()
-                        updatedBooks.forEach { book ->
-                            book.releaseDate?.let { instant ->
-                                scheduleNotificationUseCase(
-                                    instance = repository.instance,
-                                    message = "${book.authorTitle ?: "Unknown Author"} - ${book.title}",
-                                    scheduledTime = instant,
-                                    notificationId = book.id.toInt()
-                                )
-                                upsertBook(next, book, instant.toLocalDate())
-                            }
-                        }
-                        next
-                    }
                 }
             }
-            .onError { _, message, _ ->
-                _error.value = message
+
+            // State updates
+            _items.update { current ->
+                val next = current.toMutableMap()
+                enrichedItems.forEach { item ->
+                    item.getCalendarDates().forEach { date ->
+                        upsertItem(next, item, date.toLocalDate())
+                    }
+                }
+                if (type == InstanceType.Sonarr) {
+                    applyGrouping(next)
+                }
+                next
             }
+        }
     }
 
-    private fun upsertBook(
-        map: MutableMap<LocalDate, List<Book>>,
-        book: Book,
+    private fun isItemOfInstanceType(item: CalendarItem, type: InstanceType): Boolean {
+        return when (type) {
+            InstanceType.Radarr -> item is ArrMovie
+            InstanceType.Sonarr -> item is Episode || item is EpisodeGroup
+            InstanceType.Lidarr -> item is ArrAlbum
+            InstanceType.Booksehelf -> item is Book
+            InstanceType.Listenarr -> item is Audiobook
+            else -> false
+        }
+    }
+
+    private fun upsertItem(
+        map: MutableMap<LocalDate, List<CalendarItem>>,
+        item: CalendarItem,
         date: LocalDate
     ) {
         val currentList = map[date]?.toMutableList() ?: mutableListOf()
 
-        val existingIndex = currentList.indexOfFirst { it.foreignBookId == book.foreignBookId }
+        val existingIndex = currentList.indexOfFirst { existing ->
+            isSameItem(existing, item)
+        }
         if (existingIndex >= 0) {
-            currentList[existingIndex] = book
+            currentList[existingIndex] = item
         } else {
-            currentList.add(book)
+            currentList.add(item)
         }
 
         map[date] = currentList
+    }
+
+    private fun isSameItem(a: CalendarItem, b: CalendarItem): Boolean {
+        if (a::class != b::class) return false
+        return when (a) {
+            is ArrMovie if b is ArrMovie -> a.tmdbId == b.tmdbId
+            is Episode if b is Episode -> {
+                when {
+                    a.tvdbId != null && b.tvdbId != null -> a.tvdbId == b.tvdbId
+                    a.series?.tvdbId != null && b.series?.tvdbId != null ->
+                        a.series.tvdbId == b.series.tvdbId &&
+                                a.seasonNumber == b.seasonNumber &&
+                                a.episodeNumber == b.episodeNumber
+
+                    else -> a.id == b.id && a.instanceId == b.instanceId
+                }
+            }
+
+            is ArrAlbum if b is ArrAlbum -> a.foreignAlbumId == b.foreignAlbumId
+            is Book if b is Book -> a.foreignBookId == b.foreignBookId
+            is Audiobook if b is Audiobook -> a.asin == b.asin
+            else -> a.calendarId == b.calendarId && a.instanceId == b.instanceId
+        }
+    }
+
+    private fun applyGrouping(map: MutableMap<LocalDate, List<CalendarItem>>) {
+        map.keys.forEach { date ->
+            val items = map[date] ?: return@forEach
+            val episodes = items.filterIsInstance<Episode>()
+            if (episodes.isEmpty()) return@forEach
+
+            val nonEpisodes = items.filter { it !is Episode && it !is EpisodeGroup }
+
+            val grouped = episodes
+                .groupBy { it.series?.id }
+                .map { (_, episodeList) ->
+                    if (episodeList.size > 1) {
+                        val sorted = episodeList.sortedWith(
+                            compareBy<Episode> { it.seasonNumber }
+                                .thenBy { it.episodeNumber }
+                        )
+                        EpisodeGroup(
+                            first = sorted.first(),
+                            additional = sorted.drop(1),
+                            totalCount = sorted.size
+                        )
+                    } else {
+                        episodeList.first()
+                    }
+                }
+
+            map[date] = nonEpisodes + grouped
+        }
     }
 
     private fun insertDates(start: LocalDate, end: LocalDate) {
@@ -447,10 +275,7 @@ class CalendarService(
     }
 
     fun reset() {
-        _movies.value = emptyMap()
-        _episodes.value = emptyMap()
-        _albums.value = emptyMap()
-        _books.value = emptyMap()
+        _items.value = emptyMap()
         _dates.value = emptyList()
         _error.value = null
     }

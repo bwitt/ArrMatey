@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Book
+import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
 import com.dnfapps.arrmatey.arr.state.CalendarFilterState
@@ -36,18 +38,9 @@ class CalendarViewModel(
         getCalendarUseCase(),
         preferencesStore.observeCalendarFilterState()
     ) { calendar, filter ->
-        CalendarState(
+        calendar.copy(
             filterState = filter,
-            movies = filterMovies(calendar.movies, filter),
-            episodes = filterEpisodes(calendar.episodes, filter),
-            groupedEpisodes = filterEpisodeGroups(calendar.groupedEpisodes, filter),
-            albums = filterAlbums(calendar.albums, filter),
-            books = filterBooks(calendar.books, filter),
-            dates = calendar.dates,
-            isLoading = calendar.isLoading,
-            isLoadingFuture = calendar.isLoadingFuture,
-            error = calendar.error,
-            today = calendar.today
+            items = filterItems(calendar.items, filter)
         )
     }.stateIn(
         scope = viewModelScope,
@@ -137,103 +130,62 @@ class CalendarViewModel(
         }
     }
 
-    private fun filterMovies(
-        movieMap: Map<LocalDate, List<ArrMovie>>,
+    private fun filterItems(
+        items: Map<LocalDate, List<CalendarItem>>,
         filter: CalendarFilterState
-    ): Map<LocalDate, List<ArrMovie>> =
-        if (
-            (filter.contentFilter != ContentFilter.MoviesOnly &&
-                    filter.contentFilter != ContentFilter.All)
-            || filter.showFinalesOnly
-        ) {
-            emptyMap()
-        } else {
-            movieMap.mapValues { (_, movies) ->
-                movies.filter { movie ->
-                    filterMovie(movie, filter)
-                }
-            }
-        }
-
-    private fun filterEpisodes(
-        episodesMap: Map<LocalDate, List<Episode>>,
-        filter: CalendarFilterState
-    ): Map<LocalDate, List<Episode>> =
-        if (
-            filter.contentFilter != ContentFilter.EpisodesOnly &&
-            filter.contentFilter != ContentFilter.All
-        ) {
-            emptyMap()
-        } else {
-            episodesMap.mapValues { (_, episodes) ->
-                episodes
-                    .filter { episode ->
-                        filterEpisode(episode, filter)
+    ): Map<LocalDate, List<CalendarItem>> {
+        return items.mapValues { (_, list) ->
+            list.mapNotNull { item ->
+                when (item) {
+                    is ArrMovie -> {
+                        if (filter.contentFilter != ContentFilter.All && filter.contentFilter != ContentFilter.MoviesOnly) return@mapNotNull null
+                        if (filter.showFinalesOnly || filter.showPremiersOnly) return@mapNotNull null
+                        if (filterMovie(item, filter)) item else null
                     }
-                    .sortedBy { it.airDateUtc }
-            }
-        }
 
-    private fun filterEpisodeGroups(
-        episodeGroups: Map<LocalDate, List<EpisodeGroup>>,
-        filter: CalendarFilterState
-    ): Map<LocalDate, List<EpisodeGroup>> =
-        if (
-            filter.contentFilter != ContentFilter.EpisodesOnly &&
-            filter.contentFilter != ContentFilter.All
-        ) {
-            emptyMap()
-        } else {
-            episodeGroups.mapValues { (_, groups) ->
-                groups.mapNotNull { group ->
-                    val allEpisodes = listOf(group.first) + group.additional
-                    val filteredEpisodes = allEpisodes.filter { episode ->
-                        filterEpisode(episode, filter)
+                    is Episode -> {
+                        if (filter.contentFilter != ContentFilter.All && filter.contentFilter != ContentFilter.EpisodesOnly) return@mapNotNull null
+                        if (filterEpisode(item, filter)) item else null
                     }
-                    if (filteredEpisodes.isNotEmpty()) {
-                        EpisodeGroup(
-                            first = filteredEpisodes.first(),
-                            additional = filteredEpisodes.drop(1)
-                        )
-                    } else {
-                        null
+
+                    is EpisodeGroup -> {
+                        if (filter.contentFilter != ContentFilter.All && filter.contentFilter != ContentFilter.EpisodesOnly) return@mapNotNull null
+                        val allEpisodes = listOf(item.first) + item.additional
+                        val filteredEpisodes = allEpisodes.filter { episode ->
+                            filterEpisode(episode, filter)
+                        }
+                        if (filteredEpisodes.isNotEmpty()) {
+                            EpisodeGroup(
+                                first = filteredEpisodes.first(),
+                                additional = filteredEpisodes.drop(1),
+                                totalCount = filteredEpisodes.size
+                            )
+                        } else {
+                            null
+                        }
+                    }
+
+                    is ArrAlbum -> {
+                        if (filter.contentFilter != ContentFilter.All && filter.contentFilter != ContentFilter.AlbumsOnly) return@mapNotNull null
+                        if (filter.showFinalesOnly || filter.showPremiersOnly) return@mapNotNull null
+                        if (filterAlbum(item, filter)) item else null
+                    }
+
+                    is Book -> {
+                        if (filter.contentFilter != ContentFilter.All && filter.contentFilter != ContentFilter.BooksOnly) return@mapNotNull null
+                        if (filter.showFinalesOnly || filter.showPremiersOnly) return@mapNotNull null
+                        if (filterBook(item, filter)) item else null
+                    }
+
+                    is Audiobook -> {
+                        if (filter.contentFilter != ContentFilter.All && filter.contentFilter != ContentFilter.AudiobooksOnly) return@mapNotNull null
+                        if (filter.showFinalesOnly || filter.showPremiersOnly) return@mapNotNull null
+                        if (filterAudiobook(item, filter)) item else null
                     }
                 }
-                    .sortedBy { it.first.airDateUtc }
             }
-        }
-
-    private fun filterAlbums(
-        albumsMap: Map<LocalDate, List<ArrAlbum>>,
-        filter: CalendarFilterState
-    ): Map<LocalDate, List<ArrAlbum>> =
-        if (filter.contentFilter != ContentFilter.All &&
-            filter.contentFilter != ContentFilter.AlbumsOnly
-        ) {
-            emptyMap()
-        } else {
-            albumsMap.mapValues { (_, albums) ->
-                albums.filter { album ->
-                    filterAlbum(album, filter)
-                }
-            }
-        }
-
-    private fun filterBooks(
-        booksMap: Map<LocalDate, List<Book>>,
-        filter: CalendarFilterState
-    ): Map<LocalDate, List<Book>> =
-        if (filter.contentFilter != ContentFilter.All &&
-            filter.contentFilter != ContentFilter.BooksOnly
-        ) {
-            emptyMap()
-        } else {
-            booksMap.mapValues { (_, books) ->
-                books.filter { book ->
-                    filterBook(book, filter)
-                }
-            }
-        }
+        }.filterValues { it.isNotEmpty() }
+    }
 
     private fun filterMovie(movie: ArrMovie, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || movie.monitored) &&
@@ -255,5 +207,10 @@ class CalendarViewModel(
     private fun filterBook(book: Book, filter: CalendarFilterState): Boolean {
         return (!filter.showMonitoredOnly || book.monitored) &&
                 (filter.instanceId == null || book.instanceId == filter.instanceId)
+    }
+
+    private fun filterAudiobook(audiobook: Audiobook, filter: CalendarFilterState): Boolean {
+        return (!filter.showMonitoredOnly || audiobook.monitored) &&
+                (filter.instanceId == null || audiobook.instanceId == filter.instanceId)
     }
 }

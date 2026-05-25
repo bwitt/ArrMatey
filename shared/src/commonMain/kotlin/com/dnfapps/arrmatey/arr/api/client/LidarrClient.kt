@@ -4,14 +4,11 @@ import com.dnfapps.arrmatey.arr.api.model.AlbumMonitorBody
 import com.dnfapps.arrmatey.arr.api.model.ApplyTags
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistEditorBody
-import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteTrackBody
-import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
@@ -19,8 +16,8 @@ import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
+import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.mapValues
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
@@ -82,8 +79,8 @@ class LidarrClient(
             "artistIds" to listOf(id)
         ))
 
-    override suspend fun lookup(query: String): NetworkResult<List<Arrtist>> =
-        get<List<Arrtist>>("artist/lookup", mapOf("term" to query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<Arrtist>> =
+        get<List<Arrtist>>("artist/lookup", mapOf("term" to params.query))
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Arrtist> =
         post<ArrMedia, Arrtist>("artist", item)
@@ -98,7 +95,7 @@ class LidarrClient(
 
         val params = buildMap<String, Any> {
             params.artistId?.let { put("artistId", it) }
-           put("albumId", params.albumId)
+           put("albumId", params.mediaId)
         }
         return get("release", params)
     }
@@ -115,22 +112,10 @@ class LidarrClient(
             "albumId" to id
         )).map { it.records }
 
-    override suspend fun getMovieCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrMovie>> = NetworkResult.Success(emptyList())
+    override suspend fun getRootFolders(): NetworkResult<List<RootFolder>> =
+        get("rootfolders")
 
-    override suspend fun getEpisodeCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Episode>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getBookCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Book>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getAlbumCalendar(
+    override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<ArrAlbum>> =

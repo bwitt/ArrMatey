@@ -145,6 +145,7 @@
     <string name="minimum_availability">Minimum Availability</string>
     <string name="genres">Genres</string>
     <string name="path">Path</string>
+    <string name="relative_path">Relative Path</string>
     <string name="error">Error</string>
     <string name="relevance">Relevance</string>
     <string name="quality_profile">Quality profile</string>
@@ -249,6 +250,8 @@
     <string name="comment">Comment</string>
     <string name="comments">Comments</string>
     <string name="description">Description</string>
+    <string name="publisher">Publisher</string>
+    <string name="audiobooks">Audiobooks</string>
     <string name="search_on_add_label">Search for files immediately</string>
     <string name="no_api_key">This instance doesn't require an API key</string>
     <string name="no_auth_required">No authentication required</string>
@@ -260,9 +263,11 @@
     <string name="instance_switcher_toggle_description">Automatically hide the switcher when only one instance is configured</string>
     <string name="open_in_browser">Open in Browser</string>
     <string name="replace_url_with_current">Replace saved URL with current</string>
-
     <string name="confirm_delete">Confirm delete</string>
-    <string name="confirm_delete_movie">This file will be deleted</string>
+    <string name="confirm_delete_file">This file will be deleted</string>
+    <string name="audiobook_info_authors">Author(s)</string>
+    <string name="audiobook_info_narrators">Narrator(s)</string>
+    <string name="narrated_by">Narrated by: %1$s</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -279,6 +284,8 @@
     <string name="book_file_imported">Book File Imported</string>
     <string name="book_file_deleted">Book File Deleted</string>
     <string name="book_file_renamed">Book File Renamed</string>
+    <string name="audiobook_file_deleted">File Delete</string>
+    <string name="audiobook_file_added">File Added</string>
 
     <!-- Errors -->
     <string name="error">Error</string>
@@ -308,6 +315,7 @@
     <string name="bookshelf_description">This is a revival of Readarr. The images published are configured to use working Goodreads or Hardcover metadata out of the box.
 
         Bookshelf is an ebook and audiobook collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new books from your favorite authors and will grab, sort, and rename them. Note that only one type of a given book is supported. If you want both an audiobook and ebook of a given book you will need multiple instances.</string>
+    <string name="listenarr_description">Listenarr is a fast, feature-rich, cross-platform audiobook management server. Built with a focus on being a complete solution for all your audiobook downloading needs. Set up your own server and get ready to streamline your audiobook listening!</string>
     <string name="prowlarr_description">Prowlarr is an indexer manager/proxy built on the popular *arr .net/reactjs base stack to integrate with your various PVR apps. Prowlarr supports management of both Torrent Trackers and Usenet Indexers.</string>
     <string name="prowlarr">Prowlarr</string>
     <string name="no_indexers_configured">No indexers configured</string>
@@ -565,6 +573,7 @@
     <string name="enable_notifications_description">Receive notifications for new releases</string>
 
     <!-- View Customization -->
+    <string name="view_customization">View Customization</string>
     <string name="customization_options">Customization Options</string>
     <string name="banner_blur">Banner Blur</string>
     <string name="show_banner_background">Show banner background</string>

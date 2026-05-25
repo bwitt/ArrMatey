@@ -23,7 +23,7 @@ struct MediaRouteDestination: View {
             MediaPreviewScreen(json: json, type: type)
             
         case .movieRelease(let movieId):
-            let releaseParams = ReleaseParamsMovie(movieId: movieId)
+            let releaseParams = ReleaseParamsMovie(mediaId: movieId)
             InteractiveSearchScreen(type: .radarr, releaseParams: releaseParams)
             
         case .movieFiles(let json):
@@ -43,17 +43,24 @@ struct MediaRouteDestination: View {
             
         case .albumReleases(let albumId, let artistId):
             let releaseParams = ReleaseParamsAlbum(
-                albumId: albumId,
+                mediaId: albumId,
                 artistId: artistId?.asKotlinLong
             )
             InteractiveSearchScreen(type: .lidarr, releaseParams: releaseParams)
             
         case .bookReleases(let bookId):
-            let releaseParams = ReleaseParamsBook(bookId: bookId)
+            let releaseParams = ReleaseParamsBook(mediaId: bookId)
             InteractiveSearchScreen(type: .booksehelf, releaseParams: releaseParams)
+            
+        case .audiobookReleases(let id, let query):
+            let releaseParams = ReleaseParamsAudiobook(mediaId: id?.asKotlinLong, query: query)
+            InteractiveSearchScreen(type: .listenarr, releaseParams: releaseParams)
             
         case .authorFiles(let authorJson):
             AuthorFilesScreen(authorJson: authorJson)
+            
+        case .audiobookFiles(let audiobookJson):
+            AudiobookFilesScreen(audiobookJson: audiobookJson)
             
         case .bookDetails(let bookJson, let authorJson):
             BookDetailsScreen(bookJson: bookJson, authorJson: authorJson)

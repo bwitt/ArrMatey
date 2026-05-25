@@ -1,9 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.client
 
 import com.dnfapps.arrmatey.arr.api.model.ApplyTags
-import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorEditorBody
 import com.dnfapps.arrmatey.arr.api.model.Book
@@ -13,17 +11,13 @@ import com.dnfapps.arrmatey.arr.api.model.BookFileBulkDeleteBody
 import com.dnfapps.arrmatey.arr.api.model.BookMonitorBody
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
-import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
-import com.dnfapps.arrmatey.arr.api.model.Episode
-import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
-import com.dnfapps.arrmatey.seerr.api.model.Network
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 
@@ -84,8 +78,8 @@ class BookshelfClient(
             "authorIds" to listOf(id)
         ))
 
-    override suspend fun lookup(query: String): NetworkResult<List<Author>> =
-        get("author/lookup", mapOf("term" to query))
+    override suspend fun lookup(params: LookupParams): NetworkResult<List<Author>> =
+        get("author/lookup", mapOf("term" to params.query))
 
     override suspend fun addItemToLibrary(item: ArrMedia): NetworkResult<Author> =
         post<ArrMedia, Author>("author", item)
@@ -97,7 +91,7 @@ class BookshelfClient(
         if (params !is ReleaseParams.Book) {
             return NetworkResult.Error(message = "Non-bookshelf params type: $params")
         }
-        val params = mapOf("bookId" to params.bookId)
+        val params = mapOf("bookId" to params.mediaId)
         return get("release", params)
     }
 
@@ -139,22 +133,7 @@ class BookshelfClient(
     suspend fun deleteBookFiles(bookFilesIds: List<Long>): NetworkResult<Unit> =
         delete("bookFiles/bulk", body = BookFileBulkDeleteBody(bookFilesIds))
 
-    override suspend fun getMovieCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrMovie>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getEpisodeCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<Episode>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getAlbumCalendar(
-        start: LocalDate,
-        end: LocalDate
-    ): NetworkResult<List<ArrAlbum>> = NetworkResult.Success(emptyList())
-
-    override suspend fun getBookCalendar(
+    override suspend fun getCalendar(
         start: LocalDate,
         end: LocalDate
     ): NetworkResult<List<Book>> =

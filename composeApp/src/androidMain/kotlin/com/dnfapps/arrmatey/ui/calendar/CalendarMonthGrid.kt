@@ -50,18 +50,11 @@ fun CalendarMonthGrid(
 
                     if (dayIndex in 0 until daysInMonth) {
                         val date = LocalDate(currentMonth.year, currentMonth.month, dayIndex + 1)
-                        val dayMovies = state.movies[date] ?: emptyList()
-                        val dayEpisodes = state.episodes[date] ?: emptyList()
-                        val dayAlbums = state.albums[date] ?: emptyList()
-                        val dayBooks = state.books[date] ?: emptyList()
 
                         CalendarDayCell(
                             date = date,
                             isSelected = date == selectedDate,
-                            movieCount = dayMovies.size,
-                            episodeCount = dayEpisodes.size,
-                            albumCount = dayAlbums.size,
-                            bookCount = dayBooks.size,
+                            items = state.items[date] ?: emptyList(),
                             modifier = Modifier.weight(1f),
                             onClick = { onDateSelected(date) }
                         )

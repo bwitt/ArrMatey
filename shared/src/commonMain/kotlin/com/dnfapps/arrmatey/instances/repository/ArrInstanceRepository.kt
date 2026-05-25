@@ -3,8 +3,11 @@ package com.dnfapps.arrmatey.instances.repository
 import com.dnfapps.arrmatey.arr.api.client.ArrClient
 import com.dnfapps.arrmatey.arr.api.client.BookshelfClient
 import com.dnfapps.arrmatey.arr.api.client.LidarrClient
+import com.dnfapps.arrmatey.arr.api.client.ListenarrClient
+import com.dnfapps.arrmatey.arr.api.client.LookupParams
 import com.dnfapps.arrmatey.arr.api.client.RadarrClient
 import com.dnfapps.arrmatey.arr.api.client.SonarrClient
+import com.dnfapps.arrmatey.arr.api.model.AddAudiobookBody
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ArrHealth
@@ -14,28 +17,36 @@ import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.AudiobookFile
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadata
+import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.BookEdition
+import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.SeriesMembership
 import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
-import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
+import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.arrmatey.client.mapValues
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -43,6 +54,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,11 +83,15 @@ class ArrInstanceRepository(
     val bookshelfClient: BookshelfClient
         get() = client as? BookshelfClient ?: throw IllegalStateException("Client is not a BookshelfClient instance")
 
+    val listenarrClient: ListenarrClient
+        get() = client as? ListenarrClient ?: throw IllegalStateException("Client is not a ListenarrClient instance")
+
     private fun createClient(): ArrClient = when (instance.type) {
         InstanceType.Sonarr -> SonarrClient(instance, httpClient)
         InstanceType.Radarr -> RadarrClient(instance, httpClient)
         InstanceType.Lidarr -> LidarrClient(instance, httpClient)
         InstanceType.Booksehelf -> BookshelfClient(instance, httpClient)
+        InstanceType.Listenarr -> ListenarrClient(instance, httpClient)
         else -> TODO()
     }
 
@@ -95,7 +111,6 @@ class ArrInstanceRepository(
     val historyCache: StateFlow<Map<Long, List<HistoryItem>>> = _historyCache.asStateFlow()
 
     private val _mediaDetailsCache = MutableStateFlow<Map<Long, ArrMedia>>(emptyMap())
-
 
     private val _qualityProfiles = MutableStateFlow<List<QualityProfile>>(emptyList())
     val qualityProfiles: StateFlow<List<QualityProfile>> = _qualityProfiles.asStateFlow()
@@ -172,6 +187,13 @@ class ArrInstanceRepository(
                 .groupBy { it.authorId!! }
         }
 
+    // Listenarr-specific
+    private val _audiobookFiles = MutableStateFlow<Map<Long, List<AudiobookFile>>>(emptyMap())
+    val audiobookFiles: StateFlow<Map<Long, List<AudiobookFile>>> = _audiobookFiles.asStateFlow()
+
+    private val _listenarrConfiguration = MutableStateFlow(ListenarrConfiguration())
+    val listenarrConfiguration: StateFlow<ListenarrConfiguration> = _listenarrConfiguration.asStateFlow()
+
     override suspend fun testConnection(): NetworkResult<Unit> {
         return client.testConnection()
     }
@@ -183,6 +205,12 @@ class ArrInstanceRepository(
             client.getBooks()
                 .onSuccess {
                     _booksLibrary.value = it
+                }
+        }
+        safePerformListenarr { client ->
+            client.getConfigurationSettings()
+                .onSuccess {
+                    _listenarrConfiguration.value = it
                 }
         }
     }
@@ -208,6 +236,9 @@ class ArrInstanceRepository(
     suspend fun refreshRootFolders() {
         client.getRootFolders()
             .onSuccess { _rootFolders.value = it }
+            .onError { code, message, cause ->
+                print("$message - $code - ${cause?.printStackTrace()}")
+            }
     }
 
     suspend fun refreshTags() {
@@ -261,7 +292,10 @@ class ArrInstanceRepository(
 
         _lookupResults.value = NetworkResult.Loading
 
-        client.lookup(query)
+        val language = _listenarrConfiguration.value.defaultSearchLanguage
+        val region = _listenarrConfiguration.value.defaultSearchRegion
+        val queryParams = LookupParams(query, language, region)
+        client.lookup(queryParams)
             .onSuccess { results ->
                 logger.info { "Lookup results: $results" }
                 _lookupResults.value = NetworkResult.Success(results)
@@ -279,7 +313,12 @@ class ArrInstanceRepository(
     suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         _addItemStatus.value = OperationStatus.InProgress
 
-        client.addItemToLibrary(item)
+        val result = client.addItemToLibrary(item)
+        processAddResult(result, searchOnAdd)
+    }
+
+    private suspend fun processAddResult(result: NetworkResult<ArrMedia>, searchOnAdd: Boolean) {
+        result
             .onSuccess { addedItem ->
                 _addItemStatus.value = OperationStatus.Success("Item added successfully")
                 addedItem.id?.let {
@@ -292,12 +331,14 @@ class ArrInstanceRepository(
                     }
                 }
                 _lastAddedItemId.value = addedItem.id
+                delay(1000)
+                _addItemStatus.value = OperationStatus.Idle
+                _lastAddedItemId.value = null
                 refreshLibrary()
             }
             .onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
-            }
-            .also {
+                delay(1000)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
             }
@@ -307,6 +348,7 @@ class ArrInstanceRepository(
         _releases.value = NetworkResult.Loading
 
         client.getReleases(params)
+            .mapValues { it.apply { mediaId = params.mediaId } }
             .onSuccess { releases ->
                 logger.info { "Got releases: $releases" }
                 _releases.value = NetworkResult.Success(releases)
@@ -602,6 +644,8 @@ class ArrInstanceRepository(
                         is ArrMovie -> item.copy(monitored = status)
                         is Arrtist -> item.copy(monitored = status)
                         is Author -> item.copy(monitored = status)
+                        is Audiobook -> item.copy(monitored = status)
+                        is SearchAudiobook -> item
                         is MockMedia -> item
                     }
                 } else {
@@ -620,6 +664,8 @@ class ArrInstanceRepository(
                 is ArrMovie -> item.copy(monitored = status)
                 is Arrtist -> item.copy(monitored = status)
                 is Author -> item.copy(monitored = status)
+                is Audiobook -> item.copy(monitored = status)
+                is SearchAudiobook -> item
                 is MockMedia -> item
             }
             val updatedCache = currentDetailsCache.toMutableMap()
@@ -631,6 +677,14 @@ class ArrInstanceRepository(
     fun clearReleases() {
         _releases.value = null
     }
+
+    fun observeCacheMediaDetails(id: Long): Flow<ArrMedia?> =
+        _mediaDetailsCache.map {
+            it[id]
+        }
+
+    fun getCacheMediaDetails(id: Long): ArrMedia? =
+        _mediaDetailsCache.value[id]
 
     fun observeMediaDetails(id: Long): Flow<NetworkResult<ArrMedia>> = flow {
         emit(NetworkResult.Loading)
@@ -657,6 +711,20 @@ class ArrInstanceRepository(
                     ?: NetworkResult.Error(message = "Media not found in cache")
             }
             .collect { emit(it) }
+    }
+
+    suspend fun toggleAudiobookMonitor(audiobook: Audiobook): NetworkResult<Audiobook> {
+        _monitorStatus.value = OperationStatus.InProgress
+
+        if (instance.type != InstanceType.Listenarr) {
+            _monitorStatus.value = OperationStatus.Error(message = "Not a Listenarr instance")
+            return NetworkResult.Error(message = "Not a Listenarr instance")
+        }
+
+        val updatedAudiobook = audiobook.copy(monitored = !audiobook.monitored)
+
+        return updateMediaItem(updatedAudiobook)
+            .map { it as Audiobook }
     }
 
     fun observeItemHistory(itemId: Long): Flow<List<HistoryItem>> {
@@ -870,6 +938,49 @@ class ArrInstanceRepository(
             client.getBookEditions(bookId)
         }
 
+    // Listenarr
+
+    suspend fun getAudiobookFiles(audiobookId: Long): NetworkResult<List<AudiobookFile>> =
+        safePerformListenarr { client ->
+            client.getDetail(audiobookId)
+                .onSuccess { result ->
+                    val currentMap = _audiobookFiles.value.toMutableMap()
+                    currentMap[audiobookId] = result.files
+                    _audiobookFiles.value = currentMap
+                }
+        }.map { it.files }
+
+    suspend fun getMetadata(asin: String, region: String) =
+        safePerformListenarr { client ->
+            client.getMetadata(asin, region)
+        }
+
+    suspend fun getPreviewPath(rootPath: String, body: AudiobookMetadataBody) =
+        safePerformListenarr { client ->
+            client.getPreviewPath(rootPath, body)
+        }
+
+    suspend fun addNewAudiobook(item: SearchAudiobook, metadata: AudiobookMetadataBody, searchOnAdd: Boolean) {
+        _addItemStatus.value = OperationStatus.InProgress
+
+        val result = safePerformListenarr { client ->
+            val path = item.rootFolderPath?.trimEnd('/')?.plus("/")?.plus(item.path?.trimStart('/')) ?: ""
+            val body = AddAudiobookBody(
+                autoSearch = searchOnAdd,
+                destinationPath = path,
+                monitored = item.monitored,
+                metadata = metadata
+            )
+            client.addNewAudiobook(body)
+                .map { it.audiobook }
+        }
+        processAddResult(result, false)
+    }
+
+    suspend fun moveAudiobookFiles(item: Audiobook) {
+
+    }
+
     // Helpers
     private suspend inline fun <reified T> safePerformSonarr(
         operation: suspend (SonarrClient) -> NetworkResult<T>
@@ -896,6 +1007,13 @@ class ArrInstanceRepository(
         operation: suspend (BookshelfClient) -> NetworkResult<T>
     ): NetworkResult<T> {
         val client = client as? BookshelfClient ?: return NetworkResult.Error(message = "Not a Readarr instance")
+        return operation(client)
+    }
+
+    private suspend inline fun <reified T> safePerformListenarr(
+        operation: suspend (ListenarrClient) -> NetworkResult<T>
+    ): NetworkResult<T> {
+        val client = client as? ListenarrClient ?: return NetworkResult.Error(message = "Not a Listenarr instance")
         return operation(client)
     }
 

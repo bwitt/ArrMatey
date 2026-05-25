@@ -1,12 +1,11 @@
 package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
-import com.dnfapps.arrmatey.extensions.formatAsRuntime
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
@@ -72,7 +71,7 @@ sealed interface ArrMedia {
     val fileSize: Long
         get() = statistics?.sizeOnDisk ?: 0L
     val runtimeString: String
-        get() = runtime?.formatAsRuntime() ?: ""
+        get() = runtime?.formatMinutesAsRuntime() ?: ""
 
     fun getPoster(): ArrImage?  {
         return images.firstOrNull { it.coverType == CoverType.Poster }
@@ -81,6 +80,7 @@ sealed interface ArrMedia {
         return images.firstOrNull { it.coverType == CoverType.FanArt }
             ?: images.firstOrNull { it.coverType == CoverType.Banner }
             ?: images.firstOrNull { it.coverType == CoverType.Poster }
+            ?: images.firstOrNull { it.coverType == CoverType.Cover }
     }
 
     fun getClearLogo(): ArrImage? {
@@ -117,6 +117,8 @@ fun ArrMedia.toJson(): String {
         is ArrMovie  -> ArrMedia.json.encodeToJsonElement(ArrMovieSerializer, this)
         is Arrtist -> ArrMedia.json.encodeToJsonElement(ArrtistSerializer, this)
         is Author -> ArrMedia.json.encodeToJsonElement(AuthorSerializer, this)
+        is Audiobook -> ArrMedia.json.encodeToJsonElement(AudiobookSerializer, this)
+        is SearchAudiobook -> ArrMedia.json.encodeToJsonElement(SearchAudiobookSerializer, this)
         is MockMedia -> ArrMedia.json.encodeToJsonElement(MockMedia.serializer(), this)
     }
 
@@ -167,6 +169,28 @@ object AuthorSerializer:
     }
 }
 
+object AudiobookSerializer:
+    JsonTransformingSerializer<Audiobook>(Audiobook.serializer()) {
+    override fun transformSerialize(element: JsonElement): JsonElement {
+        val obj = element.jsonObject
+        return buildJsonObject {
+            obj.forEach { (k, v) -> put(k, v) }
+            put("mediaType", InstanceType.Listenarr.name)
+        }
+    }
+}
+
+object SearchAudiobookSerializer:
+    JsonTransformingSerializer<SearchAudiobook>(SearchAudiobook.serializer()) {
+    override fun transformSerialize(element: JsonElement): JsonElement {
+        val obj = element.jsonObject
+        return buildJsonObject {
+            obj.forEach { (k, v) -> put(k, v) }
+            put("mediaType", InstanceType.Listenarr.name + "_search")
+        }
+    }
+}
+
 
 object AnyArrMediaSerializer: KSerializer<ArrMedia> {
     override val descriptor: SerialDescriptor
@@ -184,6 +208,8 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
             InstanceType.Radarr.name -> decoder.json.decodeFromJsonElement(ArrMovie.serializer(), element)
             InstanceType.Lidarr.name -> decoder.json.decodeFromJsonElement(Arrtist.serializer(), element)
             InstanceType.Booksehelf.name -> decoder.json.decodeFromJsonElement(Author.serializer(), element)
+            InstanceType.Listenarr.name -> decoder.json.decodeFromJsonElement(Audiobook.serializer(), element)
+            InstanceType.Listenarr.name + "_search" -> decoder.json.decodeFromJsonElement(SearchAudiobook.serializer(), element)
             else -> error("Unknown mediaType: $mediaType")
         }
     }
@@ -196,6 +222,8 @@ object AnyArrMediaSerializer: KSerializer<ArrMedia> {
             is ArrMovie  -> json.encodeToJsonElement(ArrMovieSerializer, value)
             is Arrtist -> json.encodeToJsonElement(ArrtistSerializer, value)
             is Author -> json.encodeToJsonElement(AuthorSerializer, value)
+            is Audiobook -> json.encodeToJsonElement(AudiobookSerializer, value)
+            is SearchAudiobook -> json.encodeToJsonElement(SearchAudiobookSerializer, value)
             is MockMedia -> json.encodeToJsonElement(MockMedia.serializer(), value)
         }
         encoder.encodeJsonElement(element)

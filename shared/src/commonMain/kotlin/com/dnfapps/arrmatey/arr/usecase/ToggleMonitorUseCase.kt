@@ -5,10 +5,12 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 
@@ -22,6 +24,8 @@ class ToggleMonitorUseCase {
             is ArrMovie -> item.copy(monitored = !item.monitored)
             is Arrtist -> item.copy(monitored = !item.monitored)
             is Author -> item.copy(monitored = !item.monitored)
+            is Audiobook -> item.copy(monitored = !item.monitored)
+            is SearchAudiobook -> item
             is MockMedia -> item
         }
         return repository.updateMediaItem(updatedItem)
@@ -54,5 +58,12 @@ class ToggleMonitorUseCase {
         repository: ArrInstanceRepository
     ): NetworkResult<Book> {
         return repository.toggleBookMonitor(book)
+    }
+
+    suspend fun toggleAudiobook(
+        audiobook: Audiobook,
+        repository: ArrInstanceRepository
+    ): NetworkResult<Audiobook> {
+        return repository.toggleAudiobookMonitor(audiobook)
     }
 }

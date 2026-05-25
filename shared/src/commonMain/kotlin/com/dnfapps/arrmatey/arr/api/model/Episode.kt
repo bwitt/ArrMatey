@@ -1,9 +1,10 @@
 package com.dnfapps.arrmatey.arr.api.model
 
-import com.dnfapps.arrmatey.extensions.formatAsRuntime
+import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
 import com.dnfapps.arrmatey.extensions.isBeforeToday
 import com.dnfapps.arrmatey.extensions.padStart
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.formatLocalDateTime
 import dev.icerock.moko.resources.StringResource
 import kotlinx.datetime.LocalDate
@@ -44,13 +45,22 @@ data class Episode(
     val images: List<ArrImage> = emptyList(),
 
     val series: ArrSeries? = null,
-    var instanceId: Long? = null
-) {
+    override var instanceId: Long? = null
+): CalendarItem {
+    override val calendarId: Long 
+        get() = tvdbId ?: id
+    override fun getCalendarDates(): List<Instant> = 
+        listOfNotNull(airDateUtc)
+    override val notificationScheduledTime: Instant? 
+        get() = airDateUtc
+    override val notificationMessage: String 
+        get() = "${series?.title ?: "Unknown Series"} - S${seasonNumber}E${episodeNumber}${airDateUtc?.let { " - ${it.format("HH:mm")}" } ?: ""}"
+
     val displayTitle: String
         get() = title ?: "Unknown"
 
     val runtimeString: String?
-        get() = runtime?.formatAsRuntime()
+        get() = runtime?.formatMinutesAsRuntime()
 
     val seasonEpLabel: String
         get() = "${seasonNumber}x${episodeNumber.padStart(2, '0')}"

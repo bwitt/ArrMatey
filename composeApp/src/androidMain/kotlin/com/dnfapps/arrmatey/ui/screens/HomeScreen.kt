@@ -9,8 +9,9 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -29,6 +30,7 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -51,9 +53,9 @@ import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.tabs.ActivityTab
 import com.dnfapps.arrmatey.ui.tabs.ArrTab
 import com.dnfapps.arrmatey.ui.tabs.CalendarTab
-import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
+import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.launch
@@ -116,8 +118,8 @@ fun HomeScreen(
     DoubleBackToExit()
 
     ModalNavigationDrawer(
-        drawerState = drawerState,
         gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
+        drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(drawerState = drawerState) {
                 DrawerContent(
@@ -275,7 +277,7 @@ private fun MainNavigationContent(
                 }
             }
         },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Bottom)
     ) { paddingValues ->
         HorizontalPager(
             state = pagerState,
@@ -313,6 +315,7 @@ private fun StandardTabContent(tab: TabItem.Standard) {
         TabItem.Standard.MOVIES -> ArrTab(InstanceType.Radarr)
         TabItem.Standard.MUSIC -> ArrTab(InstanceType.Lidarr)
         TabItem.Standard.BOOKS -> ArrTab(InstanceType.Booksehelf)
+        TabItem.Standard.AUDIOBOOKS -> ArrTab(InstanceType.Listenarr)
         TabItem.Standard.ACTIVITY -> ActivityTab()
         TabItem.Standard.DOWNLOADS -> DownloadsTab()
         TabItem.Standard.CALENDAR -> CalendarTab()

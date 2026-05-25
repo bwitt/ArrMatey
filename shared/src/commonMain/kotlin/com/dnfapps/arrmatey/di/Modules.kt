@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.di
 import com.dnfapps.arrmatey.arr.api.client.DynamicLogger
 import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
@@ -17,6 +18,9 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetAudiobookFilesUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetAudiobookMetadataUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetAudiobookPreviewPathUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAuthorFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetBookEditionUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetBookHistoryUseCase
@@ -42,6 +46,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
@@ -202,7 +207,7 @@ val repositoryModule = module {
 
 val serviceModule = module {
     single { ActivityQueueService(get(), get()) }
-    single { CalendarService(get(), get(), get(), get()) }
+    single { CalendarService(get(), get(), get()) }
     single { DownloadQueueService(get()) }
 }
 
@@ -288,6 +293,9 @@ val useCaseModule = module {
     factory { GetBookHistoryUseCase() }
     factory { UpdateDownloadClientPreferencesUseCase(get()) }
     factory { ObserveDownloadClientPreferencesUseCase(get()) }
+    factory { GetAudiobookFilesUseCase(get()) }
+    factory { GetAudiobookPreviewPathUseCase(get()) }
+    factory { GetAudiobookMetadataUseCase() }
 }
 
 val viewModelModule = module {
@@ -302,10 +310,10 @@ val viewModelModule = module {
         InstancesViewModel(type, get(), get(), get())
     }
     factory { (type: InstanceType) ->
-        ArrSearchViewModel(type, get(), get())
+        ArrSearchViewModel(type, get(), get(), get())
     }
-    factory { (type: InstanceType) ->
-        MediaPreviewViewModel(type, get(), get())
+    factory { (preview: ArrMedia, type: InstanceType) ->
+        MediaPreviewViewModel(preview, type, get(), get(), get(), get())
     }
     factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
         InteractiveSearchViewModel(type, defaultFilter, get(), get(), get())
@@ -349,6 +357,9 @@ val viewModelModule = module {
     }
     factory { (authorId: Long) ->
         AuthorFilesViewModel(authorId, get())
+    }
+    factory { (audiobookId: Long) ->
+        AudiobookFilesViewModel(audiobookId, get())
     }
 }
 

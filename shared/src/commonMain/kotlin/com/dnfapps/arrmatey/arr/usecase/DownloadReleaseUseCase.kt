@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrRelease
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
 import com.dnfapps.arrmatey.arr.api.model.DownloadReleasePayload
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
+import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
 import com.dnfapps.arrmatey.arr.api.model.SeriesRelease
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -27,6 +28,7 @@ class DownloadReleaseUseCase(
             is MovieRelease -> buildRadarrPayload(release, force)
             is LidarrRelease -> buildLidarrPayload(release, force)
             is BookshelfRelease -> buildBookshelfPayload(release)
+            is ListenarrRelease -> buildListenarrPayload(release)
         }
         return repository.downloadRelease(payload)
     }
@@ -58,5 +60,11 @@ class DownloadReleaseUseCase(
         DownloadReleasePayload.Book(
             guid = release.guid,
             indexerId = release.indexerId
+        )
+    
+    private fun buildListenarrPayload(release: ListenarrRelease): DownloadReleasePayload =
+        DownloadReleasePayload.AudioBook(
+            audiobookId = release.mediaId ?: -1,
+            searchResult = release
         )
 }

@@ -15,34 +15,35 @@ struct MediaPreviewScreen: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var navigation: NavigationManager
 
-    @ObservedObject private var viewModel: MediaPreviewViewModelS
+    @StateObject private var viewModel: MediaPreviewViewModelS
 
     @State private var sheetPresented: Bool = false
     
     init(json: String, type: InstanceType) {
         self.type = type
-        self.media = ArrMediaCompanion().fromJson(value: json)
-        self.viewModel = MediaPreviewViewModelS(type: type)
+        let media = ArrMediaCompanion().fromJson(value: json)
+        self.media = media
+        self._viewModel = StateObject(wrappedValue: MediaPreviewViewModelS(preview: media, type: type))
     }
     
     private var lastAddedItemId: Int64? {
-        viewModel.lastAddedItemId
+        viewModel.uiState.lastAddedItemId?.int64Value
     }
     
     private var addItemStatus: OperationStatus {
-        viewModel.addItemStatus
+        viewModel.uiState.addItemStatus
     }
     
     private var qualityProfiles: [QualityProfile] {
-        viewModel.qualityProfiles
+        viewModel.uiState.qualityProfiles
     }
     
     private var rootFolders: [RootFolder] {
-        viewModel.rootFolders
+        viewModel.uiState.rootFolders
     }
     
     private var tags: [Tag] {
-        viewModel.tags
+        viewModel.uiState.tags
     }
     
     var body: some View {
@@ -135,6 +136,18 @@ struct MediaPreviewScreen: View {
                 qualityProfiles: qualityProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
+                onAddItem: { item, searchOnAdd in
+                    viewModel.addItem(item, searchOnAdd)
+                },
+                onDismiss: { sheetPresented = false }
+            )
+        case let audiobook as SearchAudiobook:
+            AddAudiobookForm(
+                audiobook: audiobook,
+                addItemStatus: addItemStatus,
+                qualityProfiles: qualityProfiles,
+                rootFolders: rootFolders,
+                relativePath: viewModel.uiState.relativePath,
                 onAddItem: { item, searchOnAdd in
                     viewModel.addItem(item, searchOnAdd)
                 },

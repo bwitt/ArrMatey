@@ -57,17 +57,20 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
+import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -77,6 +80,7 @@ import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
+import com.dnfapps.arrmatey.ui.components.AudiobookFileView
 import com.dnfapps.arrmatey.ui.components.BooksArea
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.InfoArea
@@ -87,6 +91,7 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.SeasonsArea
 import com.dnfapps.arrmatey.ui.components.UpcomingDateView
 import com.dnfapps.arrmatey.ui.sheets.EditArtistSheet
+import com.dnfapps.arrmatey.ui.sheets.EditAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
@@ -94,7 +99,9 @@ import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
+import java.util.Locale
 import kotlin.time.ExperimentalTime
+import androidx.compose.ui.platform.LocalLocale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -235,10 +242,13 @@ fun MediaDetailsScreen(
                             modifier = Modifier.verticalScroll(scrollState),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            DetailsHeader(item, type)
+                            DetailsHeader(item, type, topPadding = paddingValues.calculateTopPadding())
 
                             Column(
-                                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .padding(bottom = 24.dp)
+                                    .padding(top = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
                                 UpcomingDateView(item)
@@ -277,7 +287,7 @@ fun MediaDetailsScreen(
                                             mediaDetailsViewModel.performAutomaticLookup()
                                         },
                                         onDeleteFile = {
-                                            mediaDetailsViewModel.deleteMovieFile()
+                                            confirmDeleteMovie = true
                                         }
                                     )
                                     is Arrtist -> AlbumsArea(
@@ -313,6 +323,14 @@ fun MediaDetailsScreen(
                                             mediaDetailsViewModel.performBookAutomaticLookup(bookId)
                                         }
                                     )
+                                    is Audiobook -> AudiobookFileView(
+                                        audiobook = item,
+                                        searchIds = automaticSearchIds,
+                                        onAutomaticSearch = {
+                                            mediaDetailsViewModel.performAutomaticLookup()
+                                        }
+                                    )
+                                    is SearchAudiobook,
                                     is MockMedia -> {}
                                 }
 
@@ -321,6 +339,8 @@ fun MediaDetailsScreen(
                                     is ArrMovie -> movieInfo(item, qualityProfiles, tags)
                                     is Arrtist -> artistInfo(item, qualityProfiles, tags)
                                     is Author -> authorInfo(item, qualityProfiles, tags)
+                                    is Audiobook -> audiobookInfo(item)
+                                    is SearchAudiobook,
                                     is MockMedia -> emptyMap()
                                 }.toInfoList()
                                 InfoArea(infoItems)
@@ -570,6 +590,15 @@ private fun EditMediaSheet(
             onEditItem = onEditItem,
             onDismiss = onDismiss
         )
+        is Audiobook -> EditAudiobookSheet(
+            item = item,
+            qualityProfiles = qualityProfiles,
+            rootFolders = rootFolders,
+            editInProgress = editInProgress,
+            onEditItem = onEditItem,
+            onDismiss = onDismiss
+        )
+        is SearchAudiobook,
         is MockMedia -> {}
     }
 }
@@ -799,5 +828,29 @@ private fun authorInfo(
         put(mokoString(MR.strings.new_books), monitorLabel)
         put(mokoString(MR.strings.quality_profile), (qualityProfile?.name ?: unknown))
         put(mokoString(MR.strings.tags), tagsLabel)
+    }
+}
+
+@Composable
+private fun audiobookInfo(
+    audiobook: Audiobook
+): Map<String, String> {
+    val unknown = mokoString(MR.strings.unknown)
+
+    val diskSize = audiobook.fileSize.bytesAsFileSizeString()
+
+    val authorString = audiobook.authors.takeUnless { it.isEmpty() }?.joinToString(Bullet) ?: unknown
+    val narratorsString = audiobook.narrators.takeUnless { it.isEmpty() }?.joinToString(Bullet) ?: unknown
+
+    return buildMap {
+        put(mokoString(MR.strings.audiobook_info_authors), authorString)
+        put(mokoString(MR.strings.audiobook_info_narrators), narratorsString)
+        put(mokoString(MR.strings.publisher), (audiobook.publisher ?: unknown))
+        audiobook.language?.let { language ->
+            put(mokoString(MR.strings.language),
+                language.replaceFirstChar { if (it.isLowerCase()) it.titlecase(LocalLocale.current.platformLocale) else it.toString() })
+        }
+        put(mokoString(MR.strings.size_on_disk), diskSize)
+        put(mokoString(MR.strings.path), (audiobook.path ?: unknown))
     }
 }
