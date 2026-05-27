@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.entensions.Bullet
@@ -82,9 +83,9 @@ fun EpisodeRow(
             }
             Text(
                 text = titleString,
-                lineHeight = 16.sp,
+                lineHeight = 1.5.em,
                 overflow = TextOverflow.MiddleEllipsis,
-                maxLines = 1
+                maxLines = 2
             )
 
             val airDate = episode.airDate?.takeIf { it.isTodayOrAfter() }

@@ -11,10 +11,11 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativePaint
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,23 +37,28 @@ fun ClearLogo(
         Box(
             modifier = Modifier
                 .wrapContentSize()
-                .drawBehind {
-                    if (isLightTheme) {
-                        drawIntoCanvas { canvas ->
-                            val paint = Paint().apply {
-                                color = Color.Black.copy(alpha = 0.4f)
-                                asFrameworkPaint().maskFilter =
-                                    BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL)
+                .drawWithCache {
+                    val paint = if (isLightTheme) {
+                        Paint().apply {
+                            color = Color.Black.copy(alpha = 0.4f)
+                            nativePaint.maskFilter =
+                                BlurMaskFilter(10f, BlurMaskFilter.Blur.NORMAL)
+                        }
+                    } else null
+
+                    onDrawBehind {
+                        paint?.let { p ->
+                            drawIntoCanvas { canvas ->
+                                canvas.drawRoundRect(
+                                    left = 0f,
+                                    top = 0f,
+                                    right = size.width,
+                                    bottom = size.height,
+                                    radiusX = 16.dp.toPx(),
+                                    radiusY = 16.dp.toPx(),
+                                    paint = p
+                                )
                             }
-                            canvas.drawRoundRect(
-                                left = 0f,
-                                top = 0f,
-                                right = size.width,
-                                bottom = size.height,
-                                radiusX = 16.dp.toPx(),
-                                radiusY = 16.dp.toPx(),
-                                paint = paint
-                            )
                         }
                     }
                 }

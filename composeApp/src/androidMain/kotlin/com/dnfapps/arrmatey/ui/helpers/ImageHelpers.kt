@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import coil3.compose.LocalPlatformContext
+import coil3.request.CachePolicy
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -27,9 +28,9 @@ fun rememberRemoteImageData(
     return remember(url) {
         ImageRequest.Builder(context)
             .data(url)
-//            .diskCacheKey(cacheKey)
-//            .networkCachePolicy(CachePolicy.ENABLED)
-//            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCacheKey(cacheKey)
+            .networkCachePolicy(CachePolicy.ENABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
             .crossfade(crossfade)
             .listener(
                 onError = onError,
