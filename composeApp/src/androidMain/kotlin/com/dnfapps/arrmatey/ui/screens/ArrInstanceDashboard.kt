@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -45,9 +44,9 @@ import com.dnfapps.arrmatey.arr.state.ArrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.model.InfoItem
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.SettingsScreen
+import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.settingsNavigator
+import com.dnfapps.arrmatey.navigation.toEditInstance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -64,10 +63,10 @@ import org.koin.compose.koinInject
 fun ArrInstanceDashboard(
     id: Long,
     viewModel: ArrInstanceDashboardViewModel = koinInjectParams(id),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<SettingsScreen> = navigationManager.settings(),
     moko: MokoStrings = koinInject()
 ) {
+    val navManager = navigationManager
+    val navigation = settingsNavigator
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -87,7 +86,7 @@ fun ArrInstanceDashboard(
                 actions = {
                     IconButton(
                         onClick = {
-                            navigation.navigateTo(SettingsScreen.EditInstance(id))
+                            navigation.toEditInstance(id)
                         }
                     ) {
                         Icon(Icons.Default.Edit, null)
@@ -118,7 +117,7 @@ fun ArrInstanceDashboard(
                         onRetry = { viewModel.refresh() },
                         onOpenSettings = {
                             instance?.let {
-                                navigationManager.openEditInstanceScreen(it.id)
+                                navManager.openEditInstanceScreen(it.id)
                             }
                         }
                     )

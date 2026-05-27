@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import com.dnfapps.arrmatey.shared.MR
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.SettingsNavigation
+import com.dnfapps.arrmatey.navigation.settingsNavigator
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.InstanceInfoCard
 import com.dnfapps.arrmatey.utils.mokoString
@@ -44,9 +44,9 @@ import org.koin.compose.koinInject
 @Composable
 fun AddInstanceScreen(
     initialType: InstanceType = InstanceType.Sonarr,
-    viewModel: AddInstanceViewModel = koinInject(),
-    navigation: SettingsNavigation = koinInject<SettingsNavigation>()
+    viewModel: AddInstanceViewModel = koinInject()
 ) {
+    val navigation = settingsNavigator
     val scope = rememberCoroutineScope()
     var selectedInstanceType by remember { mutableStateOf(initialType) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()

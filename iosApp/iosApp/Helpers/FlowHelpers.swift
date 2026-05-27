@@ -10,10 +10,9 @@ import SwiftUI
 
 extension SkieSwiftStateFlow {
     func observeAsync(_ consumer: @escaping (_ emission: T) -> Void) {
-        Task { @MainActor in
-            await Task.yield()
+        Task {
             for try await value in self {
-                Task { @MainActor in
+                await MainActor.run {
                     consumer(value)
                 }
             }
@@ -21,10 +20,9 @@ extension SkieSwiftStateFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T) -> Void) {
-        Task { @MainActor [weak owner] in
-            await Task.yield()
+        Task { [weak owner] in
             for try await value in self {
-                Task { @MainActor [weak owner] in
+                await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
                     consumer(owner, value)
                 }
@@ -41,10 +39,9 @@ extension SkieSwiftStateFlow {
 
 extension SkieSwiftOptionalStateFlow {
     func observeAsync(_ consumer: @escaping (_ emission: T?) -> Void) {
-        Task { @MainActor in
-            await Task.yield()
+        Task {
             for try await value in self {
-                Task { @MainActor in
+                await MainActor.run {
                     consumer(value)
                 }
             }
@@ -52,10 +49,9 @@ extension SkieSwiftOptionalStateFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T?) -> Void) {
-        Task { @MainActor [weak owner] in
-            await Task.yield()
+        Task { [weak owner] in
             for try await value in self {
-                Task { @MainActor [weak owner] in
+                await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
                     consumer(owner, value)
                 }
@@ -72,10 +68,9 @@ extension SkieSwiftOptionalStateFlow {
 
 extension SkieSwiftFlow {
     func observeAsync(_ consumer: @escaping (_ emission: T) -> Void) {
-        Task { @MainActor in
-            await Task.yield()
+        Task {
             for try await value in self {
-                Task { @MainActor in
+                await MainActor.run {
                     consumer(value)
                 }
             }
@@ -83,10 +78,9 @@ extension SkieSwiftFlow {
     }
     
     func observeAsync<Owner: AnyObject>(on owner: Owner, _ consumer: @escaping (Owner, T) -> Void) {
-        Task { @MainActor [weak owner] in
-            await Task.yield()
+        Task { [weak owner] in
             for try await value in self {
-                Task { @MainActor [weak owner] in
+                await MainActor.run { [weak owner] in
                     guard let owner = owner else { return }
                     consumer(owner, value)
                 }

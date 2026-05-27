@@ -42,7 +42,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -54,46 +53,45 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
+import com.dnfapps.arrmatey.compose.utils.formatWithCommas
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.SeerrScreen
+import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.isDebug
+import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.seerrNavigator
+import com.dnfapps.arrmatey.seerr.api.model.Episode
+import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import com.dnfapps.arrmatey.seerr.state.MediaProvider
 import com.dnfapps.arrmatey.seerr.state.SeerrDetailsState
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ErrorView
+import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
-import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
-import com.dnfapps.arrmatey.utils.koinInjectParams
-import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.ImageResource
-import dev.icerock.moko.resources.compose.painterResource
-import org.koin.compose.koinInject
-import androidx.core.net.toUri
-import coil3.compose.AsyncImage
-import com.dnfapps.arrmatey.compose.utils.formatWithCommas
-import com.dnfapps.arrmatey.entensions.openLink
-import com.dnfapps.arrmatey.isDebug
-import com.dnfapps.arrmatey.model.InfoItem
-import com.dnfapps.arrmatey.seerr.api.model.Episode
-import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
-import com.dnfapps.arrmatey.ui.components.ContainerCard
-import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
+import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.format
+import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoPlural
+import com.dnfapps.arrmatey.utils.mokoString
+import dev.icerock.moko.resources.ImageResource
+import dev.icerock.moko.resources.compose.painterResource
+import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -102,10 +100,10 @@ fun SeerrDetailsScreen(
     tmdbId: Long,
     requestType: RequestType,
     viewModel: SeerrMediaDetailsViewModel = koinInjectParams(tmdbId, requestType),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<SeerrScreen> = navigationManager.requests(),
     moko: MokoStrings = koinInject()
 ) {
+    val navManager = navigationManager
+    val navigation = seerrNavigator
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -143,7 +141,7 @@ fun SeerrDetailsScreen(
                         message = state.message ?: mokoString(MR.strings.unknown),
                         onOpenSettings = {
                             selectedInstance?.id?.let { id ->
-                                navigationManager.openEditInstanceScreen(id)
+                                navManager.openEditInstanceScreen(id)
                             }
                         },
                         onRetry = {

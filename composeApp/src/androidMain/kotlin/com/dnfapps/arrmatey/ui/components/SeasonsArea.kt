@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.ui.components
 
-import com.dnfapps.arrmatey.shared.MR
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -32,17 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.utils.mokoPlural
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toEpisodeDetails
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 
@@ -58,10 +54,9 @@ fun SeasonsArea(
     onSeasonAutomaticSearch: (Int) -> Unit,
     deleteSeasonFiles: (Int) -> Unit,
     seasonDeleteInProgress: Boolean,
-    activityQueueViewModel: ActivityQueueViewModel = koinInject(),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.series()
+    activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {
+    val navigation = arrNavigator
     val queueItems by activityQueueViewModel.activityTasks.collectAsStateWithLifecycle()
 
     Column(
@@ -154,8 +149,7 @@ fun SeasonsArea(
                                 isActive = isActive,
                                 progressLabel = activityProgress,
                                 onClick = {
-                                    val destination = ArrScreen.EpisodeDetails(series, episode)
-                                    navigation.navigateTo(destination)
+                                    navigation.toEpisodeDetails(series, episode)
                                 },
                                 onAutomaticSearch = onEpisodeAutomaticSearch,
                                 onToggleMonitor = onToggleEpisodeMonitor,

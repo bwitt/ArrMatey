@@ -70,6 +70,9 @@ fun PosterItem(
         onError = { _, err ->
             println(err.throwable.message)
             imageLoadError = true
+        },
+        onSuccess = { _, _ ->
+            imageLoadError = false
         }
     )
 

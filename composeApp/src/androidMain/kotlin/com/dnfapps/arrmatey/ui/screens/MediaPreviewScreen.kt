@@ -40,9 +40,7 @@ import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DetailsHeader
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
@@ -55,17 +53,15 @@ import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MediaPreviewScreen(
     item: ArrMedia,
     type: InstanceType,
-    viewModel: MediaPreviewViewModel = koinInjectParams(item, type),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.arr(type)
+    viewModel: MediaPreviewViewModel = koinInjectParams(item, type)
 ) {
+    val navigation = arrNavigator
     val context = LocalContext.current
     var showBottomSheet by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
@@ -92,8 +88,7 @@ fun MediaPreviewScreen(
     LaunchedEffect(uiState.lastAddedItemId) {
         uiState.lastAddedItemId?.let { id ->
             showBottomSheet = false
-            val newScreen = ArrScreen.Details(id)
-            navigation.replaceCurrent(newScreen)
+            navigation.replaceCurrent(com.dnfapps.arrmatey.navigation.ArrScreen.Details(id))
         }
     }
 

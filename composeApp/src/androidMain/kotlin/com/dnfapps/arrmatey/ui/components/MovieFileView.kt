@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.ui.components
 
-import com.dnfapps.arrmatey.shared.MR
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,11 +17,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toMovieFiles
+import com.dnfapps.arrmatey.navigation.toMovieReleases
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -32,17 +31,15 @@ fun MovieFileView(
     movieExtraFiles: List<ExtraFile>,
     searchIds: Set<Long>,
     onAutomaticSearch: () -> Unit,
-    onDeleteFile: () -> Unit,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.movies()
+    onDeleteFile: () -> Unit
 ) {
+    val navigation = arrNavigator
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         ReleaseDownloadButtons(
             onInteractiveClicked = {
-                val destination = ArrScreen.MovieReleases(movie.id!!)
-                navigation.navigateTo(destination)
+                navigation.toMovieReleases(movie.id!!)
             },
             onAutomaticClicked = onAutomaticSearch,
             automaticSearchEnabled = movie.monitored,
@@ -67,7 +64,7 @@ fun MovieFileView(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-                    navigation.navigateTo(ArrScreen.MovieFiles(movie))
+                    navigation.toMovieFiles(movie)
                 }
             )
         }

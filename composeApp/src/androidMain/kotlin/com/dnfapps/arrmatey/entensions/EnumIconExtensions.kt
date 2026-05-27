@@ -60,7 +60,7 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.DOWNLOADS -> Icons.Default.CloudDownload
             TabItem.Standard.CALENDAR -> Icons.Default.CalendarMonth
             TabItem.Standard.REQUESTS -> Icons.Default.Inbox
-            TabItem.Standard.PROWLARR -> Icons.Default.ManageSearch
+            TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
         }
         is TabItem.CustomWebpage -> Icons.Default.Language
         is TabItem.Settings -> Icons.Default.Settings

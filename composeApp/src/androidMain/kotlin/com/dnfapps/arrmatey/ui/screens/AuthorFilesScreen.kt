@@ -27,24 +27,20 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthorFilesScreen(
     author: Author,
-    viewModel: AuthorFilesViewModel = koinInjectParams(author.id ?: 0L),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.books()
+    viewModel: AuthorFilesViewModel = koinInjectParams(author.id ?: 0L)
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val navigation = arrNavigator
 
     Scaffold(
         topBar = {

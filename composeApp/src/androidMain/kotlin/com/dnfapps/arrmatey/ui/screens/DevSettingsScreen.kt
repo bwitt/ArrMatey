@@ -2,7 +2,6 @@ package com.dnfapps.arrmatey.ui.screens
 
 import android.content.Context
 import android.content.Intent
-import com.dnfapps.arrmatey.shared.MR
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -20,11 +19,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,13 +30,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -53,34 +44,29 @@ import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.logging.LogReader
-import com.dnfapps.arrmatey.navigation.SettingsNavigation
+import com.dnfapps.arrmatey.navigation.settingsNavigator
+import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.utils.mokoString
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DevSettingsScreen(
-    preferenceStore: PreferencesStore = koinInject<PreferencesStore>(),
-    settingsNav: SettingsNavigation = koinInject<SettingsNavigation>()
+    preferenceStore: PreferencesStore = koinInject<PreferencesStore>()
 ) {
-    val scope = rememberCoroutineScope()
+    val settingsNav = settingsNavigator
     val context = LocalContext.current
 
     val showInfoCardMap by preferenceStore.showInfoCards.collectAsState(emptyMap())
     val activityPollingOn by preferenceStore.enableActivityPolling.collectAsState(true)
     val logLevel by preferenceStore.httpLogLevel.collectAsState(LoggerLevel.Headers)
     val useDynamicTheme by preferenceStore.useDynamicTheme.collectAsStateWithLifecycle(true)
-    val useClearLogo by preferenceStore.useClearLogo.collectAsStateWithLifecycle(true)
 
     Scaffold(
         topBar = {

@@ -22,17 +22,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @Composable
 fun NoInstanceView(
     type: InstanceType,
-    modifier: Modifier = Modifier,
-    navigationManager: NavigationManager = koinInject()
+    modifier: Modifier = Modifier
 ) {
+    val navManager = navigationManager
     Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -58,7 +57,7 @@ fun NoInstanceView(
 
         Button(
             onClick = {
-                navigationManager.openNewInstanceScreen(type)
+                navManager.openNewInstanceScreen(type)
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,

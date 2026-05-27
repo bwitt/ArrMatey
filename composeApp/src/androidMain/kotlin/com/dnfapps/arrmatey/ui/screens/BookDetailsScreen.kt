@@ -6,13 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
@@ -62,9 +60,8 @@ import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DetailHeaderBanner
@@ -77,16 +74,14 @@ import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @Composable
 fun BookDetailsScreen(
     book: Book,
     author: Author,
-    viewModel: BookDetailsViewModel = koinInjectParams(author.id, book),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.books()
+    viewModel: BookDetailsViewModel = koinInjectParams(author.id, book)
 ) {
+    val navigation = arrNavigator
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -193,8 +188,7 @@ fun BookDetailsScreen(
 
                     ReleaseDownloadButtons(
                         onInteractiveClicked = {
-                            val destination = ArrScreen.BookRelease(bookId = currentBook.id)
-                            navigation.navigateTo(destination)
+                            navigation.toBookRelease(bookId = currentBook.id)
                         },
                         onAutomaticClicked = {
                             viewModel.executeAutomaticSearch()

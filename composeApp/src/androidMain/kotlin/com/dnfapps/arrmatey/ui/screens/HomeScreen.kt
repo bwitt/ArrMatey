@@ -34,6 +34,7 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -47,6 +48,7 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.TabItemIconView
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.navigation.LocalNavigationManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
@@ -117,58 +119,60 @@ fun HomeScreen(
 
     DoubleBackToExit()
 
-    ModalNavigationDrawer(
-        gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(drawerState = drawerState) {
-                DrawerContent(
-                    drawerTabs = drawerTabs,
-                    overlayTab = overlayTab,
-                    useServiceNavIcons = useServiceNavIcons,
-                    activityQueueIssuesCount = activityQueueIssuesCount,
-                    onHomeClick = {
-                        scope.launch {
-                            navigationManager.closeOverlay()
-                            navigationManager.closeDrawer()
-                            drawerState.close()
+    CompositionLocalProvider(LocalNavigationManager provides navigationManager) {
+        ModalNavigationDrawer(
+            gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
+            drawerState = drawerState,
+            drawerContent = {
+                ModalDrawerSheet(drawerState = drawerState) {
+                    DrawerContent(
+                        drawerTabs = drawerTabs,
+                        overlayTab = overlayTab,
+                        useServiceNavIcons = useServiceNavIcons,
+                        activityQueueIssuesCount = activityQueueIssuesCount,
+                        onHomeClick = {
+                            scope.launch {
+                                navigationManager.closeOverlay()
+                                navigationManager.closeDrawer()
+                                drawerState.close()
+                            }
+                        },
+                        onDrawerTabClick = { tab ->
+                            scope.launch {
+                                navigationManager.openOverlay(tab)
+                                drawerState.close()
+                            }
+                        },
+                        onSettingsClick = {
+                            scope.launch {
+                                navigationManager.openOverlay(TabItem.Settings)
+                                drawerState.close()
+                            }
                         }
-                    },
-                    onDrawerTabClick = { tab ->
-                        scope.launch {
-                            navigationManager.openOverlay(tab)
-                            drawerState.close()
-                        }
-                    },
-                    onSettingsClick = {
-                        scope.launch {
-                            navigationManager.openOverlay(TabItem.Settings)
-                            drawerState.close()
-                        }
-                    }
-                )
+                    )
+                }
             }
-        }
-    ) {
-        AnimatedContent(
-            targetState = overlayTab,
-            transitionSpec = {
-                (fadeIn() + scaleIn(initialScale = 0.98f))
-                    .togetherWith(fadeOut())
-            },
-            label = "OverlayTransition"
-        ) { currentOverlay ->
-            if (currentOverlay != null) {
-                TabItemContent(currentOverlay)
-            } else {
-                MainNavigationContent(
-                    useServiceNavIcons = useServiceNavIcons,
-                    activityQueueIssuesCount = activityQueueIssuesCount,
-                    visibleTabs = visibleTabs,
-                    selectedTab = selectedTab,
-                    pagerState = pagerState,
-                    onTabSelected = { navigationManager.setSelectedTab(it) }
-                )
+        ) {
+            AnimatedContent(
+                targetState = overlayTab,
+                transitionSpec = {
+                    (fadeIn() + scaleIn(initialScale = 0.98f))
+                        .togetherWith(fadeOut())
+                },
+                label = "OverlayTransition"
+            ) { currentOverlay ->
+                if (currentOverlay != null) {
+                    TabItemContent(currentOverlay)
+                } else {
+                    MainNavigationContent(
+                        useServiceNavIcons = useServiceNavIcons,
+                        activityQueueIssuesCount = activityQueueIssuesCount,
+                        visibleTabs = visibleTabs,
+                        selectedTab = selectedTab,
+                        pagerState = pagerState,
+                        onTabSelected = { navigationManager.setSelectedTab(it) }
+                    )
+                }
             }
         }
     }

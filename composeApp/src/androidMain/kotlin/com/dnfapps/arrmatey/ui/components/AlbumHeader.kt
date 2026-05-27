@@ -11,13 +11,11 @@ import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toAlbumRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -29,10 +27,9 @@ fun AlbumHeader(
     onPerformAutomaticSearch: (Long) -> Unit,
     searchInProgress: (Long) -> Boolean,
     onDeleteAlbum: () -> Unit,
-    deleteInProgress: Boolean,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.music()
+    deleteInProgress: Boolean
 ) {
+    val navigation = arrNavigator
     val release = album.releaseDate?.format("MMM d, yyyy")
         ?: mokoString(MR.strings.tba)
 
@@ -50,12 +47,11 @@ fun AlbumHeader(
     )
     ReleaseDownloadButtons(
         onInteractiveClicked = {
-            artistId?.let { artistId
-                val destination = ArrScreen.AlbumRelease(
-                    artistId = artistId,
+            artistId?.let {
+                navigation.toAlbumRelease(
+                    artistId = it,
                     albumId = album.id
                 )
-                navigation.navigateTo(destination)
             }
         },
         onAutomaticClicked = {

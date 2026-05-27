@@ -32,27 +32,21 @@ import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
-import com.dnfapps.arrmatey.ui.components.ExtraFileCard
-import com.dnfapps.arrmatey.ui.components.FileCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AudiobookFilesScreen(
     audiobook: Audiobook,
-    viewModel: AudiobookFilesViewModel = koinInjectParams(audiobook.id ?: 0L),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.audiobooks()
+    viewModel: AudiobookFilesViewModel = koinInjectParams(audiobook.id ?: 0L)
 ) {
+    val navigation = arrNavigator
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(

@@ -312,6 +312,7 @@ class ArrInstanceRepository(
 
     suspend fun addItem(item: ArrMedia, searchOnAdd: Boolean) {
         _addItemStatus.value = OperationStatus.InProgress
+        delay(100)
 
         val result = client.addItemToLibrary(item)
         processAddResult(result, searchOnAdd)
@@ -331,14 +332,14 @@ class ArrInstanceRepository(
                     }
                 }
                 _lastAddedItemId.value = addedItem.id
-                delay(1000)
+                refreshLibrary()
+                delay(1500)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
-                refreshLibrary()
             }
             .onError { code, error, cause ->
                 _addItemStatus.value = OperationStatus.Error(code, error, cause)
-                delay(1000)
+                delay(1500)
                 _addItemStatus.value = OperationStatus.Idle
                 _lastAddedItemId.value = null
             }
@@ -962,6 +963,7 @@ class ArrInstanceRepository(
 
     suspend fun addNewAudiobook(item: SearchAudiobook, metadata: AudiobookMetadataBody, searchOnAdd: Boolean) {
         _addItemStatus.value = OperationStatus.InProgress
+        delay(100)
 
         val result = safePerformListenarr { client ->
             val path = item.rootFolderPath?.trimEnd('/')?.plus("/")?.plus(item.path?.trimStart('/')) ?: ""

@@ -24,11 +24,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.icons.Hard_drive
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -37,9 +36,9 @@ fun InstancePicker(
     currentInstance: Instance?,
     typeInstances: List<Instance>,
     onInstanceSelected: (Instance) -> Unit,
-    modifier: Modifier = Modifier,
-    navigationManager: NavigationManager = koinInject()
+    modifier: Modifier = Modifier
 ) {
+    val navManager = navigationManager
     var isExpanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -81,7 +80,7 @@ fun InstancePicker(
                     leadingIcon = { Icon(Icons.Default.Add, null) },
                     onClick = {
                         isExpanded = false
-                        navigationManager.openNewInstanceScreen(type)
+                        navManager.openNewInstanceScreen(type)
                     }
                 )
             }

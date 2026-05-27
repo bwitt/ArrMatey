@@ -50,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -76,8 +77,8 @@ import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.model.toInfoList
 import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
 import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
@@ -99,9 +100,7 @@ import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
-import java.util.Locale
 import kotlin.time.ExperimentalTime
-import androidx.compose.ui.platform.LocalLocale
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -110,7 +109,7 @@ fun MediaDetailsScreen(
     type: InstanceType,
     mediaDetailsViewModel: ArrMediaDetailsViewModel = koinInjectParams(id, type),
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.arr(type)
+    navigation: Navigator<ArrScreen> = navigationManager.arr(type)
 ) {
     val context = LocalContext.current
     val uiState by mediaDetailsViewModel.uiState.collectAsStateWithLifecycle()
@@ -364,7 +363,7 @@ fun MediaDetailsScreen(
                 AlertDialog(
                     onDismissRequest = { confirmDeleteMovie = false },
                     title = { Text(mokoString(MR.strings.confirm_delete)) },
-                    text = { Text(text = mokoString(MR.strings.confirm_delete_movie)) },
+                    text = { Text(text = mokoString(MR.strings.confirm_delete_file)) },
                     dismissButton = {
                         TextButton(onClick = { confirmDeleteMovie = false  }) {
                             Text(mokoString(MR.strings.cancel))

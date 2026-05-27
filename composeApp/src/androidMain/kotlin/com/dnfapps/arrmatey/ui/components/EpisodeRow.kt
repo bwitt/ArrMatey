@@ -33,12 +33,10 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @Composable
 fun EpisodeRow(
@@ -49,10 +47,9 @@ fun EpisodeRow(
     searchInProgress: (Long) -> Boolean,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
-    progressLabel: String? = null,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.series()
+    progressLabel: String? = null
 ) {
+    val navigation = arrNavigator
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -123,8 +120,7 @@ fun EpisodeRow(
         }
         IconButton(
             onClick = {
-                val destination = ArrScreen.SeriesRelease(episodeId = episode.id)
-                navigation.navigateTo(destination)
+                navigation.toSeriesRelease(episodeId = episode.id)
             },
             modifier = Modifier.size(24.dp)
         ) {

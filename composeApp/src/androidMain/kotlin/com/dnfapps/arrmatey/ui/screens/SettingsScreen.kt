@@ -1,16 +1,12 @@
 package com.dnfapps.arrmatey.ui.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -19,12 +15,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.Web
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
@@ -54,32 +47,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import android.content.Context
-import android.net.Uri
-import com.dnfapps.arrmatey.BuildConfig
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
-import com.dnfapps.arrmatey.datastore.PreferencesStore
-import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.entensions.openLink
-import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.isDebug
-import com.dnfapps.arrmatey.logging.LogReader
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.SettingsNavigation
-import com.dnfapps.arrmatey.navigation.SettingsScreen
+import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.onInstanceTap
+import com.dnfapps.arrmatey.navigation.settingsNavigator
+import com.dnfapps.arrmatey.navigation.toAddCustomWebpage
+import com.dnfapps.arrmatey.navigation.toAddDownloadClient
+import com.dnfapps.arrmatey.navigation.toAddInstance
+import com.dnfapps.arrmatey.navigation.toDev
+import com.dnfapps.arrmatey.navigation.toEditCustomWebpage
+import com.dnfapps.arrmatey.navigation.toEditDownloadClient
+import com.dnfapps.arrmatey.navigation.toTabPreferences
 import com.dnfapps.arrmatey.shared.MR
-import com.dnfapps.arrmatey.ui.components.LabelledSwitch
-import com.dnfapps.arrmatey.ui.components.LargeLabelledSwitch
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.settings.AboutCard
-import com.dnfapps.arrmatey.utils.CrashManager
+import com.dnfapps.arrmatey.ui.icons.Hard_drive
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
@@ -88,21 +78,18 @@ import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.m3.libraryColors
 import com.mikepenz.aboutlibraries.util.withContext
-import dev.icerock.moko.resources.compose.painterResource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
-import androidx.core.net.toUri
-import com.dnfapps.arrmatey.ui.icons.Hard_drive
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: MoreScreenViewModel = koinInject(),
-    navigationManager: NavigationManager = koinInject(),
-    settingsNav: SettingsNavigation = navigationManager.settings(),
     moko: MokoStrings = koinInject()
 ) {
+    val navManager = navigationManager
+    val settingsNav = settingsNavigator
     val context = LocalContext.current
     val allInstances by viewModel.instances.collectAsStateWithLifecycle()
     val allDownloadClients by viewModel.downloadClients.collectAsStateWithLifecycle()
@@ -117,7 +104,7 @@ fun SettingsScreen(
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
 
     BackHandler {
-        navigationManager.openDrawer()
+        navManager.openDrawer()
     }
 
     Scaffold(
@@ -178,7 +165,7 @@ fun SettingsScreen(
                     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                     onClick = {
-                        settingsNav.navigateTo(SettingsScreen.AddInstance())
+                        settingsNav.toAddInstance()
                     }
                 )
             )
@@ -198,7 +185,7 @@ fun SettingsScreen(
                             )
                         },
                         onClick = {
-                            settingsNav.navigateTo(SettingsScreen.EditDownloadClient(downloadClient.id))
+                            settingsNav.toEditDownloadClient(downloadClient.id)
                         },
                         titleExtraContent = {
                             Box(
@@ -219,7 +206,7 @@ fun SettingsScreen(
                     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                     onClick = {
-                        settingsNav.navigateTo(SettingsScreen.AddDownloadClient)
+                        settingsNav.toAddDownloadClient()
                     }
                 )
             )
@@ -232,7 +219,7 @@ fun SettingsScreen(
                         subtitle = webpage.url,
                         icon = IconSource.Vector(Icons.Default.Language),
                         onClick = {
-                            settingsNav.navigateTo(SettingsScreen.EditCustomWebpage(webpage.id))
+                            settingsNav.toEditCustomWebpage(webpage.id)
                         },
                         trailingContent = {
                             Icon(
@@ -247,7 +234,7 @@ fun SettingsScreen(
                     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
                     icon = IconSource.Vector(Icons.Default.AddCircleOutline),
                     onClick = {
-                        settingsNav.navigateTo(SettingsScreen.AddCustomWebpage)
+                        settingsNav.toAddCustomWebpage()
                     }
                 )
             )
@@ -259,7 +246,7 @@ fun SettingsScreen(
                         icon = IconSource.Vector(Icons.Default.Navigation),
                         title = mokoString(MR.strings.navigation_bar_configuration),
                         onClick = {
-                            settingsNav.navigateTo(SettingsScreen.TabPreferences)
+                            settingsNav.toTabPreferences()
                         }
                     ),
                     SettingItem(
@@ -317,7 +304,7 @@ fun SettingsScreen(
                     shape = MaterialTheme.shapes.extraLarge,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
-                        settingsNav.navigateTo(SettingsScreen.Dev)
+                        settingsNav.toDev()
                     },
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer

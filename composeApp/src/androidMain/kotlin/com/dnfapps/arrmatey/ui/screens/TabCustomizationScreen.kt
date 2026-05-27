@@ -34,7 +34,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,15 +50,11 @@ import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.datastore.TabPreferences
 import com.dnfapps.arrmatey.entensions.androidIcon
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.SettingsScreen
+import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.arrmatey.webpage.model.CustomWebpage
-import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import dev.icerock.moko.resources.StringResource
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
@@ -72,10 +67,9 @@ private const val MAX_TABS = 5
 @Composable
 fun TabCustomizationScreen(
     preferenceStore: PreferencesStore = koinInject(),
-    tabManager: TabManager = koinInject(),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<SettingsScreen> = navigationManager.settings()
+    tabManager: TabManager = koinInject()
 ) {
+    val navigation = settingsNavigator
     val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
     val useServiceNavLogos by preferenceStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
 

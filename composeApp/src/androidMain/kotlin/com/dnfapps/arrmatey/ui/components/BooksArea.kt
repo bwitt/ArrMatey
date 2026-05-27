@@ -6,8 +6,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
@@ -39,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.autoSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -60,15 +56,15 @@ import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.isToday
 import com.dnfapps.arrmatey.extensions.isTodayOrAfter
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toAuthorFiles
+import com.dnfapps.arrmatey.navigation.toBookDetails
+import com.dnfapps.arrmatey.navigation.toBookRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
-import kotlin.math.exp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -80,10 +76,9 @@ fun BooksArea(
     searchIds: Set<Long>,
     onToggleMonitor: (Book) -> Unit,
     onToggleSeriesMonitor: (List<Book>) -> Unit,
-    onAutomaticSearch: (Long) -> Unit,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.books()
+    onAutomaticSearch: (Long) -> Unit
 ) {
+    val navigation = arrNavigator
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -115,7 +110,7 @@ fun BooksArea(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-                    navigation.navigateTo(ArrScreen.AuthorFiles(author))
+                    navigation.toAuthorFiles(author)
                 }
             )
         }
@@ -157,10 +152,9 @@ private fun BooksView(
     books: List<Book>,
     searchIds: Set<Long>,
     onToggleMonitor: (Book) -> Unit,
-    onAutomaticSearch: (Long) -> Unit,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.books()
+    onAutomaticSearch: (Long) -> Unit
 ) {
+    val navigation = arrNavigator
     Column {
         books.forEach { book ->
             BookRow(
@@ -171,7 +165,7 @@ private fun BooksView(
                 onToggleMonitor = onToggleMonitor,
                 searchInProgress = { searchIds.contains(it) },
                 onClick = {
-                    navigation.navigateTo(ArrScreen.BookDetails(author, book))
+                    navigation.toBookDetails(author, book)
                 }
             )
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -190,10 +184,9 @@ fun BookRow(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     progressLabel: String? = null,
-    seriesPosition: String? = null,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.books()
+    seriesPosition: String? = null
 ) {
+    val navigation = arrNavigator
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -241,8 +234,7 @@ fun BookRow(
 
         IconButton(
             onClick = {
-                val destination = ArrScreen.BookRelease(bookId = book.id)
-                navigation.navigateTo(destination)
+                navigation.toBookRelease(bookId = book.id)
             },
             modifier = Modifier.size(24.dp),
             enabled = book.monitored
@@ -297,10 +289,9 @@ private fun SeriesView(
     searchIds: Set<Long>,
     onToggleMonitor: (Book) -> Unit,
     onToggleSeriesMonitor: (List<Book>) -> Unit,
-    onAutomaticSearch: (Long) -> Unit,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.books()
+    onAutomaticSearch: (Long) -> Unit
 ) {
+    val navigation = arrNavigator
     Column {
         series.forEach { bookSeries ->
             val seriesBooks = remember(series, books) {
@@ -380,7 +371,7 @@ private fun SeriesView(
                                     onToggleMonitor = onToggleMonitor,
                                     searchInProgress = { searchIds.contains(it) },
                                     onClick = {
-                                        navigation.navigateTo(ArrScreen.BookRelease(book.id))
+                                        navigation.toBookRelease(book.id)
                                     },
                                     seriesPosition = link.position
                                 )

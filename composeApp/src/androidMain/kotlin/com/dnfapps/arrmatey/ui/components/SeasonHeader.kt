@@ -12,13 +12,11 @@ import com.dnfapps.arrmatey.arr.api.model.Season
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.extensions.formatMinutesAsRuntime
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -30,10 +28,9 @@ fun SeasonHeader(
     onPerformAutomaticSearch: (Int) -> Unit,
     searchInProgress: (Int) -> Boolean,
     onDeleteSeason: () -> Unit,
-    deleteInProgress: Boolean,
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.series()
+    deleteInProgress: Boolean
 ) {
+    val navigation = arrNavigator
     val tbaLabel = mokoString(MR.strings.tba)
     val year = remember(episodes) {
         episodes.mapNotNull { it.airDateUtc }.minOrNull()
@@ -59,11 +56,10 @@ fun SeasonHeader(
     ReleaseDownloadButtons(
         onInteractiveClicked = {
             seriesId?.let { seriesId ->
-                val destination = ArrScreen.SeriesRelease(
+                navigation.toSeriesRelease(
                     seriesId = seriesId,
                     seasonNumber = season.seasonNumber
                 )
-                navigation.navigateTo(destination)
             }
         },
         onAutomaticClicked = {

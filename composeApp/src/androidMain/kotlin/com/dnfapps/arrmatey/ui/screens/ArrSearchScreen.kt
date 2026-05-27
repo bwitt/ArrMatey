@@ -18,7 +18,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,9 +29,9 @@ import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toDetails
+import com.dnfapps.arrmatey.navigation.toPreview
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.MediaList
@@ -53,10 +52,9 @@ fun ArrSearchScreen(
     initialQuery: String,
     type: InstanceType,
     viewModel: ArrSearchViewModel = koinInjectParams(type),
-    activityQueueViewModel: ActivityQueueViewModel = koinInject(),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.arr(type)
+    activityQueueViewModel: ActivityQueueViewModel = koinInject()
 ) {
+    val navigation = arrNavigator
     val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
     val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
 
@@ -133,12 +131,11 @@ fun ArrSearchScreen(
                             aspectRatio = type.aspectRatio,
                             items = state.items,
                             onItemClick = { item ->
-                                val destination = if (item.id == null) {
-                                    ArrScreen.Preview(item)
+                                if (item.id == null) {
+                                    navigation.toPreview(item)
                                 } else {
-                                    ArrScreen.Details(item.id!!)
+                                    navigation.toDetails(item.id!!)
                                 }
-                                navigation.navigateTo(destination)
                             },
                             itemIsActive = { item -> queueItems.any { it.mediaId == item.id } },
                             includeOverview = true

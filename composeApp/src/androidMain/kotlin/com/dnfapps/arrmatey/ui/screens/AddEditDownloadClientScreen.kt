@@ -67,12 +67,8 @@ import com.dnfapps.arrmatey.downloadclient.state.DownloadClientConfigurationUiSt
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientMutationState
 import com.dnfapps.arrmatey.downloadclient.viewmodel.DownloadClientSettingsViewModel
 import com.dnfapps.arrmatey.entensions.openAppSettings
-import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.instances.state.AddInstanceUiState
 import com.dnfapps.arrmatey.isDebug
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.SettingsScreen
+import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.permissions.rememberLocationPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
@@ -93,10 +89,9 @@ import org.koin.compose.koinInject
 @Composable
 fun AddEditDownloadClientScreen(
     clientId: Long? = null,
-    viewModel: DownloadClientSettingsViewModel = koinInjectParams(clientId),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<SettingsScreen> = navigationManager.settings()
+    viewModel: DownloadClientSettingsViewModel = koinInjectParams(clientId)
 ) {
+    val navigation = settingsNavigator
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }

@@ -1,35 +1,44 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.SeerrScreen
+import com.dnfapps.arrmatey.navigation.seerrNavigator
+import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.NoInstanceView
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.ui.screens.requests.*
+import com.dnfapps.arrmatey.ui.screens.requests.IssuesContent
+import com.dnfapps.arrmatey.ui.screens.requests.RequestsContent
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RequestsScreen(
     viewModel: RequestsViewModel,
-    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<SeerrScreen> = navigationManager.requests()
+    instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr)
 ) {
+    val navigation = seerrNavigator
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val userState by viewModel.userState.collectAsStateWithLifecycle()
     val pagedData by viewModel.requestsState.collectAsStateWithLifecycle()
@@ -93,7 +102,7 @@ fun RequestsScreen(
                             onDelete = { viewModel.cancelRequest(it) },
                             onRemoveFromService = { viewModel.deleteMediaFile(it) },
                             onNavigateToDetails = { tmdbId, type ->
-                                navigation.navigateTo(SeerrScreen.Details(tmdbId, type))
+                                navigation.toDetails(tmdbId, type)
                             },
                             onLoadMore = { viewModel.loadNextRequestsPage() },
                             onRetry = { viewModel.retryRequests() },

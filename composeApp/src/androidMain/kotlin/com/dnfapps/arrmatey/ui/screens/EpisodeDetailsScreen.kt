@@ -46,9 +46,8 @@ import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.EpisodeDetailsHeader
 import com.dnfapps.arrmatey.ui.components.FileCard
@@ -58,18 +57,16 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 
 @Composable
 fun EpisodeDetailsScreen(
     series: ArrSeries,
     episode: Episode,
-    viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.series()
+    viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode)
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    val navigation = arrNavigator
 
     val currentEpisode by viewModel.episode.collectAsStateWithLifecycle()
     val history by viewModel.history.collectAsStateWithLifecycle()
@@ -171,8 +168,7 @@ fun EpisodeDetailsScreen(
 
                     ReleaseDownloadButtons(
                         onInteractiveClicked = {
-                            val destination = ArrScreen.SeriesRelease(episodeId = currentEpisode.id)
-                            navigation.navigateTo(destination)
+                            navigation.toSeriesRelease(episodeId = currentEpisode.id)
                         },
                         onAutomaticClicked = {
                             viewModel.executeAutomaticSearch()

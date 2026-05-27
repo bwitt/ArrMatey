@@ -2,10 +2,8 @@ package com.dnfapps.arrmatey.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
@@ -38,21 +36,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.database.dao.InsertResult
-import com.dnfapps.arrmatey.navigation.SettingsNavigation
+import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 import com.dnfapps.arrmatey.utils.navigationBarBottomInset
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditInstanceScreen(
     id: Long,
-    viewModel: EditInstanceViewModel = koinInjectParams(id),
-    settingsNav: SettingsNavigation = koinInject<SettingsNavigation>()
+    viewModel: EditInstanceViewModel = koinInjectParams(id)
 ) {
+    val settingsNav = settingsNavigator
     val scope = rememberCoroutineScope()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 

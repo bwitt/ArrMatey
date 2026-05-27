@@ -48,9 +48,10 @@ import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.toDetails
+import com.dnfapps.arrmatey.navigation.toSearch
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -74,10 +75,10 @@ fun ArrLibraryScreen(
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject(),
     globalPreferencesStore: PreferencesStore = koinInject(),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.arr(type)
 ) {
     val context = LocalContext.current
+    val navigation = arrNavigator
+    val navigationManager = navigationManager
 
     val queueItems by activityQueueViewModel.queueItems.collectAsStateWithLifecycle()
     val uiState by arrMediaViewModel.uiState.collectAsStateWithLifecycle()
@@ -107,7 +108,7 @@ fun ArrLibraryScreen(
         floatingActionButton = {
             instancesState.selectedInstance?.let {
                 FloatingActionButton(
-                    onClick = { navigation.navigateTo(ArrScreen.Search()) }
+                    onClick = { navigation.toSearch() }
                 ) {
                     Icon(Icons.Default.Add, null)
                 }
@@ -202,9 +203,7 @@ fun ArrLibraryScreen(
                                     items = items,
                                     onItemClick = {
                                         it.id?.let { id ->
-                                            navigation.navigateTo(
-                                                ArrScreen.Details(id = id)
-                                            )
+                                            navigation.toDetails(id)
                                         }
                                     },
                                     preferences = preferences,
@@ -214,8 +213,7 @@ fun ArrLibraryScreen(
                                 )
                             } else {
                                 EmptySearchResultsView(type, textFieldState.text.toString()) {
-                                    val destination = ArrScreen.Search(textFieldState.text.toString())
-                                    navigation.navigateTo(destination)
+                                    navigation.toSearch(textFieldState.text.toString())
                                 }
                             }
                         }

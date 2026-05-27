@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
@@ -57,9 +56,8 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.extensions.formatAgeMinutes
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.Navigation
-import com.dnfapps.arrmatey.navigation.NavigationManager
+import com.dnfapps.arrmatey.navigation.arrNavigator
+import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.ErrorView
@@ -78,10 +76,10 @@ fun InteractiveSearchScreen(
     releaseParams: ReleaseParams,
     defaultFilter: ReleaseFilterBy = ReleaseFilterBy.Any,
     viewModel: InteractiveSearchViewModel = koinInjectParams(instanceType, defaultFilter),
-    instanceViewModel: InstancesViewModel = koinInjectParams(instanceType),
-    navigationManager: NavigationManager = koinInject(),
-    navigation: Navigation<ArrScreen> = navigationManager.arr(instanceType)
+    instanceViewModel: InstancesViewModel = koinInjectParams(instanceType)
 ) {
+    val navigation = arrNavigator
+    val navManager = navigationManager
     val context = LocalContext.current
     val releaseUiState by viewModel.releaseUiState.collectAsStateWithLifecycle()
     val downloadState by viewModel.downloadReleaseState.collectAsStateWithLifecycle()
@@ -203,7 +201,7 @@ fun InteractiveSearchScreen(
                         message = state.message,
                         onOpenSettings = {
                             instanceState.selectedInstance?.let {
-                                navigationManager.openEditInstanceScreen(it.id)
+                                navManager.openEditInstanceScreen(it.id)
                             }
                         },
                         onRetry = { viewModel.getRelease(releaseParams) }

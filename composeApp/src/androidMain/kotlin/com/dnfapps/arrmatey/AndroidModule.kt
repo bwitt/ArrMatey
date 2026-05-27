@@ -1,31 +1,48 @@
 package com.dnfapps.arrmatey
 
 import coil3.ImageLoader
-import com.dnfapps.arrmatey.navigation.AudiobooksTabNavigation
-import com.dnfapps.arrmatey.navigation.BooksTabNavigation
-import com.dnfapps.arrmatey.navigation.MoviesTabNavigation
-import com.dnfapps.arrmatey.navigation.MusicTabNavigation
+import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.navigation.AppState
+import com.dnfapps.arrmatey.navigation.AudiobooksTabNavigator
+import com.dnfapps.arrmatey.navigation.BooksTabNavigator
+import com.dnfapps.arrmatey.navigation.MoviesTabNavigator
+import com.dnfapps.arrmatey.navigation.MusicTabNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
-import com.dnfapps.arrmatey.navigation.RequestsTabNavigation
-import com.dnfapps.arrmatey.navigation.SeriesTabNavigation
-import com.dnfapps.arrmatey.navigation.SettingsNavigation
+import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.RequestsTabNavigator
+import com.dnfapps.arrmatey.navigation.SeriesTabNavigator
+import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
 import com.dnfapps.arrmatey.ui.helpers.ArrImageLoader
 import com.dnfapps.arrmatey.utils.AndroidCrashManager
 import com.dnfapps.arrmatey.utils.CrashManager
 import org.koin.dsl.module
 
 val androidModule = module {
-    single { SettingsNavigation() }
+    single { AppState() }
 
-    single { SeriesTabNavigation() }
-    single { MoviesTabNavigation() }
-    single { MusicTabNavigation() }
-    single { RequestsTabNavigation() }
-    single { BooksTabNavigation() }
-    single { AudiobooksTabNavigation() }
+    // Navigators
+    single { SettingsTabNavigator() }
+    single { SeriesTabNavigator() }
+    single { MoviesTabNavigator() }
+    single { MusicTabNavigator() }
+    single { RequestsTabNavigator() }
+    single { BooksTabNavigator() }
+    single { AudiobooksTabNavigator() }
 
-    single { NavigationManager(get(), get(), get(), get(), get(), get(), get()) }
+    // Navigation Manager
+    single {
+        val registry: Map<TabItem, Navigator<*>> = mapOf(
+            TabItem.Standard.SHOWS to get<SeriesTabNavigator>(),
+            TabItem.Standard.MOVIES to get<MoviesTabNavigator>(),
+            TabItem.Standard.MUSIC to get<MusicTabNavigator>(),
+            TabItem.Standard.REQUESTS to get<RequestsTabNavigator>(),
+            TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
+            TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>()
+        )
+        NavigationManager(registry, get(), get(), get())
+    }
 
+    // Others
     single<ImageLoader> {
         ArrImageLoader(get(), get())
             .imageLoader
