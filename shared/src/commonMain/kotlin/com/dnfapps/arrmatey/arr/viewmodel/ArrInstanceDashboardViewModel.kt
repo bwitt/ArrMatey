@@ -48,10 +48,8 @@ class ArrInstanceDashboardViewModel(
             }
             _instance.value = currentRepo.instance
 
-            // Trigger initial refresh
             refresh()
 
-            // Combine data flows AND the refresh flow
             combine(
                 currentRepo.softwareStatus,
                 currentRepo.diskSpace,
@@ -71,7 +69,6 @@ class ArrInstanceDashboardViewModel(
     }
 
     fun refresh() {
-        // Prevent multiple simultaneous refreshes
         if (_isRefreshing.value) return
 
         viewModelScope.launch {
@@ -79,7 +76,6 @@ class ArrInstanceDashboardViewModel(
             try {
                 repository?.refreshInstanceStatuses()
             } catch (e: Exception) {
-                // If we are in Success state, maybe show a toast instead of changing state
                 if (_state.value is ArrDashboardState.Initial) {
                     _state.value = ArrDashboardState.Error(ErrorType.Unexpected, e.message)
                 }

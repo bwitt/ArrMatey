@@ -3,8 +3,11 @@ package com.dnfapps.arrmatey.arr.api.client
 import com.dnfapps.arrmatey.arr.api.model.AddAudiobookBody
 import com.dnfapps.arrmatey.arr.api.model.AddAudiobookResponse
 import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
+import com.dnfapps.arrmatey.arr.api.model.ArrDiskSpace
+import com.dnfapps.arrmatey.arr.api.model.ArrHealth
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
+import com.dnfapps.arrmatey.arr.api.model.ArrSoftwareStatus
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.AudiobookEditResponse
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataBody
@@ -18,9 +21,11 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrCommandResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
+import com.dnfapps.arrmatey.arr.api.model.ListenarrDiskSpace
 import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
+import com.dnfapps.arrmatey.arr.api.model.ListenarrSystemInfo
 import com.dnfapps.arrmatey.arr.api.model.MonitorBody
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.PreviewPathBody
@@ -152,6 +157,20 @@ class ListenarrClient(
                 QueuePage(page, pageSize, it.items.size, it.items)
                     .setInstance(instance.id, instance.label)
             }
+
+    override suspend fun getHealth(): NetworkResult<List<ArrHealth>> =
+        NetworkResult.Success(emptyList())
+//        get("system/health")
+
+    override suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>> =
+        get<ListenarrDiskSpace>("system/storage").map {
+            listOf(it.toArrDiskSpace())
+        }
+
+    override suspend fun getStatus(): NetworkResult<ArrSoftwareStatus> =
+        get<ListenarrSystemInfo>("system/info").map {
+            it.toArrSoftwareStatus()
+        }
 
     suspend fun getEnabledIndexers(): NetworkResult<List<ListenarrIndexer>> =
         get("indexers/enabled")
