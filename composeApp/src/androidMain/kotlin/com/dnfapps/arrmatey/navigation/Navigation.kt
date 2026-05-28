@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.arrmatey.ui.screens.SettingsScreen
 
 /**
  * A generic navigator that manages a reactive backstack of screens.
@@ -22,6 +23,7 @@ interface Navigator<T : NavKey> {
     fun replaceCurrent(screen: T)
     fun replaceBackStack(newStack: List<T>)
     fun clearAndStartWith(screen: T)
+    fun popToRoot()
 }
 
 /**
@@ -55,6 +57,14 @@ open class BaseNavigator<T : NavKey>(initialScreen: T) : Navigator<T> {
     override fun clearAndStartWith(screen: T) {
         backStack.clear()
         backStack.add(screen)
+    }
+
+    override fun popToRoot() {
+        if (backStack.size > 1) {
+            val root = backStack.first()
+            backStack.clear()
+            backStack.add(root)
+        }
     }
 }
 
@@ -99,6 +109,7 @@ fun Navigator<SettingsScreen>.toAddInstance(type: InstanceType = InstanceType.So
 fun Navigator<SettingsScreen>.toEditInstance(id: Long) = navigateTo(SettingsScreen.EditInstance(id))
 fun Navigator<SettingsScreen>.toDev() = navigateTo(SettingsScreen.Dev)
 fun Navigator<SettingsScreen>.toTabPreferences() = navigateTo(SettingsScreen.TabPreferences)
+fun Navigator<SettingsScreen>.toShortcutsPreferences() = navigateTo(SettingsScreen.ShortcutPreferences)
 fun Navigator<SettingsScreen>.toArrDashboard(id: Long) = navigateTo(SettingsScreen.ArrDashboard(id))
 fun Navigator<SettingsScreen>.toAddDownloadClient() = navigateTo(SettingsScreen.AddDownloadClient)
 fun Navigator<SettingsScreen>.toEditDownloadClient(id: Long) = navigateTo(SettingsScreen.EditDownloadClient(id))
