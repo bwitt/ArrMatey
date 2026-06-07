@@ -177,7 +177,7 @@ struct MediaInfoArea: View {
             InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
             InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
             InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown),
-            InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
+            InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel),
             InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
             InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
         ]
@@ -191,12 +191,19 @@ struct MediaInfoArea: View {
         let authorString = audiobook.authors.joined(separator: " • ")
         let narratorsString = audiobook.narrators.joined(separator: " • ")
         
-        return [
+        var info = [
             InfoItem(label: MR.strings().audiobook_info_authors.localized(), value: authorString),
             InfoItem(label: MR.strings().audiobook_info_narrators.localized(), value: narratorsString),
-            InfoItem(label: MR.strings().publisher.localized(), value: audiobook.publisher ?? unknown),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
-            InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown)
+            InfoItem(label: MR.strings().publisher.localized(), value: audiobook.publisher ?? unknown)
         ]
+        
+        if let language = audiobook.language {
+            info.append(InfoItem(label: MR.strings().language.localized(), value: language.capitalized))
+        }
+        
+        info.append(InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize))
+        info.append(InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown))
+        
+        return info
     }
 }

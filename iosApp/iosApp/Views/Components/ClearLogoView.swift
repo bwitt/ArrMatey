@@ -29,18 +29,20 @@ struct ClearLogoView: View {
 //                                    .padding(-4)
 //                            }
 //                        }
-                } else {
-                    Color.clear.frame(height: 64)
                 }
+//                else {
+//                    Color.clear.frame(height: 64)
+//                }
             }
             .frame(maxWidth: .infinity, alignment: .center)
-        } else {
-            Text(item.title ?? MR.strings().unknown.localized())
-                .font(.system(size: 36, weight: .bold))
-                .lineLimit(4)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.center)
-                .frame(maxWidth: .infinity, alignment: .center)
         }
+//        else {
+//            Text(item.title ?? MR.strings().unknown.localized())
+//                .font(.system(size: 36, weight: .bold))
+//                .lineLimit(4)
+//                .truncationMode(.tail)
+//                .multilineTextAlignment(.center)
+//                .frame(maxWidth: .infinity, alignment: .center)
+//        }
     }
 }

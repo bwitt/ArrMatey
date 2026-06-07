@@ -20,7 +20,7 @@ struct MediaDetailsScreen: View {
     @State private var showConfirmSheet: Bool = false
     @State private var showEditSheet: Bool = false
     @State private var confirmDeleteSeason: Int32? = nil
-    @State private var confirmDeleteAlbum: ArrAlbum? = nil
+    @State private var confirmDeleteAlbum: Int64? = nil
     @State private var confirmDeleteFile: Bool = false
     
     init(id: Int64, type: InstanceType) {
@@ -61,11 +61,11 @@ struct MediaDetailsScreen: View {
                     action: { viewModel.deleteSeasonFiles(season) }
                 )
             }
-            .confirmationAlert(item: $confirmDeleteAlbum) { album in
+            .confirmationAlert(item: $confirmDeleteAlbum) { albumId in
                 AlertConfig(
                     title: MR.strings().delete_album.localized(),
-                    message: MR.strings().delete_album_confirm.formatted(args: [album.title ?? MR.strings().unknown.localized()]),
-                    action: { viewModel.deleteAlbumFiles(album.id) }
+                    message: MR.strings().delete_album_confirm.localized(),
+                    action: { viewModel.deleteAlbumFiles(albumId) }
                 )
             }
             .alert(MR.strings().confirm_delete.localized(), isPresented: $confirmDeleteFile) {
@@ -96,17 +96,19 @@ struct MediaDetailsScreen: View {
             List {
                 Section {
                     MediaDetailsHeader(item: item, type: type)
-                        .frame(height: 400)
+                        .listRowInsets(EdgeInsets())
                 }
-                .listRowInsets(EdgeInsets())
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
                 
                 Section {
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 24) {
+                        Text(item.title ?? MR.strings().unknown.localized())
+                            .font(.system(size: 28, weight: .bold))
+                        
                         if let airingString = makeAiringString(for: item) {
                             Text(airingString)
-                                .font(.system(size: 20, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
                                 .foregroundColor(.themePrimary)
                         }
                         
@@ -119,20 +121,22 @@ struct MediaDetailsScreen: View {
                 .listRowBackground(Color.clear)
                 
                 filesArea(for: item, state.extraFiles, state.episodes, state.albums, state.tracks, state.trackFiles, state.bookFiles, state.bookSeries, state.books)
-                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 0, trailing: 24))
+                    .listRowInsets(EdgeInsets(top: 24, leading: 24, bottom: 0, trailing: 24))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                 
                 MediaInfoArea(item: item, qualityProfiles: viewModel.qualityProfiles, tags: viewModel.tags)
-                    .listRowInsets(EdgeInsets(top: 12, leading: 24, bottom: 12, trailing: 24))
+                    .listRowInsets(EdgeInsets(top: 24, leading: 24, bottom: 24, trailing: 24))
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .ignoresSafeArea(edges: .top)
-        case _ as MediaDetailsUiStateError:
-            VStack{}
+        case let state as MediaDetailsUiStateError:
+            VStack {
+                Text(state.message ?? "")
+            }
         default:
             VStack {
                 EmptyView()
@@ -141,43 +145,48 @@ struct MediaDetailsScreen: View {
     }
     
     private func makeAiringString(for item: ArrMedia) -> String? {
+        let pattern = "HH:mm MMMM d, yyyy"
         switch item {
         case let series as ArrSeries:
             if series.status == .continuing {
-                if let airing = series.nextAiring?.format(pattern: "HH:mm MMMM d, yyyy") {
+                if let airing = series.nextAiring?.format(pattern: pattern) {
                     return "\(MR.strings().airing_next.localized()) \(airing)"
                 } else {
-                    return MR.strings().continuing_unknown.localized()
+                    return nil
                 }
             } else { return nil }
         case let movie as ArrMovie:
-            if let inCinemas = movie.inCinemas?.format(pattern: "MMMM d, yyyy"), movie.digitalRelease == nil, movie.physicalRelease == nil {
-                return "\(MR.strings().in_cinemas.localized()) \(inCinemas)"
+            if let digitalRelease = movie.digitalRelease, digitalRelease.isTodayOrAfter() {
+                return MR.strings().digital_release.formatted(args: [digitalRelease.format(pattern: pattern)])
+            } else if let physicalRelease = movie.physicalRelease, physicalRelease.isTodayOrAfter() {
+                return MR.strings().physical_release.formatted(args: [physicalRelease.format(pattern: pattern)])
+            } else if let inCinemas = movie.inCinemas, inCinemas.isTodayOrAfter() {
+                return MR.strings().in_cinemas.formatted(args: [inCinemas.format(pattern: pattern)])
             } else {
                 return nil
             }
         case let artist as Arrtist:
             if artist.status == .continuing {
-                if let release = artist.nextAlbum?.releaseDate?.format(pattern: "MMMM d, yyyy") {
+                if let release = artist.nextAlbum?.releaseDate?.format(pattern: pattern) {
                     return "\(MR.strings().next_album.localized()) \(release)"
                 } else {
-                    return MR.strings().continuing_unknown.localized()
+                    return nil
                 }
             } else { return nil }
         case let author as Author:
             if author.status == .continuing {
-                if let release = author.nextBook?.releaseDate?.format(pattern: "MMMM d, yyyy") {
+                if let release = author.nextBook?.releaseDate?.format(pattern: pattern) {
                     return "\(MR.strings().next_book.localized()) \(release)"
                 } else {
-                    return MR.strings().continuing_unknown.localized()
+                    return nil
                 }
             } else { return nil }
         case let audiobook as Audiobook:
-            if let published = audiobook.publishedDate?.ifTodayOrAfter()?.format(pattern: "MMMM d, yyyy") {
+            if let published = audiobook.publishedDate?.ifTodayOrAfter()?.format(pattern: pattern) {
                 return "\(MR.strings().release_date.localized()) \(published)"
             } else { return nil }
         case let searchAudiobook as SearchAudiobook:
-            return searchAudiobook.releaseDate?.ifTodayOrAfter()?.format(pattern: "MMMM d, yyyy")
+            return searchAudiobook.releaseDate?.ifTodayOrAfter()?.format(pattern: "MMM d, yyyy")
         default: return nil
         }
     }
@@ -243,8 +252,8 @@ struct MediaDetailsScreen: View {
                 onAlbumAutomaticSearch: {
                     viewModel.performAlbumAutomaticLookup(albumId: $0)
                 },
-                deleteAlbumFiles: {
-                    confirmDeleteAlbum = $0
+                deleteAlbumFiles: { album in
+                    confirmDeleteAlbum = album.id
                 },
                 albumDeleteInProgress: viewModel.deleteAlbumInProgress
             )
@@ -319,8 +328,8 @@ struct MediaDetailsScreen: View {
         })
         .presentationBackground(.ultraThinMaterial)
             
-        case let artist as Arrtist: EditArtistSheet(item: artist, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newSeries, moveFiles in
-            viewModel.editItem(newSeries, moveFiles: moveFiles)
+        case let artist as Arrtist: EditArtistSheet(item: artist, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newArtist, moveFiles in
+            viewModel.editItem(newArtist, moveFiles: moveFiles)
         })
             
         case let author as Author: EditAuthorSheet(item: author, qualityProfiles: viewModel.qualityProfiles, rootFolders: viewModel.rootFolders, tags: viewModel.tags, editInProgress: viewModel.editInProgress, onEditItem: { newAuthor, moveFiles in

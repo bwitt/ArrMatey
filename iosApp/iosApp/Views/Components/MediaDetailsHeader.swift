@@ -15,51 +15,52 @@ struct MediaDetailsHeader: View {
     @Environment(\.colorScheme) var colorScheme
     
     private var infoString: String {
-        guard !(item is Arrtist) else { return "" }
         var result = ""
         if let year = item.year {
             result += "\(year)"
         }
-        result += " • \(item.runtimeString)"
-        if let certifcation = item.certification {
-            result += " • \(certifcation)"
+        if !item.runtimeString.isEmpty {
+            result += (result.isEmpty ? "" : " • ") + item.runtimeString
+        }
+        if let certification = item.certification {
+            result += (result.isEmpty ? "" : " • ") + certification
         }
         return result
     }
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
-                MediaHeaderBanner(bannerUrl: URL(string: item.getBanner()?.remoteUrl ?? ""))
-                    .frame(width: geometry.size.width)
+        ZStack(alignment: .bottom) {
+            MediaHeaderBanner(bannerUrl: URL(string: item.getBanner()?.remoteUrl ?? ""))
+            
+            HStack(alignment: .bottom, spacing: 24) {
+                PosterItem(item: item, aspectRatio: type.aspectRatio)
+                    .frame(width: 150)
                 
-                HStack(alignment: .bottom, spacing: 12) {
-                    PosterItem(item: item, aspectRatio: type.aspectRatio)
-                        .frame(width: 145)
+                VStack(alignment: .leading, spacing: 8) {
+                    ClearLogoView(item: item)
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        ClearLogoView(item: item)
-                            .padding(.bottom, 12)
-                        
                         if !(item is Arrtist) && !(item is Author) {
-                            Text(infoString)
-                                .font(.system(size: 16))
+                            if !infoString.isEmpty {
+                                Text(infoString)
+                                    .font(.system(size: 16))
+                            }
                             
-                            Text([item.releasedBy ?? "", item.statusString].joined(separator: " • "))
-                                .font(.system(size: 14))
+                            if !(item is Audiobook) {
+                                Text([item.releasedBy ?? "", item.statusString].filter { !$0.isEmpty }.joined(separator: " • "))
+                                    .font(.system(size: 14))
+                            }
                         }
                         
-                        Text(item.genres.prefix(3).joined(separator: " • "))
+                        Text(item.genres.joined(separator: " • "))
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
-                        
                     }
-                    .frame(maxWidth: .infinity, alignment: .top)
                 }
-                .padding(.top, 170)
-                .padding(.horizontal, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
-        .frame(maxWidth: .infinity)
     }
 }
