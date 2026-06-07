@@ -22,6 +22,7 @@ import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrCommandResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.ListenarrDiskSpace
+import com.dnfapps.arrmatey.arr.api.model.ListenarrHealth
 import com.dnfapps.arrmatey.arr.api.model.ListenarrIndexer
 import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueResponse
 import com.dnfapps.arrmatey.arr.api.model.ListenarrRelease
@@ -159,8 +160,9 @@ class ListenarrClient(
             }
 
     override suspend fun getHealth(): NetworkResult<List<ArrHealth>> =
-        NetworkResult.Success(emptyList())
-//        get("system/health")
+        get<ListenarrHealth>("system/health").map {
+            it.toArrHealthItems()
+        }
 
     override suspend fun getDiskSpace(): NetworkResult<List<ArrDiskSpace>> =
         get<ListenarrDiskSpace>("system/storage").map {
