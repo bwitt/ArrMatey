@@ -37,6 +37,8 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -64,6 +66,7 @@ import com.dnfapps.arrmatey.webpage.viewmodel.CustomWebpageViewerViewModel
 @Composable
 fun CustomWebpageViewerScreen(
     webpageId: Long,
+    wideRailIsVisible: Boolean,
     customWebpageViewModel: CustomWebpageViewerViewModel = koinInjectParams(webpageId)
 ) {
     val webpage by customWebpageViewModel.webpage.collectAsStateWithLifecycle()
@@ -127,6 +130,7 @@ fun CustomWebpageViewerScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -148,7 +152,11 @@ fun CustomWebpageViewerScreen(
                         }
                     }
                 },
-                navigationIcon = { NavigationDrawerButton() },
+                navigationIcon = {
+                    if (!wideRailIsVisible) {
+                        NavigationDrawerButton()
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = { webView?.goBack() },

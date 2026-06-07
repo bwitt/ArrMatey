@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +28,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProwlarrTab(
+    wideRailIsVisible: Boolean,
     indexersViewModel: ProwlarrIndexersViewModel = koinInject(),
     searchViewModel: ProwlarrSearchViewModel = koinInject()
 ) {
@@ -38,11 +41,16 @@ fun ProwlarrTab(
     val sortingState by indexersViewModel.indexerSortState.collectAsStateWithLifecycle()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             FullScreenSearchAppBar(
                 textFieldState = textFieldState,
                 searchPlaceholder = mokoString(MR.strings.prowlarr_search_hint),
-                navigationIcon = { NavigationDrawerButton() },
+                navigationIcon = {
+                    if (!wideRailIsVisible) {
+                        NavigationDrawerButton()
+                    }
+                },
                 actions = {
                     IndexersSortMenu(
                         sortBy = sortingState.sortBy,

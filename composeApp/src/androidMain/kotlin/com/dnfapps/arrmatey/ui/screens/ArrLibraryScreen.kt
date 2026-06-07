@@ -71,6 +71,8 @@ import org.koin.compose.koinInject
 @Composable
 fun ArrLibraryScreen(
     type: InstanceType,
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
     activityQueueViewModel: ActivityQueueViewModel = koinInject(),
@@ -105,12 +107,15 @@ fun ArrLibraryScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            instancesState.selectedInstance?.let {
-                FloatingActionButton(
-                    onClick = { navigation.toSearch() }
-                ) {
-                    Icon(Icons.Default.Add, null)
+            if (!isExpanded) {
+                instancesState.selectedInstance?.let {
+                    FloatingActionButton(
+                        onClick = { navigation.toSearch() }
+                    ) {
+                        Icon(Icons.Default.Add, null)
+                    }
                 }
             }
         },
@@ -126,7 +131,11 @@ fun ArrLibraryScreen(
                         modifier = Modifier.size(24.dp)
                     )
                 },
-                navigationIcon = { NavigationDrawerButton() },
+                navigationIcon = {
+                    if (!wideRailIsVisible) {
+                        NavigationDrawerButton()
+                    }
+                },
                 actions = {
                     if (!hideInstancePicker || instancesState.instances.size > 1) {
                         InstancePicker(

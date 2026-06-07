@@ -50,6 +50,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -97,6 +99,7 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DownloadsTab(
+    wideRailIsVisible: Boolean,
     viewModel: DownloadQueueViewModel = koinInject(),
     clientsViewModel: DownloadClientsViewModel = koinInject()
 ) {
@@ -131,6 +134,7 @@ fun DownloadsTab(
     val listState = rememberLazyListState()
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             val count = queueState.queueItems.size
             val placeholderLabel = mokoString(MR.strings.search_downloads, count)
@@ -139,7 +143,9 @@ fun DownloadsTab(
                 textFieldState = textFieldState,
                 searchPlaceholder = placeholderLabel,
                 navigationIcon = {
-                    NavigationDrawerButton()
+                    if (!wideRailIsVisible) {
+                        NavigationDrawerButton()
+                    }
                 },
                 actions = {
                     DownloadClientQueueSortMenu(
