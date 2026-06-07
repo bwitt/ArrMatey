@@ -26,16 +26,22 @@ fun UpcomingDateView(item: ArrMedia) {
     when (item) {
         is ArrSeries -> if (item.status == MediaStatus.Continuing) item.nextAiring?.format()?.let {
             "${mokoString(MR.strings.airing_next)} $it"
-        } ?: mokoString(MR.strings.continuing_unknown) else null
-        is ArrMovie -> item.inCinemas?.format()?.takeUnless {
-            item.digitalRelease != null || item.physicalRelease != null
-        }?.let { "${mokoString(MR.strings.in_cinemas)} $it" }
+        } else null
+        is ArrMovie -> when {
+            item.digitalRelease?.isTodayOrAfter() == true ->
+                mokoString(MR.strings.digital_release, item.digitalRelease?.format() ?: "")
+            item.physicalRelease?.isTodayOrAfter() == true ->
+                mokoString(MR.strings.physical_release, item.physicalRelease?.format() ?: "")
+            item.inCinemas?.isTodayOrAfter()  == true ->
+                mokoString(MR.strings.in_cinemas, item.inCinemas?.format() ?: "")
+            else -> null
+        }
         is Arrtist -> if (item.status == MediaStatus.Continuing) item.nextAlbum?.releaseDate?.format()?.let {
             "${mokoString(MR.strings.next_album)} $it"
-        } ?: mokoString(MR.strings.continuing_unknown) else null
+        } else null
         is Author -> if (item.status == MediaStatus.Continuing) item.nextBook?.releaseDate?.format()?.let {
             "${mokoString(MR.strings.next_book)} $it"
-        } ?: mokoString(MR.strings.continuing_unknown) else null
+        } else null
         is Audiobook -> item.publishedDate?.ifTodayOrAfter()?.format()?.let {
             "${mokoString(MR.strings.release_date)} $it"
         }

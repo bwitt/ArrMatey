@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
@@ -19,10 +21,7 @@ import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 
 @Composable
-fun BoxScope.DetailHeaderBanner(
-    bannerUrl: String?,
-    height: Dp = 400.dp
-) {
+fun BoxScope.DetailHeaderBanner(bannerUrl: String?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -35,23 +34,6 @@ fun BoxScope.DetailHeaderBanner(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize()
-        )
-
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                            MaterialTheme.colorScheme.background
-                        ),
-                        startY = 0f,
-                        endY = Float.POSITIVE_INFINITY
-                    )
-                )
         )
     }
 }

@@ -27,7 +27,7 @@ fun EpisodeDetailsHeader(episode: Episode, series: ArrSeries) {
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        DetailHeaderBanner(episode.getBanner()?.remoteUrl, height = 300.dp)
+        DetailHeaderBanner(episode.getBanner()?.remoteUrl)
         Row(
             modifier = Modifier
                 .fillMaxWidth()

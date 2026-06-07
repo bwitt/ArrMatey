@@ -252,6 +252,10 @@ fun MediaDetailsScreen(
                                     .padding(top = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
+                                Text(
+                                    text = item.title ?: mokoString(MR.strings.unknown),
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
                                 UpcomingDateView(item)
 
                                 item.overview?.let { overview ->
