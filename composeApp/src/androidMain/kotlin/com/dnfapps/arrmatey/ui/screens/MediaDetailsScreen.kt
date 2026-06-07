@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,8 +52,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
@@ -68,6 +72,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.toRatingItems
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
@@ -76,11 +81,11 @@ import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.model.toInfoList
-import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.navigation.ArrScreen
-import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.arrNavigator
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumsArea
 import com.dnfapps.arrmatey.ui.components.AudiobookFileView
@@ -99,9 +104,9 @@ import com.dnfapps.arrmatey.ui.sheets.EditAuthorSheet
 import com.dnfapps.arrmatey.ui.sheets.EditMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.EditSeriesSheet
 import com.dnfapps.arrmatey.utils.format
+import com.dnfapps.arrmatey.utils.formatToOneDecimal
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -252,11 +257,13 @@ fun MediaDetailsScreen(
                                     .padding(top = 12.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
-                                Text(
-                                    text = item.title ?: mokoString(MR.strings.unknown),
-                                    style = MaterialTheme.typography.headlineMedium
-                                )
-                                UpcomingDateView(item)
+                                Column {
+                                    Text(
+                                        text = item.title ?: mokoString(MR.strings.unknown),
+                                        style = MaterialTheme.typography.headlineMedium
+                                    )
+                                    UpcomingDateView(item)
+                                }
 
                                 item.overview?.let { overview ->
                                     ItemDescriptionCard(overview)
@@ -733,6 +740,7 @@ private fun seriesInfo(
     val diskSize = series.fileSize.bytesAsFileSizeString()
 
     return mapOf(
+        mokoString(MR.strings.status) to mokoString(series.status.resource),
         mokoString(MR.strings.series_type) to series.seriesType.name,
         mokoString(MR.strings.size_on_disk) to diskSize,
         mokoString(MR.strings.root_folder) to (series.rootFolderPath ?: unknown),
@@ -760,6 +768,7 @@ private fun movieInfo(
         ?: mokoString(MR.strings.unknown)
 
     return buildMap {
+        put(mokoString(MR.strings.status), mokoString(movie.status.resource))
         put(mokoString(MR.strings.minimum_availability), movie.minimumAvailability.name)
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (movie.path ?: unknown))
@@ -798,6 +807,7 @@ private fun artistInfo(
     val diskSize = artist.fileSize.bytesAsFileSizeString()
 
     return buildMap {
+        put(mokoString(MR.strings.status), mokoString(artist.status.resource))
         put(mokoString(MR.strings.size_on_disk), diskSize)
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (artist.path ?: unknown))
@@ -827,6 +837,7 @@ private fun authorInfo(
     val diskSize = author.fileSize.bytesAsFileSizeString()
 
     return buildMap {
+        put(mokoString(MR.strings.status), mokoString(author.status.resource))
         put(mokoString(MR.strings.size_on_disk), diskSize)
         put(mokoString(MR.strings.root_folder), rootFolderPathValue)
         put(mokoString(MR.strings.path), (author.path ?: unknown))
