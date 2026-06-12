@@ -32,7 +32,7 @@ object ReleaseNotes {
             androidContentFile = MR.files.release_0_4_2_txt
         ),
         FeatureUpdate(
-            buildCode = 6,
+            buildCode = 8,
             title = MR.strings.v6_title,
             androidContentFile = MR.files.release_0_5_0_txt
         )

@@ -38,6 +38,7 @@ class AppShortcutManager(
         const val ACTION_OPEN_SCHEDULE = "com.dnfapps.arrmatey.ACTION_OPEN_SCHEDULE"
         const val ACTION_OPEN_REQUESTS = "com.dnfapps.arrmatey.ACTION_OPEN_REQUESTS"
         const val ACTION_OPEN_ISSUES = "com.dnfapps.arrmatey.ACTION_OPEN_ISSUES"
+        const val ACTION_OPEN_DASHBOARD = "com.dnfapps.arrmatey.ACTION_OPEN_DASHBOARD"
 
         const val EXTRA_INSTANCE_TYPE = "instance_type"
     }
@@ -116,6 +117,13 @@ class AppShortcutManager(
             label = moko.getString(MR.strings.activity),
             action = ACTION_OPEN_ACTIVITY,
             iconRes = R.drawable.outline_download_24
+        ))
+
+        shortcuts.add(ShortcutItem(
+            id = "dashboard",
+            label = moko.getString(MR.strings.dashboard),
+            action = ACTION_OPEN_DASHBOARD,
+            iconRes = R.drawable.baseline_dashboard_24
         ))
 
         return shortcuts
