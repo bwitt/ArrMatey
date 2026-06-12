@@ -17,39 +17,41 @@ struct ReleaseDownloadButtons: View {
     var body: some View {
         HStack(spacing: 6) {
             Button(action: onInteractiveClicked) {
-                Label(
-                    title: { Text(MR.strings().interactive.localized()) },
-                    icon: { Image(systemName: "person.fill") }
-                )
-                .font(.system(size: 16, weight: .medium))
-                .foregroundStyle(.white)
+                HStack(spacing: 4) {
+                    Image(systemName: "person.fill")
+                        .font(.system(size: 11))
+                    Text(MR.strings().interactive.localized())
+                        .font(.system(size: 12, weight: .medium))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
             .tint(.themePrimary)
+            .controlSize(.small)
             .clipShape(Capsule())
             
             Button(action: onAutomaticClicked) {
-                Group {
+                HStack(spacing: 4) {
                     if automaticSearchInProgress {
                         ProgressView()
                             .controlSize(.small)
                             .tint(.white)
                     } else {
-                        Label(
-                            title: { Text(MR.strings().automatic.localized()) },
-                            icon: { Image(systemName: "magnifyingglass") }
-                        )
-                        .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.white)
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 11))
+                        Text(MR.strings().automatic.localized())
+                            .font(.system(size: 12, weight: .medium))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.5)
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
             .tint(.themePrimary)
+            .controlSize(.small)
             .clipShape(Capsule())
             .disabled(!automaticSearchEnabled || automaticSearchInProgress)
         }

@@ -41,7 +41,7 @@ struct SeasonCard: View {
                     }
                     .tint(.red)
                     .buttonStyle(.borderedProminent)
-                    .controlSize(.regular)
+                    .controlSize(.small)
                     
                     ReleaseDownloadButtons(onInteractiveClicked: {
                         if let id = series.id?.int64Value {
@@ -52,8 +52,9 @@ struct SeasonCard: View {
                         onSeasonAutomaticSearch(season.seasonNumber)
                     }, automaticSearchInProgress: false)
                 }
+                .padding(.bottom, 4)
                 
-                ForEach(episodes, id: \.self) { episode in
+                ForEach(episodes, id: \.id) { episode in
                     EpisodeRow(episode: episode, onToggleEpisodeMonitor: { ep in
                         onToggleEpisodeMonitor(ep)
                     }, onAutomaticSearch: {

@@ -547,6 +547,7 @@
     <string name="no_activity">No Activity</string>
     <string name="nothing_recently_added">Nothing Added Recently</string>
     <string name="empty_dashboard_message">Try adding something to your dashboard</string>
+    <string name="library">Library</string>
 
     <!--- Download Status -->
     <string name="downloading">Downloading</string>
