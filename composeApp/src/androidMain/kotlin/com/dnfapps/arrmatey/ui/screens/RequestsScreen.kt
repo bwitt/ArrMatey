@@ -58,7 +58,7 @@ fun RequestsScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(mokoString(MR.strings.seerr)) },
+                title = { Text(mokoString(MR.strings.requests)) },
                 navigationIcon = {
                     if (!wideRailIsVisible) {
                         NavigationDrawerButton()
@@ -107,6 +107,32 @@ fun RequestsScreen(
                                         }
                                     })
                                 }
+                            )
+                        }
+
+                        if (selectedTab == SeerrTab.Requests) {
+                            RequestsContent(
+                                pagedData = pagedData,
+                                userState = userState,
+                                operationsState = requestOperationsState,
+                                onApprove = { viewModel.approveRequest(it) },
+                                onDecline = { viewModel.declineRequest(it) },
+                                onEdit = { },
+                                onDelete = { viewModel.cancelRequest(it) },
+                                onRemoveFromService = { viewModel.deleteMediaFile(it) },
+                                onNavigateToDetails = { tmdbId, type ->
+                                    navigation.toDetails(tmdbId, type)
+                                },
+                                onLoadMore = { viewModel.loadNextRequestsPage() },
+                                onRetry = { viewModel.retryRequests() },
+                                onClearError = { viewModel.clearRequestsError() }
+                            )
+                        } else {
+                            IssuesContent(
+                                pagedData = issuesData,
+                                onLoadMore = { viewModel.loadNextIssuesPage() },
+                                onRetry = { viewModel.retryIssues() },
+                                onClearError = { viewModel.clearIssuesError() }
                             )
                         }
                     } else {
