@@ -86,6 +86,12 @@ struct DashboardTabContent: View {
         .sheet(isPresented: $showAddCardSheet) {
             AddDashboardCardSheet(viewModel: viewModel)
         }
+        .alert(MR.strings().dashboard_first_launch.localized(), isPresented: Binding(
+            get: { viewModel.showFirstLaunchAlert },
+            set: { _ in viewModel.setFirstLaunchComplete() }
+        )) {
+            Button(MR.strings().ok.localized(), role: .cancel) { }
+        }
     }
     
     @ViewBuilder

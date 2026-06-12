@@ -15,6 +15,7 @@ class DashboardViewModelS: ObservableObject {
     @Published private(set) var isRefreshing: Bool = false
     @Published private(set) var state: CombinedDashboardState = CombinedDashboardStateInitial()
     @Published private(set) var isEditing: Bool = false
+    @Published private(set) var showFirstLaunchAlert: Bool = false
     @Published var cards: [DashboardCards] = []
     
     init() {
@@ -29,6 +30,9 @@ class DashboardViewModelS: ObservableObject {
         viewModel.state.observeAsync(on: self, to: \.state)
         viewModel.isEditing.observeAsync(on: self) { owner, editing in
             owner.isEditing = editing.boolValue
+        }
+        viewModel.showFirstLaunchToast.observeAsync(on: self) { owner, show in
+            owner.showFirstLaunchAlert = show.boolValue
         }
         viewModel.cards.observeAsync(on: self) { owner, cards in
             owner.cards = cards
@@ -57,6 +61,10 @@ class DashboardViewModelS: ObservableObject {
     
     func addCard(card: DashboardCards) {
         viewModel.addCard(card: card)
+    }
+    
+    func setFirstLaunchComplete() {
+        viewModel.setFirstLaunchComplete()
     }
     
     func moveCard(from source: IndexSet, to destination: Int) {

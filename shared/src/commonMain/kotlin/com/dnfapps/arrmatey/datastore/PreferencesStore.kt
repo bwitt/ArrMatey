@@ -65,6 +65,7 @@ class PreferencesStore(
     private val downloadClientSortByKey = stringPreferencesKey("downloadClientSortBy")
     private val downloadClientSortOrderKey = stringPreferencesKey("downloadClientSortOrder")
     private val dashboardCardsOrderKey = stringPreferencesKey("dashboardCardsOrderKey")
+    private val dashboardFirstLaunchKey = booleanPreferencesKey("dashboardFirstLaunchKey")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -397,6 +398,19 @@ class PreferencesStore(
     suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>) {
         dataStore.edit {
             it[dashboardCardsOrderKey] = cards.joinToString("~")
+        }
+    }
+
+    val dashboardFirstLaunch: Flow<Boolean> = dataStore.data
+        .map { preferences ->
+            preferences[dashboardFirstLaunchKey] ?: true
+        }
+
+    fun markDashboardAsSeen() {
+        scope.launch {
+            dataStore.edit {
+                it[dashboardFirstLaunchKey] = false
+            }
         }
     }
 

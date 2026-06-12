@@ -364,7 +364,7 @@ val viewModelModule = module {
     factory { (audiobookId: Long) ->
         AudiobookFilesViewModel(audiobookId, get())
     }
-    factory { CombinedDashboardViewModel(get(), get(), get(), get(), get()) }
+    factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
 }
 
 val resourcesModule = module {

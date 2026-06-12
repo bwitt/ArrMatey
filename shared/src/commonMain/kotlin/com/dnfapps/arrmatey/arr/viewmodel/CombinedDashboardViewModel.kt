@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
 import com.dnfapps.arrmatey.client.NetworkResult
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
+import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
@@ -46,7 +47,8 @@ class CombinedDashboardViewModel(
     private val downloadClientManager: DownloadClientManager,
     private val downloadQueueService: DownloadQueueService,
     private val calendarService: CalendarService,
-    private val dashboardManager: DashboardManager
+    private val dashboardManager: DashboardManager,
+    private val preferencesStore: PreferencesStore
 ) : ViewModel() {
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -63,6 +65,13 @@ class CombinedDashboardViewModel(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyList()
+        )
+
+    val showFirstLaunchToast: StateFlow<Boolean> = preferencesStore.isFirstLaunch
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
         )
 
     init {
@@ -361,5 +370,9 @@ class CombinedDashboardViewModel(
 
     fun addCard(card: DashboardCards) {
         dashboardManager.addCard(card)
+    }
+
+    fun setFirstLaunchComplete() {
+        preferencesStore.markDashboardAsSeen()
     }
 }
