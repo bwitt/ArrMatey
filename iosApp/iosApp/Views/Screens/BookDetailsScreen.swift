@@ -52,6 +52,10 @@ struct BookDetailsScreen: View {
                 BookDetailsHeader(author: author, book: viewModel.book)
                 
                 VStack(alignment: .leading, spacing: 12) {
+                    Text(book.title.breakable())
+                        .font(.title)
+                        .bold()
+
                     if let overview = viewModel.bookEdition?.overview {
                         ItemDescriptionCard(overview: overview)
                     }

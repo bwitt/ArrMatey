@@ -13,7 +13,6 @@ struct MediaDetailsHeader: View {
     let type: InstanceType
     
     @Environment(\.colorScheme) var colorScheme
-    @State private var detailsHeight: CGFloat = 0
     
     private var infoString: String {
         var result = ""
@@ -30,20 +29,24 @@ struct MediaDetailsHeader: View {
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
+        ZStack(alignment: .topLeading) {
             MediaHeaderBanner(bannerUrl: URL(string: item.getBanner()?.remoteUrl ?? ""))
             
-            // Dynamic Gradient Overlay
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    .clear,
-                    Color(.systemBackground).opacity(0.8),
-                    Color(.systemBackground)
-                ]),
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: detailsHeight * 2)
+            // Gradient Overlay
+            VStack(spacing: 0) {
+                Spacer()
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        .clear,
+                        Color(.systemBackground).opacity(0.8),
+                        Color(.systemBackground)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 150)
+            }
+            .frame(height: 400)
             
             HStack(alignment: .bottom, spacing: 24) {
                 PosterItem(item: item, aspectRatio: type.aspectRatio)
@@ -64,7 +67,7 @@ struct MediaDetailsHeader: View {
                                                 .frame(width: 14, height: 14)
                                         } else {
                                             Image(systemName: "star.fill")
-                                                .foregroundColor(.yellow)
+                                                .foregroundColor(.arrOrange)
                                                 .font(.system(size: 14))
                                         }
                                         Text(rating.score)
@@ -78,33 +81,91 @@ struct MediaDetailsHeader: View {
                         if !(item is Arrtist) && !(item is Author) {
                             if !infoString.isEmpty {
                                 Text(infoString)
-                                    .font(.system(size: 16))
+                                    .font(.body)
                             }
                             
                             if let releasedBy = item.releasedBy {
                                 Text(releasedBy)
-                                    .font(.system(size: 14))
+                                    .font(.subheadline)
                             }
                         }
                         
                         Text(item.genres.joined(separator: " • "))
-                            .font(.system(size: 14))
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
                             .lineLimit(2)
                     }
-                    .background(GeometryReader { geometry in
-                        Color.clear.onAppear {
-                            detailsHeight = geometry.size.height
-                        }
-                        .onChange(of: geometry.size.height) { _, newHeight in
-                            detailsHeight = newHeight
-                        }
-                    })
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
+            .padding(.top, 170)
         }
+        .frame(height: 400)
+    }
+}
+
+struct RequestMediaDetailsHeader: View {
+    let item: RequestMediaDetails
+    
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            MediaHeaderBanner(bannerUrl: URL(string: item.fullBackdropPath ?? ""))
+            
+            // Gradient Overlay
+            VStack(spacing: 0) {
+                Spacer()
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        .clear,
+                        Color(.systemBackground).opacity(0.8),
+                        Color(.systemBackground)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 150)
+            }
+            .frame(height: 400)
+            
+            HStack(alignment: .bottom, spacing: 24) {
+                GenericPosterItem(posterUrl: item.fullPosterPath)
+                    .frame(width: 150)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(infoString)
+                        .font(.system(size: 16))
+                        .padding(.top, 6)
+                    
+                    Text(item.genres.map { $0.name }.joined(separator: " • "))
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
+                        .lineSpacing(2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding(.top, 170)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+        }
+        .frame(height: 400)
+    }
+    
+    private var infoString: String {
+        var items: [String] = []
+        if let displayDate = item.displayDate {
+            items.append(displayDate.format(pattern: "MMM d, yyyy"))
+        }
+        if let movie = item as? MovieDetails, let runtime = movie.runtime {
+            items.append(Int(truncating: runtime).formatAsRuntime())
+        }
+        if let tv = item as? TvDetails {
+            items.append(MR.plurals().seasons.localized(Int(tv.seasons.count)))
+        }
+        if let certification = item.getCertification(localeCode: Locale.current.region?.identifier ?? "") {
+            items.append(certification)
+        }
+        return items.joined(separator: " • ")
     }
 }

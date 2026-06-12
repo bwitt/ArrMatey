@@ -9,28 +9,45 @@ import SwiftUI
 
 struct ItemDescriptionCard: View {
     let overview: String?
-     private let decodedOverview: String?
     
     @State private var expanded = false
+    @State private var decodedOverview: String?
     
-     init(overview: String?) {
-         self.overview = overview
-         self.decodedOverview = overview?.decodingHTMLEntities()
-     }
+    init(overview: String?) {
+        self.overview = overview
+    }
     
     var body: some View {
-        if let decodedOverview {
+        if let text = decodedOverview ?? overview {
             VStack {
-                Text(decodedOverview)
+                Text(text)
                     .font(.system(size: 14))
                     .lineLimit(expanded ? nil : 10)
                     .truncationMode(.tail)
-                    .transition(.slide)
-                    .background()
-                    .onTapGesture {
-                        withAnimation(.snappy) { expanded = true }
-                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
+            .padding(.vertical, 12)
+            .padding(.horizontal, 18)
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
+            .transition(.slide)
+            .onTapGesture {
+                if !expanded {
+                    withAnimation(.snappy) { expanded = true }
+                }
+            }
+            .onAppear {
+                decode()
+            }
+            .onChange(of: overview) { _, _ in
+                decode()
+            }
+        }
+    }
+    
+    private func decode() {
+        if let overview = overview {
+            decodedOverview = overview.decodingHTMLEntities()
         }
     }
 }

@@ -58,10 +58,14 @@ struct SeerrDetailsScreen: View {
         
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                detailsHeader(item: item)
-                    .frame(height: 400)
+                RequestMediaDetailsHeader(item: item)
                 
                 VStack(alignment: .leading, spacing: 12) {
+                    Text(item.displayTitle)
+                        .font(.title)
+                        .bold()
+                        .padding(.horizontal, 24)
+
                     if let tagline = item.tagline, !tagline.isEmpty {
                         Text(tagline)
                             .font(.title3)
@@ -93,50 +97,7 @@ struct SeerrDetailsScreen: View {
         .ignoresSafeArea(edges: .top)
     }
     
-    // MARK: - Header
-    
-    private func detailsHeader(item: RequestMediaDetails) -> some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .topLeading) {
-                MediaHeaderBanner(bannerUrl: URL(string: item.fullBackdropPath ?? ""))
-                    .frame(width: geometry.size.width)
 
-                HStack(alignment: .top, spacing: 0) {
-                    GenericPosterItem(posterUrl: item.fullPosterPath)
-                        .frame(height: 220)
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(item.displayTitle)
-                            .font(.title2.bold())
-                        
-                        HStack(spacing: 8) {
-                            if let year = item.displayDate?.year {
-                                Text(String(year))
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                            }
-                            Text(item.status)
-                                .font(.caption)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 2)
-                                .background(Color.accentColor.opacity(0.15))
-                                .clipShape(Capsule())
-                        }
-                        
-                        if !item.genres.isEmpty {
-                            Text(item.genres.prefix(3).map { $0.name }.joined(separator: " \u{2022} "))
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .top)
-                }
-                .padding(.top, 170)
-                .padding(.horizontal, 12)
-            }
-        }
-    }
-    
     // MARK: - Seasons
     
     private func seasonsSection(_ series: TvDetails) -> some View {

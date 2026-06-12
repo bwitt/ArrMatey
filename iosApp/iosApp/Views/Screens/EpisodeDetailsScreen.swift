@@ -52,6 +52,10 @@ struct EpisodeDetailsScreen: View {
                 EpisodeDetailsHeader(series: series, episode: episode)
                 
                 VStack(alignment: .leading, spacing: 12) {
+                    Text(episode.displayTitle)
+                        .font(.title)
+                        .bold()
+
                     ItemDescriptionCard(overview: episode.overview)
                     
                     ReleaseDownloadButtons(
@@ -77,7 +81,8 @@ struct EpisodeDetailsScreen: View {
                     case let success as HistoryStateSuccess:
                         if success.items.isEmpty {
                             Text(MR.strings().no_history.localized())
-                                .font(.system(size: 22, weight: .medium))
+                                .font(.system(size: 16, weight: .medium))
+                                .frame(maxWidth: .infinity, alignment: .center)
                         } else {
                             Text(MR.strings().history.localized())
                                 .font(.system(size: 20, weight: .bold))

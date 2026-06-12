@@ -21,12 +21,14 @@ struct ReleaseDownloadButtons: View {
                     title: { Text(MR.strings().interactive.localized()) },
                     icon: { Image(systemName: "person.fill") }
                 )
+                .font(.system(size: 16, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
             .tint(.themePrimary)
-            .controlSize(.regular)
+            .clipShape(Capsule())
             
             Button(action: onAutomaticClicked) {
                 Group {
@@ -39,13 +41,16 @@ struct ReleaseDownloadButtons: View {
                             title: { Text(MR.strings().automatic.localized()) },
                             icon: { Image(systemName: "magnifyingglass") }
                         )
+                        .font(.system(size: 16, weight: .medium))
                         .foregroundStyle(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.regular)
+            .tint(.themePrimary)
+            .clipShape(Capsule())
             .disabled(!automaticSearchEnabled || automaticSearchInProgress)
         }
     }

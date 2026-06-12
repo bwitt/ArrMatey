@@ -12,46 +12,73 @@ struct BookDetailsHeader: View {
     let author: Author
     let book: Book
     
+    @State private var detailsHeight: CGFloat = 0
+    
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottom) {
             MediaHeaderBanner(bannerUrl: URL(string: book.getCover()?.remoteUrl ?? ""))
-            HStack(alignment: .bottom, spacing: 12) {
+            
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    .clear,
+                    Color(.systemBackground).opacity(0.8),
+                    Color(.systemBackground)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: detailsHeight * 2)
+
+            HStack(alignment: .bottom, spacing: 24) {
                 if let url = book.getCover()?.remoteUrl {
                     AsyncImage(url: URL(string: url)) { image in
                         image.image?
                             .resizable()
-                            .aspectRatio(contentMode: .fit)
+                            .aspectRatio(contentMode: .fill)
                     }
-                        .frame(width: 120, height: 180)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .background(.clear)
+                    .frame(width: 120, height: 180)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .shadow(radius: 4)
                 }
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(book.title)
-                        .font(.system(size: 32, weight: .bold))
-                        .lineLimit(3)
-                        .truncationMode(.tail)
-                    Text(author.title ?? MR.strings().unknown.localized())
-                        .font(.system(size: 18))
-                    
+                    if let seriesTitle = book.seriesTitle {
+                        Text(seriesTitle)
+                            .font(.headline)
+                    }
+
                     Text(statusRow)
-                        .font(.system(size: 16))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
-                .frame(alignment: .top)
-                .frame(maxWidth: .infinity)
+                .background(GeometryReader { geometry in
+                    Color.clear.onAppear {
+                        detailsHeight = geometry.size.height
+                    }
+                    .onChange(of: geometry.size.height) { _, newHeight in
+                        detailsHeight = newHeight
+                    }
+                })
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity)
             .padding(.top, 170)
             .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
     }
     
     private var statusRow: String {
-        [
-            book.releaseDate?.format(pattern: "yyyy")
-        ]
-            .compactMap { $0 }
-            .joined(separator: " • ")
+        var items: [String] = []
+        if let authorTitle = author.title {
+            items.append(authorTitle)
+        } else {
+            items.append(MR.strings().unknown.localized())
+        }
+        
+        if let pageCount = book.pageCount {
+            items.append("\(pageCount) pages")
+        }
+        
+        return items.joined(separator: " • ")
     }
 }
