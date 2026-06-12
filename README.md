@@ -25,45 +25,49 @@
 
 ## Features
 
+### Combined Dashboard
+- Centralized overview of all instances, download clients, and requests
+- Customizable layout: add, remove, and reorder cards to fit your workflow
+- Real-time network status and detailed disk space monitoring
+- Quick-access shortcuts to your recently added media and upcoming schedule
+
 ### Multi-Instance Support
-- Manage multiple Sonarr, Radarr, Lidarr, and Prowlarr instances
-- Quick instance switching
-- Custom instance labels and configurations
+- Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances
+- Seamless integration with Prowlarr for indexer management and Seerr for requests and issues
+- Quick instance switching and custom instance labels
 
 ### Library Management
 - Browse your entire media library with list and grid views
-- Search and filter by title, quality, monitored status
+- Search and filter by title, quality, and monitored status
 - Sort by name, date added, size, and more
-- View detailed media information including:
-  - Episode lists with file status
-  - Season management
-  - Quality profiles and custom formats
-  - File sizes and storage information
+- View detailed media information, including episode lists, season management, and file status
+- Dedicated management for Audiobooks with metadata and file tracking
 
 ### Interactive Search
-- Manual search for releases
-- Filter by quality, language, indexer, protocol
+- Manual search for releases via Arr instances or Prowlarr
+- Filter by quality, language, indexer, and protocol
 - View seeders, size, age, and custom format scores
 - One-tap download with confirmation for rejected releases
 
 ### Calendar View
-- View upcoming episodes and movie releases
+- View upcoming episodes, movies, albums, books, and audiobooks
 - Switch between list and month views
-- Filter by content type, monitored status, premieres/finales
+- Filter by content type, monitored status, and premieres/finales
 - Scroll-to-today for easy navigation
 
 ### Activity Queue
-- Real-time download monitoring
-- View progress, ETA, and status
-- Cancel downloads with blocklist options
-- Detailed queue item information
+- Real-time download monitoring across all download clients
+- View progress, ETA, and detailed status
+- Manage downloads with options to remove, blocklist, or skip redownload
 
 ### Advanced Features
+- **Android App Shortcuts**: Jump to services or search directly from your home screen
+- **Local Network Switching**: Automatically use local URLs when connected to home Wi-Fi
+- **Custom Webpages**: Pin your favorite status pages or secondary dashboards (like Tautulli) directly in the app
 - **Custom Headers**: Add custom HTTP headers per instance
-- **Slow Instance Mode**: Configurable timeout for remote instances
+- **Slow Instance Mode**: Configurable timeout for remote or slower instances
 - **Pull-to-refresh**: Update data across all screens
 - **Material 3/Liquid Glass Design**: Beautiful, modern UI with dynamic theming on Android and Liquid Glass on iOS
-- **Search Everywhere**: Unified search across your library
 
 ### Download Client
 - **Multiple Integrations**: Support for Transmission, Deluge, qBittorrent, and SABnzbd
@@ -72,26 +76,33 @@
 - [ ] Tablet/Large screen support
 - [ ] Home screen widgets
 - [ ] Schedule notifications
-- [ ] bulk library actions
-- [ ] Additional instances types
-  - [ ] Seer
-  - [ ] Readarr/Chaptarr
-  - [ ] Bazarr
-  - [ ] Kapowarr
-  - [ ] tautulli
+- [ ] Bulk library actions
+- [ ] Additional instance types (eg. Bazarr, Tracearr, nzbget)
 - and more to come
 
 ## Screenshots
+
+### Dashboard
+<table>
+  <tr>
+    <td><img src="screenshots/dashboard_android.png" width="250"/><img src="screenshots/dashboard_ios.png" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Combined Dashboard (Android & iOS)</em></td>
+  </tr>
+</table>
 
 ### Library Views
 <table>
   <tr>
     <td><img src="screenshots/library_list.png" width="250"/><img src="screenshots/library_list_ios.png" width="250"/></td>
     <td><img src="screenshots/library_grid.png" width="250"/><img src="screenshots/library_grid_ios.png" width="250"/></td>
+    <td><img src="screenshots/library_view_customization.png" width="250"/><img src="screenshots/library_view_customization_ios.png" width="250"/></td>
   </tr>
   <tr>
     <td align="center"><em>List View</em></td>
     <td align="center"><em>Grid View</em></td>
+    <td align="center"><em>View Customization</em></td>
   </tr>
 </table>
 
@@ -101,13 +112,11 @@
     <td><img src="screenshots/series_details.png" width="250"/><img src="screenshots/series_details_ios.png" width="250"/></td>
     <td><img src="screenshots/movie_details.png" width="250"/><img src="screenshots/movie_details_ios.png" width="250"/></td>
     <td><img src="screenshots/episode_details.png" width="250"/><img src="screenshots/episode_details_ios.png" width="250"/></td>
-    <td><img src="screenshots/artist_details.png" width="250"/><img src="screenshots/artist_details_ios.png" width="250"/></td>
   </tr>
   <tr>
     <td align="center"><em>Series Details</em></td>
     <td align="center"><em>Movie Details</em></td>
     <td align="center"><em>Episode Details</em></td>
-    <td align="center"><em>Artist Details</em></td>
   </tr>
 </table>
 
@@ -131,7 +140,7 @@
     <td><img src="screenshots/instance_dashboard.png" width="250"/><img src="screenshots/instance_dashboard_ios.png" width="250"/></td>
   </tr>
   <tr>
-    <td align="center"><em>Instance Dashbaord</em></td>
+    <td align="center"><em>Instance Dashboard</em></td>
   </tr>
 </table>
 
@@ -175,7 +184,7 @@ Any new strings should be added to strings.xml, or plurals.xml for plural string
 
 1. Open the app and navigate to **Settings**
 2. Tap **Add Instance**
-3. Select your instance type (Sonarr/Radarr/Lidarr)
+3. Select your instance type (Sonarr/Radarr/Lidarr/Bookshelf/Listenarr/etc.)
 4. Enter your instance details:
   - **Label**: A friendly name for this instance
   - **Host**: Your instance URL (e.g., `http://192.168.1.100:8989`, `https://service.mydomain.com`)
@@ -184,7 +193,7 @@ Any new strings should be added to strings.xml, or plurals.xml for plural string
   - **Slow Instance**: Enable for remote instances with higher latency
   - **Custom Timeout**: Set a custom timeout in seconds (default: 60s)
   - **Custom Headers**: Add additional HTTP headers if needed
-  - **Local Endpoint**: If you use a custom domain for remoote access, you can specify the local address of your instance to use on your home network.
+  - **Local Endpoint**: If you use a custom domain for remote access, you can specify the local address of your instance to use on your home network.
 6. Tap **Test Connection** to verify
 7. Save your instance
 
@@ -239,7 +248,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Sonarr](https://sonarr.tv/) - Smart PVR for newsgroup and bittorrent users
 - [Radarr](https://radarr.video/) - Movie collection manager
 - [Lidarr](https://lidarr.audio/) - Music collection manager
+- [Bookshelf](https://github.com/pennydreadful/bookshelf) - Ebook and audiobook collection manager
+- [Listenarr](https://github.com/Listenarrs/Listenarr) - Audiobook management server
+- [Prowlarr](https://prowlarr.com/) - Indexer manager
+- [Seerr](https://docs.seerr.dev/) - Request management
 - [Material Design 3](https://m3.material.io/) - Design system
 - [Jetpack Compose](https://developer.android.com/jetpack/compose) - Modern UI toolkit
-- [SwftUI](https://developer.apple.com/xcode/swiftui/) - Apple's declarative framework for building user interfaces
+- [SwiftUI](https://developer.apple.com/xcode/swiftui/) - Apple's declarative framework for building user interfaces
 - [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) - Kotlin's cross-platform solution
