@@ -34,12 +34,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -71,6 +74,7 @@ import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
+import com.dnfapps.arrmatey.utils.dp
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
@@ -182,6 +186,11 @@ fun BookDetailsScreen(
                     modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    Text(
+                        text = book.title.breakable(),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+
                     bookEdition?.overview?.let { overview ->
                         ItemDescriptionCard(overview)
                     }
@@ -271,8 +280,12 @@ fun BookDetailsHeader(
     book: Book,
     author: Author
 ) {
+    var detailHeight by remember { mutableIntStateOf(0) }
     Box(modifier = Modifier.fillMaxSize()) {
-        DetailHeaderBanner(book.getCover()?.remoteUrl)
+        DetailHeaderBanner(
+            bannerUrl = book.getCover()?.remoteUrl,
+            gradientHeight = detailHeight.times(2).dp()
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -284,20 +297,11 @@ fun BookDetailsHeader(
             BookCover(book)
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.onGloballyPositioned {
+                    detailHeight = it.size.height
+                }
             ) {
-                Text(
-                    text = book.title.breakable(),
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 1.em,
-                    maxLines = 6,
-                    overflow = TextOverflow.Ellipsis,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 16.sp,
-                        maxFontSize = 38.sp,
-                        stepSize = 2.sp
-                    )
-                )
                 book.seriesTitle?.let { seriesTitle ->
                     Text(
                         text = seriesTitle

@@ -6,28 +6,39 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.entensions.Bullet
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.dp
 import com.dnfapps.arrmatey.utils.mokoString
 
 @Composable
-fun EpisodeDetailsHeader(episode: Episode, series: ArrSeries) {
+fun EpisodeDetailsHeader(
+    episode: Episode,
+    series: ArrSeries
+) {
+    var detailHeight by remember { mutableIntStateOf(0) }
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        DetailHeaderBanner(episode.getBanner()?.remoteUrl)
+        DetailHeaderBanner(
+            bannerUrl = episode.getBanner()?.remoteUrl,
+            gradientHeight = detailHeight.times(2).dp()
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -39,20 +50,11 @@ fun EpisodeDetailsHeader(episode: Episode, series: ArrSeries) {
             EpisodePosterItem(episode)
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.onGloballyPositioned {
+                    detailHeight = it.size.height
+                }
             ) {
-                Text(
-                    text = episode.displayTitle,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 1.em,
-                    maxLines = 6,
-                    overflow = TextOverflow.Ellipsis,
-                    autoSize = TextAutoSize.StepBased(
-                        minFontSize = 16.sp,
-                        maxFontSize = 38.sp,
-                        stepSize = 2.sp
-                    )
-                )
                 Text(
                     text = series.title ?: mokoString(MR.strings.unknown),
                     fontSize = 18.sp

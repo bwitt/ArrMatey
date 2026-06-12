@@ -162,6 +162,11 @@ fun EpisodeDetailsScreen(
                     modifier = Modifier.padding(horizontal = 24.dp).padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    Text(
+                        text = episode.displayTitle,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+
                     currentEpisode.overview?.let { overview ->
                         ItemDescriptionCard(overview)
                     }

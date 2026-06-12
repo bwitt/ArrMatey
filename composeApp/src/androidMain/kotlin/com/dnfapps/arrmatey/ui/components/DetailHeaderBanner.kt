@@ -19,9 +19,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
+import com.dnfapps.arrmatey.utils.Blur
+import com.dnfapps.arrmatey.utils.dp
+import com.skydoves.cloudy.cloudy
 
 @Composable
-fun BoxScope.DetailHeaderBanner(bannerUrl: String?) {
+fun BoxScope.DetailHeaderBanner(
+    bannerUrl: String?,
+    gradientHeight: Dp
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,6 +40,24 @@ fun BoxScope.DetailHeaderBanner(bannerUrl: String?) {
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize()
+        )
+
+        Box(
+            modifier = Modifier
+                .height(gradientHeight)
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
+                            MaterialTheme.colorScheme.background
+                        ),
+                        startY = 0f,
+                        endY = Float.POSITIVE_INFINITY
+                    )
+                )
         )
     }
 }

@@ -1,6 +1,5 @@
 package com.dnfapps.arrmatey.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalLocale
@@ -34,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.RatingItem
 import com.dnfapps.arrmatey.arr.api.model.toRatingItems
@@ -61,24 +58,9 @@ fun DetailsHeader(
     Box(
         modifier = Modifier.fillMaxWidth()
     ) {
-        DetailHeaderBanner(item.getBanner()?.remoteUrl)
-
-        Box(
-            modifier = Modifier
-                .height(detailHeight.times(2).dp())
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
-                            MaterialTheme.colorScheme.background
-                        ),
-                        startY = 0f,
-                        endY = Float.POSITIVE_INFINITY
-                    )
-                )
+        DetailHeaderBanner(
+            bannerUrl = item.getBanner()?.remoteUrl,
+            gradientHeight = detailHeight.times(2).dp()
         )
 
         Row(
@@ -180,8 +162,12 @@ fun RatingsSection(
 fun DetailsHeader(
     item: RequestMediaDetails
 ) {
+    var detailHeight by remember { mutableIntStateOf(0) }
     Box(modifier = Modifier.fillMaxWidth()) {
-        DetailHeaderBanner(item.fullBackdropPath)
+        DetailHeaderBanner(
+            bannerUrl = item.fullBackdropPath,
+            gradientHeight = detailHeight.times(2).dp()
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -191,19 +177,14 @@ fun DetailsHeader(
         ) {
             PosterItem(
                 item = item,
-                modifier = Modifier.height(220.dp)
+                modifier = Modifier.width(150.dp)
             )
             Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.onGloballyPositioned {
+                    detailHeight = it.size.height
+                }
             ) {
-                Text(
-                    text = item.displayTitle,
-                    fontSize = 38.sp,
-                    fontWeight = FontWeight.Medium,
-                    lineHeight = 42.sp,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
-                )
                 Text(
                     text = listOfNotNull(
                         item.displayDate?.format("MMM d, yyyy"),
