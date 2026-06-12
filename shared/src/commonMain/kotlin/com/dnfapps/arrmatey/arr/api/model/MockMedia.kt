@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlin.time.Instant
@@ -31,7 +32,7 @@ sealed class MockMedia(
     override val statistics: ArrStatistics? = null,
     override val added: Instant? = null,
     override val status: MediaStatus = MediaStatus.Continuing
-): ArrMedia {
+): ArrMedia, InstanceTypeIdentifiable {
     @Transient override val guid: Long = 1L
     override fun ratingScore(): Double = 4.5
     @Transient override val statusProgress: Float = 0.5f
@@ -48,6 +49,7 @@ sealed class MockMedia(
     data object Radarr: MockMedia(title = "A Totally Awesome Movie")
     data object Lidarr: MockMedia(title = "A Totally Awesome Album")
     data object Readarr: MockMedia(title = "A Totally Awesome Book")
+    data object Listenarr: MockMedia(title = "A Totally Awesome Book")
 
 }
 //data class MockMedia(

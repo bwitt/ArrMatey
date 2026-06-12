@@ -26,6 +26,7 @@ struct TabItemContent: View {
                 case .downloads: DownloadsTab().environment(\.navigationContext, .mainTab)
                 case .requests: RequestsTab().environment(\.navigationContext, .mainTab)
                 case .prowlarr: ProwlarrTab().environment(\.navigationContext, .mainTab)
+                case .dashboard: DashboardTab().environment(\.navigationContext, .mainTab)
                 }
             } else if let custom = tabItem as? TabItemCustomWebpage {
                 CustomWebpageViewerScreen(webpageId: custom.id)
@@ -33,7 +34,6 @@ struct TabItemContent: View {
                 SettingsScreen()
             }
         }
-        .navigationTitle(LocalizedStringKey(tabItem.resource.localized()))
         .navigationDestination(for: SettingsRoute.self) { route in
             SettingsRouteView(route: route)
         }

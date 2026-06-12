@@ -66,6 +66,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.DoubleBackToExit
 import com.dnfapps.arrmatey.ui.tabs.ActivityTab
 import com.dnfapps.arrmatey.ui.tabs.ArrTab
 import com.dnfapps.arrmatey.ui.tabs.CalendarTab
+import com.dnfapps.arrmatey.ui.tabs.DashboardTab
 import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
@@ -106,10 +107,14 @@ fun HomeScreen(
         }
     ) { visibleTabs.size }
 
-    LaunchedEffect(visibleTabs, overlayTab) {
-        if (overlayTab == null && selectedTab !in visibleTabs) {
-            visibleTabs.firstOrNull()?.let {
-                navigationManager.setSelectedTab(it)
+    LaunchedEffect(visibleTabs, overlayTab, tabConfig.isInitialValue) {
+        if (tabConfig.isInitialValue) return@LaunchedEffect
+
+        if (overlayTab == null) {
+            if (selectedTab == null || selectedTab !in visibleTabs) {
+                visibleTabs.firstOrNull()?.let {
+                    navigationManager.setSelectedTab(it)
+                }
             }
         }
     }
@@ -217,7 +222,7 @@ fun HomeScreen(
                                     }
 
                                     val currentTab = overlayTab ?: selectedTab
-                                    val associatedType = currentTab.associatedType
+                                    val associatedType = currentTab?.associatedType
                                     val navigator =
                                         associatedType?.takeIf { it in InstanceType.arrs() }
                                             ?.let { navigationManager.arr(it) }
@@ -401,7 +406,7 @@ private fun TabItemContent(tab: TabItem, windowSizeClass: WindowSizeClass, wideR
                 CustomWebpageViewerScreen(webpageId = tab.id, wideRailIsVisible = wideRailIsVisible)
             }
         }
-        is TabItem.Settings -> SettingsTabNavHost()
+        is TabItem.Settings -> SettingsTabNavHost(windowSizeClass)
     }
 }
 
@@ -418,5 +423,6 @@ private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSiz
         TabItem.Standard.CALENDAR -> CalendarTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.REQUESTS -> SeerrTab(windowSizeClass, wideRailIsVisible)
         TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
+        TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
     }
 }

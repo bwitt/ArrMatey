@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.arr.api.client.LoggerLevel
 import com.dnfapps.arrmatey.arr.state.CalendarFilterState
 import com.dnfapps.arrmatey.arr.state.CalendarViewMode
 import com.dnfapps.arrmatey.arr.state.ContentFilter
+import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -31,6 +32,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlin.collections.emptyList
 
 class PreferencesStore(
     dataStoreFactory: DataStoreFactory
@@ -62,6 +64,7 @@ class PreferencesStore(
     private val isFirstLaunchKey = booleanPreferencesKey("isFirstLaunch")
     private val downloadClientSortByKey = stringPreferencesKey("downloadClientSortBy")
     private val downloadClientSortOrderKey = stringPreferencesKey("downloadClientSortOrder")
+    private val dashboardCardsOrderKey = stringPreferencesKey("dashboardCardsOrderKey")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -377,6 +380,23 @@ class PreferencesStore(
         dataStore.edit {
             it[downloadClientSortByKey] = state.sortBy.name
             it[downloadClientSortOrderKey] = state.sortOrder.name
+        }
+    }
+
+    val dashboardCardsOrder: Flow<List<DashboardCards>> = dataStore.data
+        .map { preferences ->
+            val cardOrderPrefs = preferences[dashboardCardsOrderKey]
+            cardOrderPrefs?.let { cardOrderPrefs ->
+                cardOrderPrefs.takeUnless { it.isEmpty() }
+                    ?.split("~")
+                    ?.map { DashboardCards.valueOf(it) }
+                    ?: emptyList()
+            } ?: DashboardCards.defaultEntries.toList()
+        }
+
+    suspend fun updateDashboardCardsOrder(cards: List<DashboardCards>) {
+        dataStore.edit {
+            it[dashboardCardsOrderKey] = cards.joinToString("~")
         }
     }
 

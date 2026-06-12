@@ -50,6 +50,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AuthorFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.BookDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.CalendarViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.CombinedDashboardViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
@@ -59,6 +60,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MovieFilesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
+import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.database.ArrMateyDatabase
@@ -203,6 +205,7 @@ val repositoryModule = module {
     single { CustomWebpageRepository(get()) }
 
     single { TabManager(get(), get()) }
+    single { DashboardManager(get()) }
 }
 
 val serviceModule = module {
@@ -361,6 +364,7 @@ val viewModelModule = module {
     factory { (audiobookId: Long) ->
         AudiobookFilesViewModel(audiobookId, get())
     }
+    factory { CombinedDashboardViewModel(get(), get(), get(), get(), get()) }
 }
 
 val resourcesModule = module {

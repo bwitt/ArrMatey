@@ -2,6 +2,7 @@ package com.dnfapps.arrmatey.navigation
 
 import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.StateFlow
 
@@ -13,11 +14,13 @@ class NavigationManager(
     private val tabNavigators: Map<TabItem, Navigator<*>>,
     val settings: SettingsTabNavigator,
     val requests: RequestsTabNavigator,
-    private val appState: AppState
+    val dashboard: DashboardTabNavigator,
+    private val appState: AppState,
+    private val tabManager: TabManager
 ) {
     // Reactive UI state properties
     val drawerExpandedState: StateFlow<Boolean> = appState.drawerExpanded
-    val selectedTab: StateFlow<TabItem> = appState.selectedTab
+    val selectedTab: StateFlow<TabItem?> = appState.selectedTab
     val overlayTab: StateFlow<TabItem?> = appState.overlayTab
 
     // UI state actions
@@ -28,11 +31,12 @@ class NavigationManager(
     fun setSelectedTab(tab: TabItem) = appState.setSelectedTab(tab)
 
     fun navigateToTab(tab: TabItem) {
-        if (tab is TabItem.Standard && tab !in TabItem.defaultStandardEntries()) {
-            openOverlay(tab)
-        } else {
+        val visibleTabs = tabManager.tabConfiguration.value.visibleTabs
+        if (tab in visibleTabs) {
             closeOverlay()
             setSelectedTab(tab)
+        } else {
+            openOverlay(tab)
         }
     }
 
@@ -67,6 +71,10 @@ class NavigationManager(
     }
 
     // Convenience methods for specific feature transitions
+    fun openSettings() {
+        openOverlay(TabItem.Settings)
+    }
+
     fun openNewInstanceScreen(type: InstanceType) {
         openOverlay(TabItem.Settings)
         settings.toAddInstance(type)
@@ -77,8 +85,41 @@ class NavigationManager(
         settings.toEditInstance(id)
     }
 
+    fun openArrInstanceDashboard(id: Long) {
+        openOverlay(TabItem.Settings)
+        settings.toArrDashboard(id)
+    }
+
     fun openNewDownloadClientScreen() {
         openOverlay(TabItem.Settings)
         settings.toAddDownloadClient()
+    }
+
+    fun openArrTab(type: InstanceType) {
+        when (type) {
+            InstanceType.Seerr -> openRequestsTab()
+            InstanceType.Prowlarr -> openProwlarrTab()
+            else -> navigateToTab(tabFor(type))
+        }
+    }
+
+    fun openRequestsTab() {
+        navigateToTab(TabItem.Standard.REQUESTS)
+    }
+
+    fun openProwlarrTab() {
+        navigateToTab(TabItem.Standard.PROWLARR)
+    }
+
+    fun openDownloadClientsTab() {
+        navigateToTab(TabItem.Standard.DOWNLOADS)
+    }
+
+    fun openActivityTab() {
+        navigateToTab(TabItem.Standard.ACTIVITY)
+    }
+
+    fun openScheduleTab() {
+        navigateToTab(TabItem.Standard.CALENDAR)
     }
 }

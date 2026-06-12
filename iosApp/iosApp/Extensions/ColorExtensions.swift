@@ -34,6 +34,21 @@ extension Color {
         )
     }
     
+    init(hex: UInt64) {
+        if hex > 0xFFFFFF {
+            let r = Double((hex >> 24) & 0xFF) / 255.0
+            let g = Double((hex >> 16) & 0xFF) / 255.0
+            let b = Double((hex >> 8) & 0xFF) / 255.0
+            let a = Double(hex & 0xFF) / 255.0
+            self.init(.sRGB, red: r, green: g, blue: b, opacity: a)
+        } else {
+            let r = Double((hex >> 16) & 0xFF) / 255.0
+            let g = Double((hex >> 8) & 0xFF) / 255.0
+            let b = Double(hex & 0xFF) / 255.0
+            self.init(.sRGB, red: r, green: g, blue: b, opacity: 1.0)
+        }
+    }
+    
     init(argb: UInt64) {
         let a = Double((argb >> 56) & 0xFF) / 255.0
         let r = Double((argb >> 48) & 0xFF) / 255.0
@@ -41,5 +56,30 @@ extension Color {
         let b = Double((argb >> 32) & 0xFF) / 255.0
         
         self.init(.sRGB, red: r, green: g, blue: b, opacity: a)
+    }
+    
+    func midpoint(with other: Color) -> Color {
+        // Use SwiftUI's native UIColor/NSColor bridge to extract color components safely
+#if os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)
+        let uiColor1 = UIColor(self)
+        let uiColor2 = UIColor(other)
+#elseif os(macOS)
+        let uiColor1 = NSColor(self)
+        let uiColor2 = NSColor(other)
+#endif
+        
+        var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0
+        var r2: CGFloat = 0, g2: CGFloat = 0, b2: CGFloat = 0, a2: CGFloat = 0
+        
+        uiColor1.getRed(&r1, green: &g1, blue: &b1, alpha: &a1)
+        uiColor2.getRed(&r2, green: &g2, blue: &b2, alpha: &a2)
+        
+        // Calculate the mathematical midpoint for each channel
+        let midRed = (r1 + r2) / 2.0
+        let midGreen = (g1 + g2) / 2.0
+        let midBlue = (b1 + b2) / 2.0
+        let midAlpha = (a1 + a2) / 2.0
+        
+        return Color(.sRGB, red: midRed, green: midGreen, blue: midBlue, opacity: midAlpha)
     }
 }

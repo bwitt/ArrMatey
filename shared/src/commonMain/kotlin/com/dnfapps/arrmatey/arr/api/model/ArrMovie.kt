@@ -2,11 +2,11 @@ package com.dnfapps.arrmatey.arr.api.model
 
 import androidx.compose.ui.graphics.Color
 import com.dnfapps.arrmatey.shared.MR
+import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrGrey
-import com.dnfapps.arrmatey.ui.theme.ArrRed
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
-import com.dnfapps.arrmatey.ui.theme.ArrBlue
+import com.dnfapps.arrmatey.ui.theme.ArrRed
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
@@ -66,7 +66,7 @@ data class ArrMovie(
     val lastSearchTime: String? = null,
 
     override val instanceId: Long? = null
-): ArrMedia, CalendarItem {
+): ArrMedia, CalendarItem, InstanceTypeIdentifiable {
 
     override val calendarId: Long
         get() = tmdbId

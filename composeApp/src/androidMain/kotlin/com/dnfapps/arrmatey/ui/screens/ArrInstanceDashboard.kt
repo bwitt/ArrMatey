@@ -29,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -44,11 +46,13 @@ import com.dnfapps.arrmatey.arr.state.ArrDashboardState
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.model.InfoItem
+import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.navigation.settingsNavigator
 import com.dnfapps.arrmatey.navigation.toEditInstance
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrHealthCard
+import com.dnfapps.arrmatey.ui.components.DiskSpaceSection
 import com.dnfapps.arrmatey.ui.components.ErrorView
 import com.dnfapps.arrmatey.ui.components.InfoArea
 import com.dnfapps.arrmatey.ui.components.navigation.BackButton
@@ -62,11 +66,14 @@ import org.koin.compose.koinInject
 @Composable
 fun ArrInstanceDashboard(
     id: Long,
+    navigation: Navigator<*>,
+    windowSizeClass: WindowSizeClass,
     viewModel: ArrInstanceDashboardViewModel = koinInjectParams(id),
     moko: MokoStrings = koinInject()
 ) {
+    val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+
     val navManager = navigationManager
-    val navigation = settingsNavigator
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -74,7 +81,9 @@ fun ArrInstanceDashboard(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = if (isCompact) {
+            Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        } else Modifier,
         topBar = {
             TopAppBar(
                 title = { instance?.let { instance ->
@@ -86,7 +95,7 @@ fun ArrInstanceDashboard(
                 actions = {
                     IconButton(
                         onClick = {
-                            navigation.toEditInstance(id)
+                            navManager.openEditInstanceScreen(id)
                         }
                     ) {
                         Icon(Icons.Default.Edit, null)
@@ -196,81 +205,6 @@ fun ArrInstanceDashboard(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun DiskSpaceSection(diskSpaces: List<ArrDiskSpace>) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            diskSpaces.forEachIndexed { index, disk ->
-                DiskSpaceItem(disk = disk)
-                if (index < diskSpaces.size - 1) {
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun DiskSpaceItem(disk: ArrDiskSpace) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = disk.path ?: mokoString(MR.strings.unknown),
-                style = MaterialTheme.typography.titleMediumEmphasized
-            )
-            Text(
-                text = "${disk.freeSpace.bytesAsFileSizeString()} ${mokoString(MR.strings.free_space_lowercase)}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        val progressColor = if (disk.usedPercentage > 0.9f) Color.Red else MaterialTheme.colorScheme.primary
-
-        LinearProgressIndicator(
-            progress = { disk.usedPercentage },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            color = progressColor,
-            trackColor = progressColor.copy(alpha = 0.2f)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "${mokoString(MR.strings.total_space)}: ${disk.totalSpace.bytesAsFileSizeString()}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "${(disk.usedPercentage * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium
-            )
         }
     }
 }
