@@ -38,7 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
-import androidx.compose.material3.rememberBottomSheetState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -105,7 +105,7 @@ fun CombinedDashboard(
     val gridState = rememberLazyStaggeredGridState()
 
     var showAddCardSheet by remember { mutableStateOf(false) }
-    val sheetState = rememberBottomSheetState(initialValue = SheetValue.Hidden)
+    val sheetState = rememberModalBottomSheetState()
 
     LaunchedEffect(showFirstLaunchToast) {
         if (showFirstLaunchToast) {
@@ -160,8 +160,7 @@ fun CombinedDashboard(
     ) { contentPadding ->
         PullToRefreshBox(
             isRefreshing = isRefreshing,
-            onRefresh = { viewModel.refresh() },
-            enabled = !isEditing,
+            onRefresh = { if (!isEditing) viewModel.refresh() },
             modifier = Modifier
                 .padding(top = contentPadding.calculateTopPadding())
                 .fillMaxSize()
