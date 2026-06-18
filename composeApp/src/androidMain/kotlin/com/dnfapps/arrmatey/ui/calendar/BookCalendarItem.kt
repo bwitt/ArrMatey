@@ -28,6 +28,8 @@ import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
+import com.dnfapps.arrmatey.ui.theme.surfaceDark
 
 @Composable
 fun BookCalendarItem(
@@ -38,7 +40,8 @@ fun BookCalendarItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = ArrRed
+            containerColor = ArrRed,
+            contentColor = surfaceDark
         )
     ) {
         Row(
@@ -78,7 +81,7 @@ fun BookCalendarItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tint = surfaceContainerLowDark,
                     modifier = Modifier.size(18.dp)
                 )
             }

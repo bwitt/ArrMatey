@@ -29,6 +29,9 @@ import com.dnfapps.arrmatey.extensions.isEqual
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
+import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
+import com.dnfapps.arrmatey.ui.theme.surfaceDark
+import com.dnfapps.arrmatey.ui.theme.surfaceVariantDark
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.datetime.LocalDate
 import kotlin.time.ExperimentalTime
@@ -44,7 +47,8 @@ fun MovieCalendarItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = ArrOrange
+            containerColor = ArrOrange,
+            contentColor = surfaceDark
         )
     ) {
         Row(
@@ -91,7 +95,7 @@ fun MovieCalendarItem(
                     text = listOfNotNull(movie.certification, movie.studio)
                         .joinToString(Bullet),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    color = surfaceContainerLowDark
                 )
             }
 
@@ -106,7 +110,7 @@ fun MovieCalendarItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    tint = surfaceContainerLowDark,
                     modifier = Modifier.size(20.dp)
                 )
             }

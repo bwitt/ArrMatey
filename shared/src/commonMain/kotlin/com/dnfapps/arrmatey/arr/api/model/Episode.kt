@@ -46,7 +46,7 @@ data class Episode(
 
     val series: ArrSeries? = null,
     override var instanceId: Long? = null
-): CalendarItem {
+): CalendarItem, InstanceTypeIdentifiable {
     override val calendarId: Long 
         get() = tvdbId ?: id
     override fun getCalendarDates(): List<Instant> = 

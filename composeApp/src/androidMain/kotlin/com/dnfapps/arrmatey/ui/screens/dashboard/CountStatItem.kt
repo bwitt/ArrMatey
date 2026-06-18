@@ -10,6 +10,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,12 +24,13 @@ fun CountStatItem(
     icon: ImageVector,
     label: String,
     count: Int,
-    color: Color,
-    modifier: Modifier = Modifier
+    containerColor: Color,
+    modifier: Modifier = Modifier,
+    contentColor: Color = contentColorFor(containerColor)
 ) {
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = color),
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
         shape = MaterialTheme.shapes.large
     ) {
         Column(

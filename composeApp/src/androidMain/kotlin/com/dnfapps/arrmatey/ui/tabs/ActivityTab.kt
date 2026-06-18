@@ -82,6 +82,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrGreen
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
@@ -202,7 +203,8 @@ fun ActivityItem(
             contentColor = MaterialTheme.colorScheme.onErrorContainer
         )
         else -> CardDefaults.cardColors(
-            containerColor = item.type.associatedColor
+            containerColor = item.type.associatedColor,
+            contentColor = surfaceDark
         )
     }
 

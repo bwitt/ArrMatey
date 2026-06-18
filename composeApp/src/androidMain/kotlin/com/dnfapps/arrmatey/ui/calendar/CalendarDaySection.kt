@@ -91,10 +91,10 @@ fun CalendarDaySection(
             when (item) {
                 is ArrMovie -> MovieCalendarItem(date, item)
                 is EpisodeGroup -> EpisodeCalendarItem(item.first, item.additional)
+                is Episode -> EpisodeCalendarItem(item)
                 is ArrAlbum -> AlbumCalendarItem(item)
                 is Book -> BookCalendarItem(item)
                 is Audiobook -> AudiobookCalendarItem(item)
-                is Episode -> EpisodeCalendarItem(item)
             }
         }
     }

@@ -6,6 +6,8 @@ sealed interface InstanceTypeIdentifiable {
     val instanceType: InstanceType
         get() = when(this) {
             is ArrSeries,
+            is Episode,
+            is EpisodeGroup,
             is MockMedia.Sonarr,
             is MockMedia.Default -> InstanceType.Sonarr
             is ArrMovie,

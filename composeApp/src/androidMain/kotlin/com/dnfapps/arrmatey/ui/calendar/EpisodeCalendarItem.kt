@@ -32,6 +32,11 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
+import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
+import com.dnfapps.arrmatey.ui.theme.surfaceDark
+import com.dnfapps.arrmatey.ui.theme.surfaceLight
 import com.dnfapps.arrmatey.utils.format
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
@@ -48,7 +53,8 @@ fun EpisodeCalendarItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = ArrBlue
+            containerColor = ArrBlue,
+            contentColor = surfaceDark
         )
     ) {
         Row(
@@ -81,7 +87,7 @@ fun EpisodeCalendarItem(
                         Text(
                             text = airTime,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                            color = surfaceContainerLowDark
                         )
                     }
                     if (episode.seasonNumber == 1 && episode.episodeNumber == 1) {
@@ -115,7 +121,7 @@ fun EpisodeCalendarItem(
                         Text(
                             text = mokoString(MR.strings.additional_items_count, additional.size),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                            color = surfaceContainerLowDark
                         )
                     }
                 }
@@ -132,7 +138,7 @@ fun EpisodeCalendarItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                    tint = surfaceContainerLowDark,
                     modifier = Modifier.size(18.dp)
                 )
             }

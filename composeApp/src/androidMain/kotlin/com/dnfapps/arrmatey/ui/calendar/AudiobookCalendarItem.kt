@@ -27,6 +27,8 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.BasePosterItem
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
+import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
+import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -39,7 +41,8 @@ fun AudiobookCalendarItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = ArrLightPurple
+            containerColor = ArrLightPurple,
+            contentColor = surfaceDark
         )
     ) {
         Row(
@@ -79,7 +82,7 @@ fun AudiobookCalendarItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tint = surfaceContainerLowDark,
                     modifier = Modifier.size(18.dp)
                 )
             }

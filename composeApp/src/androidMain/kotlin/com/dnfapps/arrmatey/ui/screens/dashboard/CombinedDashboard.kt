@@ -225,13 +225,6 @@ fun CombinedDashboard(
                                     Box(contentAlignment = Alignment.Center) {
                                         val navManager = navigationManager
 
-                                        val onLongClick = {
-                                            if (!isEditing) {
-                                                viewModel.toggleEditing()
-                                                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            }
-                                        }
-
                                         val cardOnClick: (() -> Unit)? = when (dashboardCard) {
                                             DashboardCards.ArrOverview -> { { navManager.openSettings() } }
                                             DashboardCards.SeerrOverview -> { { navManager.openRequestsTab() } }

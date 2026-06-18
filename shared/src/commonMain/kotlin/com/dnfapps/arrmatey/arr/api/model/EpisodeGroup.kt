@@ -8,7 +8,7 @@ data class EpisodeGroup(
     val first: Episode,
     val additional: List<Episode>,
     val totalCount: Int = 1 + additional.size
-): CalendarItem {
+): CalendarItem, InstanceTypeIdentifiable {
 
     override val instanceId: Long?
         get() = first.instanceId

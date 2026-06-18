@@ -28,6 +28,7 @@ import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
+import com.dnfapps.arrmatey.ui.theme.surfaceLight
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 
@@ -92,14 +93,15 @@ fun SeerrSection(
                     icon = Icons.Default.ConfirmationNumber,
                     label = mokoString(MR.strings.requests),
                     count = totalRequests,
-                    color = ArrPurple
+                    containerColor = ArrPurple,
+                    contentColor = surfaceLight
                 )
                 CountStatItem(
                     modifier = Modifier.weight(1f),
                     icon = Icons.Default.BugReport,
                     label = mokoString(MR.strings.issues),
                     count = totalIssues,
-                    color = when {
+                    containerColor = when {
                         totalIssues > 0 -> MaterialTheme.colorScheme.errorContainer
                         else -> MaterialTheme.colorScheme.secondaryContainer
                     }

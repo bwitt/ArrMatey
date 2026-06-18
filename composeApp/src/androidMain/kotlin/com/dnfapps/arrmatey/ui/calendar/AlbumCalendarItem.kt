@@ -28,6 +28,8 @@ import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.AlbumCover
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.surfaceContainerLowDark
+import com.dnfapps.arrmatey.ui.theme.surfaceDark
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 import kotlin.time.ExperimentalTime
@@ -42,7 +44,8 @@ fun AlbumCalendarItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = ArrGreen
+            containerColor = ArrGreen,
+            contentColor = surfaceDark
         )
     ) {
         Row(
@@ -76,7 +79,7 @@ fun AlbumCalendarItem(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tint = surfaceContainerLowDark,
                     modifier = Modifier.size(18.dp)
                 )
             }
