@@ -136,9 +136,11 @@ import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.IssueDetailsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.RequestsViewModel
 import com.dnfapps.arrmatey.seerr.viewmodel.SeerrMediaDetailsViewModel
+import com.dnfapps.arrmatey.utils.EncryptionManager
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.NetworkConnectivityObserverFactory
 import com.dnfapps.arrmatey.utils.NetworkConnectivityRepository
+import com.dnfapps.arrmatey.utils.SimpleEncryptionManager
 import com.dnfapps.arrmatey.webpage.repository.CustomWebpageRepository
 import com.dnfapps.arrmatey.webpage.usecase.AddCustomWebpageUseCase
 import com.dnfapps.arrmatey.webpage.usecase.DeleteCustomWebpageUseCase
