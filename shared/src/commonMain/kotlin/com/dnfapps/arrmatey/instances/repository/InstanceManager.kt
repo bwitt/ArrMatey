@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.HttpClientFactory
+import com.dnfapps.arrmatey.database.CredentialMigrationUseCase
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -8,6 +9,7 @@ import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
@@ -19,9 +21,11 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class InstanceManager(
     private val instanceRepository: InstanceRepository,
     private val httpClientFactory: HttpClientFactory,
+    private val credentialMigrationUseCase: CredentialMigrationUseCase,
     private val logger: Logger
 ) {
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -31,6 +35,9 @@ class InstanceManager(
     val instanceRepositories: StateFlow<Map<Long, InstanceScopedRepository>> = _instanceRepositories
 
     init {
+        scope.launch {
+            credentialMigrationUseCase()
+        }
         observeInstances()
     }
 

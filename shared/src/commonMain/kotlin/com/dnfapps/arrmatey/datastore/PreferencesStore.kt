@@ -66,6 +66,7 @@ class PreferencesStore(
     private val downloadClientSortOrderKey = stringPreferencesKey("downloadClientSortOrder")
     private val dashboardCardsOrderKey = stringPreferencesKey("dashboardCardsOrderKey")
     private val dashboardFirstLaunchKey = booleanPreferencesKey("dashboardFirstLaunchKey")
+    private val credentialsMigratedKey = booleanPreferencesKey("credentialsMigrated")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -356,6 +357,12 @@ class PreferencesStore(
         }
     }
 
+    fun setUseServiceNavLogos(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[useServiceNavLogosKey] = value }
+        }
+    }
+
     val hideInstanceSwitcher: Flow<Boolean> = dataStore.data
         .map { preferences ->
             preferences[hideInstanceSwitcherKey] ?: false
@@ -367,6 +374,12 @@ class PreferencesStore(
                 val current = preferences[hideInstanceSwitcherKey] ?: false
                 preferences[hideInstanceSwitcherKey] = !current
             }
+        }
+    }
+
+    fun setHideInstanceSwitcher(value: Boolean) {
+        scope.launch {
+            dataStore.edit { it[hideInstanceSwitcherKey] = value }
         }
     }
 
@@ -410,6 +423,17 @@ class PreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[dashboardFirstLaunchKey] = false
+            }
+        }
+    }
+
+    val credentialsMigrated: Flow<Boolean> = dataStore.data
+        .map { it[credentialsMigratedKey] ?: false }
+
+    fun markCredentialsMigrated() {
+        scope.launch {
+            dataStore.edit {
+                it[credentialsMigratedKey] = true
             }
         }
     }

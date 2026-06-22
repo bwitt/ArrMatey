@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
+import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
@@ -16,6 +17,7 @@ import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import dev.icerock.moko.resources.ImageResource
 import dev.icerock.moko.resources.StringResource
+import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "instances",
@@ -29,7 +31,7 @@ data class Instance(
     val type: InstanceType,
     val label: String,
     val url: String,
-    val apiKey: String,
+    val apiKey: EncryptedString,
     val noApiKeyRequired: Boolean = false,
     val enabled: Boolean = true,
     val slowInstance: Boolean = false,
@@ -75,6 +77,7 @@ data class Instance(
     }
 }
 
+@Serializable
 enum class InstanceType(
     val resource: StringResource,
     val icon: ImageResource,
