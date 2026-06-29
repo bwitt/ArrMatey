@@ -7,7 +7,9 @@ import com.dnfapps.arrmatey.bazarr.api.model.ProviderSubtitle
 
 /** The sub-sections shown within the Bazarr tab. */
 enum class BazarrSection {
-    Episodes,
+    WantedEpisodes,
+    WantedMovies,
+    Series,
     Movies,
     Providers
 }
@@ -43,6 +45,7 @@ sealed interface BazarrSubtitlesUiState {
     data class Error(val message: String) : BazarrSubtitlesUiState
     data class Success(
         val present: List<BazarrSubtitle>,
+        val embedded: List<BazarrSubtitle>,
         val missing: List<BazarrSubtitleLanguage>
     ) : BazarrSubtitlesUiState
 }

@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 
@@ -58,4 +59,9 @@ sealed interface SettingsScreen : NavKey {
 sealed interface DashboardScreen: NavKey {
     data object Main: DashboardScreen
     data class ArrDashboard(val id: Long): DashboardScreen
+}
+
+sealed interface BazarrScreen: NavKey {
+    data object Library: BazarrScreen
+    data class Details(val id: Long, val type: BazarrMediaType): BazarrScreen
 }

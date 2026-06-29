@@ -39,21 +39,21 @@ suspend inline fun <reified T> HttpClient.safePut(
     }
 }
 
-suspend inline fun <reified T> HttpClient.safePatch(
-    url: String,
-    crossinline builder: HttpRequestBuilder.() -> Unit = {}
-): NetworkResult<T> {
-    return safeCall {
-        patch(url, builder).body()
-    }
-}
-
 suspend inline fun <reified T> HttpClient.safeDelete(
     url: String,
     crossinline builder: HttpRequestBuilder.() -> Unit = {}
 ): NetworkResult<T> {
     return safeCall {
         delete(url, builder).body()
+    }
+}
+
+suspend inline fun <reified T> HttpClient.safePatch(
+    url: String,
+    crossinline builder: HttpRequestBuilder.() -> Unit = {}
+): NetworkResult<T> {
+    return safeCall {
+        patch(url, builder).body()
     }
 }
 

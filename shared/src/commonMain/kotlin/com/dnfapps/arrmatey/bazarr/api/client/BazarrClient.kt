@@ -1,8 +1,14 @@
 package com.dnfapps.arrmatey.bazarr.api.client
 
+import com.dnfapps.arrmatey.bazarr.api.model.AutoSearchBody
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrBadges
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrEpisodesResponse
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMoviesResponse
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeriesResponse
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrSystem
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrSystemStatus
 import com.dnfapps.arrmatey.bazarr.api.model.ProviderSubtitle
 import com.dnfapps.arrmatey.bazarr.api.model.ProviderSubtitlesResponse
 import com.dnfapps.arrmatey.bazarr.api.model.ProvidersResponse
@@ -16,6 +22,12 @@ import com.dnfapps.arrmatey.client.safePost
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.timeout
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import org.koin.core.component.KoinComponent
 
 /**
@@ -32,13 +44,18 @@ private const val SEARCH_TIMEOUT_MS = 180_000L
  */
 interface BazarrClient {
     suspend fun testConnection(): NetworkResult<Unit>
+    suspend fun getSystemStatus(): NetworkResult<BazarrSystemStatus>
+    suspend fun getSystemSettings(): NetworkResult<BazarrSystem>
     suspend fun getBadges(): NetworkResult<BazarrBadges>
 
-    suspend fun getWantedEpisodes(start: Int = 0, length: Int = -1): NetworkResult<WantedEpisodesResponse>
-    suspend fun getWantedMovies(start: Int = 0, length: Int = -1): NetworkResult<WantedMoviesResponse>
+    suspend fun getWantedEpisodes(): NetworkResult<WantedEpisodesResponse>
+    suspend fun getWantedMovies(): NetworkResult<WantedMoviesResponse>
 
     suspend fun getEpisodes(seriesId: Long): NetworkResult<BazarrEpisodesResponse>
     suspend fun getMovie(radarrId: Long): NetworkResult<BazarrMoviesResponse>
+
+    suspend fun getMovies(): NetworkResult<List<BazarrMovie>>
+    suspend fun getSeries(): NetworkResult<List<BazarrSeries>>
 
     suspend fun getProviders(): NetworkResult<ProvidersResponse>
     suspend fun resetProviders(): NetworkResult<Unit>
@@ -46,6 +63,9 @@ interface BazarrClient {
     /** Manual provider search for a given episode/movie. */
     suspend fun searchEpisodeSubtitles(episodeId: Long): NetworkResult<List<ProviderSubtitle>>
     suspend fun searchMovieSubtitles(radarrId: Long): NetworkResult<List<ProviderSubtitle>>
+
+    suspend fun autoSearchSeriesSubtitles(seriesId: Long): NetworkResult<Unit>
+    suspend fun autoSearchMovieSubtitles(radarrId: Long): NetworkResult<Unit>
 
     /** Download a specific subtitle returned by a manual search. */
     suspend fun downloadEpisodeSubtitle(
@@ -113,20 +133,32 @@ class BazarrClientImpl(
     override suspend fun testConnection(): NetworkResult<Unit> =
         get(instance.type.testEndpoint)
 
+    override suspend fun getSystemStatus(): NetworkResult<BazarrSystemStatus> =
+        httpClient.safeGet("$baseUrl/system/status")
+
+    override suspend fun getSystemSettings(): NetworkResult<BazarrSystem> =
+        httpClient.safeGet("$baseUrl/system/settings")
+
     override suspend fun getBadges(): NetworkResult<BazarrBadges> =
         get("badges")
 
-    override suspend fun getWantedEpisodes(start: Int, length: Int): NetworkResult<WantedEpisodesResponse> =
-        get("episodes/wanted", mapOf("start" to start, "length" to length))
+    override suspend fun getWantedEpisodes(): NetworkResult<WantedEpisodesResponse> =
+        get("episodes/wanted")
 
-    override suspend fun getWantedMovies(start: Int, length: Int): NetworkResult<WantedMoviesResponse> =
-        get("movies/wanted", mapOf("start" to start, "length" to length))
+    override suspend fun getWantedMovies(): NetworkResult<WantedMoviesResponse> =
+        get("movies/wanted")
 
     override suspend fun getEpisodes(seriesId: Long): NetworkResult<BazarrEpisodesResponse> =
         get("episodes", mapOf("seriesid[]" to seriesId))
 
     override suspend fun getMovie(radarrId: Long): NetworkResult<BazarrMoviesResponse> =
         get("movies", mapOf("radarrid[]" to radarrId))
+
+    override suspend fun getSeries(): NetworkResult<List<BazarrSeries>> =
+        get<BazarrSeriesResponse>("series").map { it.data }
+
+    override suspend fun getMovies(): NetworkResult<List<BazarrMovie>> =
+        get<BazarrMoviesResponse>("movies").map { it.data }
 
     override suspend fun getProviders(): NetworkResult<ProvidersResponse> =
         get("providers")
@@ -228,6 +260,12 @@ class BazarrClientImpl(
             timeoutMillis = SEARCH_TIMEOUT_MS
         )
 
+    override suspend fun autoSearchSeriesSubtitles(seriesId: Long): NetworkResult<Unit> =
+        patch("series", body = AutoSearchBody(seriesid = seriesId))
+
+    override suspend fun autoSearchMovieSubtitles(radarrId: Long): NetworkResult<Unit> =
+        patch("movies", body = AutoSearchBody(radarrid = radarrId))
+
     override suspend fun deleteEpisodeSubtitle(
         seriesId: Long,
         episodeId: Long,
@@ -273,7 +311,7 @@ class BazarrClientImpl(
 
     private fun Boolean.asPyBool(): String = if (this) "True" else "False"
 
-    private fun io.ktor.client.request.HttpRequestBuilder.applyParams(
+    private fun HttpRequestBuilder.applyParams(
         params: Map<String, Any>,
         timeoutMillis: Long?
     ) {
@@ -303,9 +341,16 @@ class BazarrClientImpl(
     private suspend inline fun <reified T> patch(
         endpoint: String,
         params: Map<String, Any> = emptyMap(),
+        body: Any? = null,
         timeoutMillis: Long? = null
     ): NetworkResult<T> =
-        httpClient.safePatch<T>("$baseUrl/$endpoint") { applyParams(params, timeoutMillis) }
+        httpClient.safePatch("$baseUrl/$endpoint") {
+            applyParams(params, timeoutMillis)
+            body?.let {
+                contentType(ContentType.Application.Json)
+                setBody(it)
+            }
+        }
 
     private suspend inline fun <reified T> delete(
         endpoint: String,

@@ -19,16 +19,6 @@ data class BazarrSubtitle(
 ) {
     /** Whether this subtitle is an external (downloadable / deletable) file rather than embedded. */
     val isExternal: Boolean get() = !path.isNullOrBlank()
-}
 
-/**
- * A subtitle language descriptor, used for missing subtitles and language tags.
- */
-@Serializable
-data class BazarrSubtitleLanguage(
-    val name: String = "",
-    val code2: String = "",
-    val code3: String = "",
-    val forced: Boolean = false,
-    val hi: Boolean = false
-)
+    val isEmbedded: Boolean get() = path.isNullOrBlank() && fileSize == 0L
+}

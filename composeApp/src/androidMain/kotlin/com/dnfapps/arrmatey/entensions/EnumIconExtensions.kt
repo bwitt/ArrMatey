@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.VideoLibrary
 import androidx.compose.material.icons.filled.Visibility
@@ -65,6 +66,7 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
             TabItem.Standard.BAZARR -> Icons.Default.Subtitles
             TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
+            TabItem.Standard.BAZARR -> Icons.Default.Subtitles
         }
         is TabItem.CustomWebpage -> Icons.Default.Language
         is TabItem.Settings -> Icons.Default.Settings

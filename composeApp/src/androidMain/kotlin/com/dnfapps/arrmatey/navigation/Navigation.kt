@@ -9,6 +9,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.ui.screens.SettingsScreen
@@ -77,6 +78,7 @@ class BooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class AudiobooksTabNavigator : BaseNavigator<ArrScreen>(ArrScreen.Library)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
 class DashboardTabNavigator : BaseNavigator<DashboardScreen>(DashboardScreen.Main)
+class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
 
 /**
  * Domain-specific navigation extensions for Arr feature set.
@@ -127,3 +129,5 @@ fun Navigator<SettingsScreen>.onInstanceTap(id: Long, type: InstanceType) =
     }
 
 fun Navigator<DashboardScreen>.openArrDashboard(id: Long) = navigateTo(DashboardScreen.ArrDashboard(id))
+
+fun Navigator<BazarrScreen>.openDetails(id: Long, type: BazarrMediaType) = navigateTo(BazarrScreen.Details(id, type))

@@ -313,6 +313,7 @@
     <string name="error_generic_title">Something went wrong</string>
 
     <!-- Instances -->
+    <string name="bazarr">Bazarr</string>
     <string name="sonarr_description">Sonarr is a PVR for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.</string>
     <string name="radarr_description">Radarr is a movie collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new movies and will interface with clients and indexers to grab, sort, and rename them. It can also be configured to automatically upgrade the quality of existing files in the library when a better quality format becomes available</string>
     <string name="lidarr_description">Lidarr is a music collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new tracks from your favorite artists and will grab, sort and rename them. It can also be configured to automatically upgrade the quality of files already downloaded when a better quality format becomes available.</string>
@@ -357,6 +358,7 @@
         • A Qt-based Windows-compatible GUI application
         • A headless daemon for servers and routers
         • A web UI for remote controlling any of the above</string>
+    <string name="bazarr_description">Bazarr is a companion application to Sonarr and Radarr. It manages and downloads subtitles based on your requirements. You define your preferences by TV show or movie and Bazarr takes care of everything for you.</string>
 
     <!-- Movie Statuses -->
     <string name="tba">TBA</string>
@@ -705,4 +707,11 @@
     <string name="export_ready">Export ready</string>
     <string name="import_complete">Import complete</string>
     <string name="invalid_backup_file">Invalid or corrupted backup file</string>
+
+    <!-- Subtitles -->
+    <string name="bazarr_series_subtitle_count">%1$d / %2$d episodes</string>
+    <string name="bazarr_movie_subtitle_count">%1$d Subtitles, %2$d Missing</string>
+    <string name="bazarr_files_count">%1$d files</string>
+    <string name="bazarr_missing_count">%1$d missing subtitles</string>
+    <string name="bazarr_embedded_count">%1$d Embedded Subtitles</string>
 </resources>

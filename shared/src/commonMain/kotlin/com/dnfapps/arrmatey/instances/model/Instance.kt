@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.theme.ArrBazarr
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
 import com.dnfapps.arrmatey.ui.theme.ArrGreen
+import com.dnfapps.arrmatey.ui.theme.ArrGrey
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
@@ -179,6 +180,7 @@ enum class InstanceType(
         supportsActivityQueue = true,
         apiBase = "api/v1",
         testEndpoint = "system/info",
+        getApiKeyEndpoint = "settings#general",
         includeTopLevelAutomaticSearchOption = false,
         aspectRatio = AspectRatio.Cover,
         supportsNotifications = true,
