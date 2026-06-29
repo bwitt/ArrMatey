@@ -6,6 +6,7 @@
     <string name="feature_request_link">https://github.com/owenlejeune/ArrMatey/issues/new?template=feature_request.md</string>
     <string name="bmac_link">https://buymeacoffee.com/owenlejeune</string>
     <string name="version_label">Version %1$s</string>
+    <string name="changelog">Changelog</string>
 
     <!-- Tabs -->
     <string name="series">Series</string>
@@ -689,8 +690,9 @@
     <string name="v2_title">We're out of alpha!</string>
     <string name="v3_title">New in 0.3.0</string>
     <string name="v4_title">It's a Big One!</string>
-    <string name="v5_title">v0.4.2</string>
+    <string name="v5_title">Downloads, Webpages, and Customization</string>
     <string name="v6_title">Dashboard, Shortcuts, and Audiobooks</string>
+    <string name="v7_title">Subtitles, Settings, and Security</string>
 
     <!-- Backup & Restore -->
     <string name="backup_restore">Backup &amp; Restore</string>

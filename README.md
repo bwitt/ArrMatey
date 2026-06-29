@@ -74,6 +74,8 @@
 - **Slow Instance Mode**: Configurable timeout for remote or slower instances
 - **Pull-to-refresh**: Update data across all screens
 - **Material 3/Liquid Glass Design**: Beautiful, modern UI with dynamic theming on Android and Liquid Glass on iOS
+- **Import/Export**: Back up and restore your settings and instances across devices
+- **Credential Encryption**: Securely store API keys and credentials in the local database
 
 ### Download Client
 - **Multiple Integrations**: Support for Transmission, Deluge, qBittorrent, and SABnzbd

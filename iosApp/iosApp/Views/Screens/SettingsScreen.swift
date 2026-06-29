@@ -28,6 +28,7 @@ struct SettingsScreen: View {
     @State private var importData: String = ""
     @State private var showExportSuccess: Bool = false
     @State private var showImportSuccess: Bool = false
+    @State private var showChangelogSheet: Bool = false
     
     private let crashManager = IOSCrashManager.shared
     
@@ -159,6 +160,9 @@ struct SettingsScreen: View {
             }
             
             AboutCard(
+                onChangelogClick: {
+                    showChangelogSheet = true
+                },
                 onFeatureRequestClick: { if let url = URL(string: MR.strings().feature_request_link.localized()) {
                     openURL(url)
                 } },
@@ -206,7 +210,10 @@ struct SettingsScreen: View {
                 self.showImportSuccess = true
             }
         }
-        .fileExporter(isPresented: $showFileExporter, document: BackupFile(data: exportData), contentType: .json, defaultFilename: "ArrMatey_Backup.json") { result in
+        .sheet(isPresented: $showChangelogSheet) {
+            ReleaseNotesSheet()
+        }
+        .fileExporter(isPresented: $showFileExporter, document: BackupFile(data: exportData), contentType: .json, defaultFilename: "\(TimeExtensionsKt.nowTimestamp())_ArrMatey_Backup.json") { result in
             switch result {
             case .success:
                 self.exportData = ""

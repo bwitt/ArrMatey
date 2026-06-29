@@ -29,18 +29,7 @@ struct iOSApp: App {
                     get: { preferences.shouldShowReleaseNotes },
                     set: { _ in preferences.markReleaseNotesAsSeen() }
                 )) {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(latestUpdate.title.localized())
-                                .font(.title.bold())
-                            
-                            MarkdownView(latestUpdate.iosContentFile.readText())
-                        }
-                        .padding(.horizontal, 12)
-                        .padding()
-                    }
-                    .presentationDetents([.fraction(0.5)])
-                    .presentationBackground(.ultraThinMaterial)
+                    ReleaseNotesSheet()
                 }
         }
     }

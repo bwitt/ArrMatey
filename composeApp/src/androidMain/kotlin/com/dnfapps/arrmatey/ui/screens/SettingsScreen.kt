@@ -55,10 +55,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.dnfapps.arrmatey.ReleaseNotesSheet
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.extensions.nowTimestamp
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
@@ -115,6 +117,8 @@ fun SettingsScreen(
     var showExportDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var pendingImportData by remember { mutableStateOf<String?>(null) }
+
+    var showChangelogSheet by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/json"),
@@ -347,6 +351,9 @@ fun SettingsScreen(
             )
 
             AboutCard(
+                onChangelogClick = {
+                    showChangelogSheet = true
+                },
                 onFeatureRequestClick = {
                     context.openLink(moko.getString(MR.strings.feature_request_link))
                 },
@@ -456,7 +463,7 @@ fun SettingsScreen(
                 onDismiss = { showExportDialog = false },
                 onConfirm = {
                     showExportDialog = false
-                    exportLauncher.launch("ArrMatey_Backup.json")
+                    exportLauncher.launch("${nowTimestamp()}_ArrMatey_Backup.json")
                 },
                 onPasswordChanged = { backupViewModel.setExportPassword(it) },
                 onToggleIncludeInstancePreferences = { backupViewModel.toggleIncludePreferences() },
@@ -494,6 +501,12 @@ fun SettingsScreen(
                     }
                 }
             )
+        }
+
+        if (showChangelogSheet) {
+            ReleaseNotesSheet {
+                showChangelogSheet = false
+            }
         }
     }
 }

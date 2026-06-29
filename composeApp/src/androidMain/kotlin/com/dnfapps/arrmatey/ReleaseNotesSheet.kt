@@ -11,40 +11,46 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.features.ReleaseNotes
-import com.dnfapps.arrmatey.ui.screens.HomeScreen
-import com.dnfapps.arrmatey.ui.theme.ArrMateyTheme
 import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.readTextAsState
 import dev.jeziellago.compose.markdowntext.MarkdownText
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun App(
-    windowSizeClass: WindowSizeClass,
-    preferences: PreferencesStore = koinInject()
+fun ReleaseNotesSheet(
+    onDismiss: () -> Unit
 ) {
-    val showReleaseNotesSheet by preferences.shouldShowReleaseNotes.collectAsStateWithLifecycle(false)
-
-    LaunchedEffect(Unit) {
-        preferences.markFirstLaunchComplete()
-    }
-
-    ArrMateyTheme {
-        HomeScreen(windowSizeClass = windowSizeClass)
-
-        if (showReleaseNotesSheet) {
-            ReleaseNotesSheet {
-                preferences.markReleaseNotesAsSeen()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            ReleaseNotes.updates.forEach { update ->
+                val releaseNotes by update.androidContentFile.readTextAsState()
+                Column {
+                    Text(
+                        text = mokoString(update.title),
+                        style = MaterialTheme.typography.headlineMediumEmphasized
+                    )
+                    Text(
+                        text = update.version,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                MarkdownText(
+                    markdown = releaseNotes ?: ""
+                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
             }
         }
     }

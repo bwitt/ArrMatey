@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.PublishedWithChanges
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,6 +33,7 @@ import dev.icerock.moko.resources.compose.painterResource
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun AboutCard(
+    onChangelogClick: () -> Unit,
     onFeatureRequestClick: () -> Unit,
     onBugReportClick: () -> Unit,
     onGitHubClick: () -> Unit,
@@ -80,6 +82,18 @@ fun AboutCard(
                 horizontalArrangement = Arrangement.Center,
                 verticalArrangement = Arrangement.spacedBy(0.dp, Alignment.CenterVertically)
             ) {
+                AssistChip(
+                    onClick = onChangelogClick,
+                    label = { Text(mokoString(MR.strings.changelog)) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.PublishedWithChanges,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
                 AssistChip(
                     onClick = onBugReportClick,
                     label = { Text(mokoString(MR.strings.bug_report)) },

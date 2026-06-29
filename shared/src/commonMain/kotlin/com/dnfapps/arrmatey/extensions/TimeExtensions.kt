@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.extensions
 
-import kotlinx.datetime.DateTimeUnit
+import com.dnfapps.arrmatey.utils.format
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -84,4 +84,9 @@ fun Instant?.isBetween(start: LocalDate, end: LocalDate): Boolean {
         instantOfEndDay.plus(1.days)
     }
     return this in startInstant..<nextDay
+}
+
+fun nowTimestamp(): String {
+    val now = Clock.System.now()
+    return now.format("yyyy-MM-dd-HH:mm")
 }
