@@ -23,7 +23,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.ui.theme.ArrBlue
@@ -32,6 +31,7 @@ import com.dnfapps.arrmatey.ui.theme.TranslucentBlackDarker
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.GridDensity
 import com.dnfapps.arrmatey.utils.GridSpacing
+import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
 
@@ -48,13 +48,15 @@ fun PosterGrid(
     gridDensity: GridDensity = GridDensity.Normal,
     gridSpacing: GridSpacing = GridSpacing.Medium,
     posterElevation: PosterElevation = PosterElevation.Medium,
-    posterRadius: PosterRadius = PosterRadius.Medium
+    posterRadius: PosterRadius = PosterRadius.Medium,
+    multiSelectState: MultiSelectState<Long> = MultiSelectState(selectionModeAvailable = false)
 ) {
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Adaptive(minSize = gridDensity.minSize),
         contentPadding = PaddingValues(gridSpacing.spacing),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
+        verticalArrangement = Arrangement.spacedBy(gridSpacing.spacing),
         userScrollEnabled = userScrollEnabled
     ) {
         items(items) { item ->
@@ -65,9 +67,6 @@ fun PosterGrid(
                 elevation = posterElevation,
                 item = item,
                 onItemClick = onItemClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(gridSpacing.spacing),
                 additionalContent = {
                     if (showOverlay && item.id != null) {
                         PosterGridItemOverlay(
@@ -77,7 +76,8 @@ fun PosterGrid(
                         )
                     }
                 },
-                showFooter = showFullDetails
+                showFooter = showFullDetails,
+                multiSelectState = multiSelectState
             )
         }
     }

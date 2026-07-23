@@ -10,9 +10,13 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteEpisodeBody
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.SeriesEditorBody
+import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorOption
+import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
+import com.dnfapps.arrmatey.arr.api.model.SeriesMonitoringBody
 import com.dnfapps.arrmatey.arr.api.model.SeriesRelease
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryResponse
@@ -21,6 +25,8 @@ import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.putJsonArray
 
 class SonarrClient(
     override val instance: Instance,
@@ -137,6 +143,15 @@ class SonarrClient(
             "unmonitored" to true,
             "includeSeries" to true
         )).map { it.map { ep -> ep.copy(instanceId = instance.id) } }
+
+    override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> =
+        post(
+            endpoint = "seasonPass",
+            body = SeriesMonitoringBody(
+                series = ids.map { IdWrapper(it) },
+                monitoringOptions = SeriesMonitorOption(monitor as SeriesMonitorType)
+            )
+        )
 
     suspend fun updateEpisode(item: Episode): NetworkResult<Episode> =
         put("episode/${item.id}", item)

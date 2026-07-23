@@ -89,7 +89,7 @@ struct ArrTab: View {
                     .progressViewStyle(.circular)
             }
         } else if let success = uiState as? ArrLibrarySuccess {
-            ArrLibraryView(type: type, state: success, searchQuery: $arrMediaViewModel.searchQuery, searchPresented: $searchPresented)
+            ArrLibraryView(type: type, viewModel: arrMediaViewModel, state: success, searchQuery: $arrMediaViewModel.searchQuery, searchPresented: $searchPresented)
         } else if let error = uiState as? ArrLibraryError {
             ZStack {
                 ErrorView(
@@ -112,18 +112,28 @@ struct ArrTab: View {
     
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if uiState is ArrLibrarySuccess {
-            toolbarViewOptions
-        }
-        
-        if !globalPreferences.hideInstanceSwitcher || instanceState.instances.count > 1 {
+        if !arrMediaViewModel.isInSelectionMode {
             ToolbarItem(placement: .topBarLeading) {
-                InstancePickerMenu(
-                    instances: instanceState.instances,
-                    onChangeInstance: { instancesViewModel.setInstanceActive($0) },
-                    onAddNewInstance: { navigation.goToNewInstance(of: type) }
-                )
-                .menuIndicator(.hidden)
+                Button {
+                    navigation.showLauncher = true
+                } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+            }
+
+            if uiState is ArrLibrarySuccess {
+                toolbarViewOptions
+            }
+            
+            if !globalPreferences.hideInstanceSwitcher || instanceState.instances.count > 1 {
+                ToolbarItem(placement: .topBarLeading) {
+                    InstancePickerMenu(
+                        instances: instanceState.instances,
+                        onChangeInstance: { instancesViewModel.setInstanceActive($0) },
+                        onAddNewInstance: { navigation.goToNewInstance(of: type) }
+                    )
+                    .menuIndicator(.hidden)
+                }
             }
         }
     }

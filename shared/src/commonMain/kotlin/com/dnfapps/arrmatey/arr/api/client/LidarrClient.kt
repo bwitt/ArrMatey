@@ -6,10 +6,14 @@ import com.dnfapps.arrmatey.arr.api.model.ArrAlbum
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Arrtist
 import com.dnfapps.arrmatey.arr.api.model.ArtistEditorBody
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitoringBody
+import com.dnfapps.arrmatey.arr.api.model.ArtistMonitoringOption
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteTrackBody
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
+import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.LidarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
@@ -121,6 +125,15 @@ class LidarrClient(
             "unmonitored" to true,
             "includeArtist" to true
         )).map { it.map { ab -> ab.copy(instanceId = instance.id) }}
+
+    override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> =
+        post(
+            endpoint = "albumStudio",
+            body = ArtistMonitoringBody(
+                artist = ids.map { IdWrapper(it) },
+                monitoringOptions = ArtistMonitoringOption(monitor as ArtistMonitorType)
+            )
+        )
 
     suspend fun getAlbums(
         artistId: Long,
