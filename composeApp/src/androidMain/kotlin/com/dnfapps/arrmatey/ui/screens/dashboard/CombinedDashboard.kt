@@ -233,6 +233,7 @@ fun CombinedDashboard(
                                             DashboardCards.ActivityQueue -> { { navManager.openActivityTab() } }
                                             DashboardCards.OnToday -> { { navManager.openScheduleTab() } }
                                             DashboardCards.UpcomingReleases -> { { navManager.openScheduleTab() } }
+                                            DashboardCards.BazarrOverview -> { { navManager.openBazarrTab() } }
                                             else -> null
                                         }
 
@@ -410,6 +411,12 @@ private fun DashboardCardContent(
 
         DashboardCards.UpcomingReleases ->
             DashboardUpcomingSection(
+                state = currentState,
+                isEditing = isEditing
+            )
+
+        DashboardCards.BazarrOverview ->
+            BazarrSection(
                 state = currentState,
                 isEditing = isEditing
             )

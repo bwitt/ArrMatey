@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
+import com.dnfapps.arrmatey.arr.state.BazarrDashboardState
 import com.dnfapps.arrmatey.arr.state.CombinedDashboardState
 import com.dnfapps.arrmatey.arr.state.DownloadClientDashboardState
 import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
@@ -19,6 +20,7 @@ import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.service.DownloadQueueService
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueBundle
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
+import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ProwlarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
@@ -154,6 +156,23 @@ class CombinedDashboardViewModel(
                         combine(flows) { it.toList() }
                     }
                 },
+                instanceManager.instanceRepositories.flatMapLatest { repoMap ->
+                    val bazarrRepos = repoMap.values.filterIsInstance<BazarrInstanceRepository>()
+                    if (bazarrRepos.isEmpty()) {
+                        flowOf(emptyList())
+                    } else {
+                        val flows = bazarrRepos.map { repo ->
+                            combine(repo.wantedEpisodesCount, repo.wantedMoviesCount) { episodes, movies ->
+                                BazarrDashboardState(
+                                    instance = repo.instance,
+                                    wantedEpisodesCount = episodes,
+                                    wantedMoviesCount = movies
+                                )
+                            }
+                        }
+                        combine(flows) { it.toList() }
+                    }
+                },
                 downloadQueueService.allTransfers,
                 downloadClientManager.downloadClientApis,
                 calendarService.items.map { itemsByDate ->
@@ -172,14 +191,16 @@ class CombinedDashboardViewModel(
                 val seerrInstances = args[1] as List<SeerrDashboardState>
                 @Suppress("UNCHECKED_CAST")
                 val prowlarrStats = args[2] as List<ProwlarrDashboardState>
-                val downloads = args[3] as DownloadQueueBundle
                 @Suppress("UNCHECKED_CAST")
-                val clientApis = args[4] as Map<Long, *>
+                val bazarrStats = args[3] as List<BazarrDashboardState>
+                val downloads = args[4] as DownloadQueueBundle
                 @Suppress("UNCHECKED_CAST")
-                val calendarPair = args[5] as Pair<List<CalendarItem>, List<CalendarItem>>
+                val clientApis = args[5] as Map<Long, *>
+                @Suppress("UNCHECKED_CAST")
+                val calendarPair = args[6] as Pair<List<CalendarItem>, List<CalendarItem>>
                 val todayCalendar = calendarPair.first
                 val upcomingCalendar = calendarPair.second
-                val refreshing = args[6] as Boolean
+                val refreshing = args[7] as Boolean
 
                 val downloadClients = downloads.transferInfo.map { transfer ->
                     val clientItems = downloads.queueItems.filter { it.client.id == transfer.client.id }
@@ -228,7 +249,8 @@ class CombinedDashboardViewModel(
                     calendarItems = todayCalendar,
                     upcomingCalendarItems = upcomingCalendar,
                     prowlarrStats = prowlarrStats,
-                    networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, downloadClients),
+                    bazarrStats = bazarrStats,
+                    networkStatus = resolveNetworkStatus(instances, seerrInstances, prowlarrStats, bazarrStats, downloadClients),
                     isRefreshing = refreshing
                 )
             }.collect { newState ->
@@ -241,6 +263,7 @@ class CombinedDashboardViewModel(
         arrInstances: List<ArrInstanceDashboardState>,
         seerrInstances: List<SeerrDashboardState>,
         prowlarrInstances: List<ProwlarrDashboardState>,
+        bazarrInstances: List<BazarrDashboardState>,
         downloadClients: List<DownloadClientDashboardState>
     ): NetworkStatusState {
         val networkUtils = getNetworkUtils()
@@ -283,6 +306,19 @@ class CombinedDashboardViewModel(
                     currentEndpoint = state.instance.getEffectiveBaseUrl(),
                     icon = state.instance.type.icon,
                     isOnline = state.totalIndexers > 0 || state.failingIndexers > 0,
+                    isLocalSwitchingEnabled = state.instance.localNetworkEnabled
+                )
+            )
+        }
+
+        bazarrInstances.forEach { state ->
+            instanceStatuses.add(
+                InstanceNetworkStatus(
+                    instanceName = state.instance.label,
+                    isLocal = state.instance.isUsingLocalNetwork(),
+                    currentEndpoint = state.instance.getEffectiveBaseUrl(),
+                    icon = state.instance.type.icon,
+                    isOnline = true, // Assume online if we have state
                     isLocalSwitchingEnabled = state.instance.localNetworkEnabled
                 )
             )
@@ -340,6 +376,15 @@ class CombinedDashboardViewModel(
                 try {
                     repo.getIndexerStatus()
                     repo.getIndexers()
+                } catch (e: Exception) {
+                    // Log error
+                }
+            }
+
+            val bazarrRepos = instanceManager.instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
+            bazarrRepos.forEach { repo ->
+                try {
+                    repo.refreshBadges()
                 } catch (e: Exception) {
                     // Log error
                 }

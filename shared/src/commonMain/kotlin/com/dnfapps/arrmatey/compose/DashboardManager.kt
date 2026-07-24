@@ -71,12 +71,13 @@ enum class DashboardCards(val title: StringResource) {
     ActivityQueue(MR.strings.dashboard_activity_queue_overview),
     OnToday(MR.strings.dashboard_todays_releases),
     UpcomingReleases(MR.strings.dashboard_upcoming_releases),
-    InstanceDashboard(MR.strings.dashboard_instance_dashboards);
+    InstanceDashboard(MR.strings.dashboard_instance_dashboards),
+    BazarrOverview(MR.strings.dashboard_bazarr_overview);
 
     companion object {
         val defaultEntries: List<DashboardCards>
             get() = listOf(
-                ArrOverview, SeerrOverview, ProwlarrOverview, ActivityQueue,
+                ArrOverview, SeerrOverview, ProwlarrOverview, BazarrOverview, ActivityQueue,
                 RecentlyAdded, OnToday, UpcomingReleases, Network, InstanceDashboard
             )
     }

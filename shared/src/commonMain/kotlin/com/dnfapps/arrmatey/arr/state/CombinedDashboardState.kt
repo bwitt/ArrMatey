@@ -47,6 +47,7 @@ sealed interface CombinedDashboardState {
         val calendarItems: List<CalendarItem> = emptyList(),
         val upcomingCalendarItems: List<CalendarItem> = emptyList(),
         val prowlarrStats: List<ProwlarrDashboardState> = emptyList(),
+        val bazarrStats: List<BazarrDashboardState> = emptyList(),
         val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false
     ) : CombinedDashboardState
@@ -95,6 +96,14 @@ sealed interface CombinedDashboardState {
                     totalIndexers = 10,
                     healthyIndexers = 8,
                     failingIndexers = 2
+                )
+            }
+
+            val bazarrStats = instances.filter { it.type == InstanceType.Bazarr }.map {
+                BazarrDashboardState(
+                    instance = it,
+                    wantedEpisodesCount = 12,
+                    wantedMoviesCount = 3
                 )
             }
 
@@ -168,6 +177,7 @@ sealed interface CombinedDashboardState {
                 instances = arrInstances,
                 seerrInstances = seerrInstances,
                 prowlarrStats = prowlarrStats,
+                bazarrStats = bazarrStats,
                 downloadClients = downloadClients,
                 activityQueue = listOf(mockQueueItem),
                 recentlyAdded = recentlyAdded,
@@ -260,4 +270,10 @@ data class ProwlarrDashboardState(
     val totalIndexers: Int,
     val healthyIndexers: Int,
     val failingIndexers: Int
+)
+
+data class BazarrDashboardState(
+    val instance: Instance,
+    val wantedEpisodesCount: Int,
+    val wantedMoviesCount: Int
 )

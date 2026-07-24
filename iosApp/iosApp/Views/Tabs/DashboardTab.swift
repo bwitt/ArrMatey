@@ -152,6 +152,7 @@ struct DashboardTabContent: View {
         case .arrOverview: navigationManager.openSettings()
         case .seerrOverview: navigationManager.openRequestsTab()
         case .prowlarrOverview: navigationManager.openProwlarrTab()
+        case .bazarrOverview: navigationManager.openBazarrTab()
         case .downloadClients: navigationManager.openDownloadsTab()
         case .activityQueue: navigationManager.openActivityTab()
         case .onToday, .upcomingReleases: navigationManager.openScheduleTab()
@@ -244,6 +245,7 @@ struct DashboardCardView: View {
             case .activityQueue: DashboardActivityQueueSection(state: state, isEditing: isEditing)
             case .onToday: DashboardTodaySection(state: state, isEditing: isEditing)
             case .upcomingReleases: DashboardUpcomingSection(state: state, isEditing: isEditing)
+            case .bazarrOverview: DashboardBazarrSection(state: state, isEditing: isEditing)
             case .instanceDashboard: DashboardInstanceDashboardSection(state: state, isEditing: isEditing)
             }
         }
@@ -371,6 +373,35 @@ struct DashboardProwlarrSection: View {
             HStack(spacing: 12) {
                 StatCard(icon: "heart", label: MR.strings().healthy_indexers.localized(), value: "\(healthy)", color: .green)
                 StatCard(icon: "exclamationmark.octagon", label: MR.strings().failing_indexers.localized(), value: "\(failing)", color: failing > 0 ? .red : .secondary)
+            }
+        }
+    }
+}
+
+struct DashboardBazarrSection: View {
+    let state: CombinedDashboardStateSuccess
+    let isEditing: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if isEditing {
+                HStack {
+                    Image(resource: InstanceType.bazarr.icon)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                    Text(MR.strings().dashboard_bazarr_overview.localized())
+                        .font(.headline)
+                        .bold()
+                }
+            }
+            
+            let totalEpisodes = state.bazarrStats.reduce(0) { $0 + Int($1.wantedEpisodesCount) }
+            let totalMovies = state.bazarrStats.reduce(0) { $0 + Int($1.wantedMoviesCount) }
+            
+            HStack(spacing: 12) {
+                StatCard(icon: "tv", label: MR.strings().bazarr_wanted_episodes.localized(), value: "\(totalEpisodes)", color: .blue)
+                StatCard(icon: "film", label: MR.strings().bazarr_wanted_movies.localized(), value: "\(totalMovies)", color: .secondary)
             }
         }
     }
