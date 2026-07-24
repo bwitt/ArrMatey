@@ -3,7 +3,9 @@ package com.dnfapps.arrmatey.bazarr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
+import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
 import com.dnfapps.arrmatey.bazarr.state.BazarrDetails
+import com.dnfapps.arrmatey.bazarr.usecase.DownloadBazarrSubtitleToDeviceUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrEpisodesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrMediaDetailsUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.PerformBazarrAutomaticSearchUseCase
@@ -26,7 +28,8 @@ class BazarrDetailsViewModel(
     private val getBazarrMediaDetailsUseCase: GetBazarrMediaDetailsUseCase,
     private val getBazarrEpisodesUseCase: GetBazarrEpisodesUseCase,
     private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
-    private val performBazarrAutomaticSearchUseCase: PerformBazarrAutomaticSearchUseCase
+    private val performBazarrAutomaticSearchUseCase: PerformBazarrAutomaticSearchUseCase,
+    private val downloadBazarrSubtitleToDeviceUseCase: DownloadBazarrSubtitleToDeviceUseCase
 ) : ViewModel() {
 
     private val _operationState = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
@@ -58,5 +61,11 @@ class BazarrDetailsViewModel(
 
     fun clearOperation() {
         _operationState.value = OperationStatus.Idle
+    }
+
+    fun downloadToDevice(subtitle: BazarrSubtitle, onResult: (ByteArray?) -> Unit) {
+        viewModelScope.launch {
+            downloadBazarrSubtitleToDeviceUseCase(subtitle, onResult)
+        }
     }
 }

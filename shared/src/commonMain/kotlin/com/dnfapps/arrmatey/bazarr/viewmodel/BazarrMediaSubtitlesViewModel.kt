@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSubtitlesUiState
+import com.dnfapps.arrmatey.bazarr.usecase.DownloadBazarrSubtitleToDeviceUseCase
 import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.client.onError
 import com.dnfapps.arrmatey.client.onSuccess
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
  */
 class BazarrMediaSubtitlesViewModel(
     private val target: BazarrMediaTarget,
-    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase
+    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    private val downloadBazarrSubtitleToDeviceUseCase: DownloadBazarrSubtitleToDeviceUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<BazarrSubtitlesUiState>(BazarrSubtitlesUiState.Loading)
@@ -127,6 +129,12 @@ class BazarrMediaSubtitlesViewModel(
                 .onError { code, message, cause ->
                     _operationState.value = OperationStatus.Error(code, message, cause)
                 }
+        }
+    }
+
+    fun downloadToDevice(subtitle: BazarrSubtitle, onResult: (ByteArray?) -> Unit) {
+        viewModelScope.launch {
+            downloadBazarrSubtitleToDeviceUseCase(subtitle, onResult)
         }
     }
 
