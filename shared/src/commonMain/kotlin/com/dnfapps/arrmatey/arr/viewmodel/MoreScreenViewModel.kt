@@ -57,6 +57,13 @@ class MoreScreenViewModel(
             initialValue = preferencesStore.defaultAppColor
         )
 
+    val localNetworkPermissionInfoDismissed = preferencesStore.localNetworkPermissionInfoDismissed
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
     private val _testingStatus = MutableStateFlow<Map<Long, OperationStatus>>(emptyMap())
     val testingStatus: StateFlow<Map<Long, OperationStatus>> = _testingStatus.asStateFlow()
 
@@ -158,6 +165,10 @@ class MoreScreenViewModel(
 
     fun setAppColor(color: AppColor) {
         preferencesStore.setAppColor(color)
+    }
+
+    fun dismissLocalNetworkPermissionInfo() {
+        preferencesStore.dismissLocalNetworkPermissionInfo()
     }
 
 }

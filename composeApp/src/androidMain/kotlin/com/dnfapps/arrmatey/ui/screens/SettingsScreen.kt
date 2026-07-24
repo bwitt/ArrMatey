@@ -1,6 +1,9 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -8,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Language
@@ -31,6 +36,7 @@ import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,6 +44,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -82,6 +89,7 @@ import com.dnfapps.arrmatey.navigation.toEditCustomWebpage
 import com.dnfapps.arrmatey.navigation.toEditDownloadClient
 import com.dnfapps.arrmatey.navigation.toShortcutsPreferences
 import com.dnfapps.arrmatey.navigation.toTabPreferences
+import com.dnfapps.arrmatey.permissions.rememberLocalNetworkPermissionHandler
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.SettingsGroup
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
@@ -161,6 +169,8 @@ fun SettingsScreen(
 
     val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
     val appColor by viewModel.appColor.collectAsStateWithLifecycle()
+    val localNetworkPermissionInfoDismissed by viewModel.localNetworkPermissionInfoDismissed.collectAsStateWithLifecycle()
+    val localNetworkPermissionHandler = rememberLocalNetworkPermissionHandler()
 
     var showThemeDropdown by remember { mutableStateOf(false) }
     var showColorDropdown by remember { mutableStateOf(false) }
@@ -191,6 +201,63 @@ fun SettingsScreen(
                 .padding(bottom = navigationBarBottomInset() + 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.CINNAMON_BUN &&
+                !localNetworkPermissionHandler.isGranted() &&
+                !localNetworkPermissionInfoDismissed
+            ) {
+                Card(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(Icons.Default.WifiOff, null)
+                            Text(
+                                text = mokoString(MR.strings.local_network_denied_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(
+                                onClick = { viewModel.dismissLocalNetworkPermissionInfo() },
+                                modifier = Modifier.size(24.dp)
+                            ) {
+                                Icon(Icons.Default.Close, null)
+                            }
+                        }
+                        Text(
+                            text = mokoString(MR.strings.local_network_denied_description),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Button(
+                            onClick = {
+                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                    data = Uri.fromParts("package", context.packageName, null)
+                                }
+                                context.startActivity(intent)
+                            },
+                            modifier = Modifier.align(Alignment.End),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            )
+                        ) {
+                            Text(mokoString(MR.strings.open_settings))
+                        }
+                    }
+                }
+            }
+
             SettingsGroup(
                 title = mokoString(MR.strings.instances),
                 items = allInstances.map { instance ->

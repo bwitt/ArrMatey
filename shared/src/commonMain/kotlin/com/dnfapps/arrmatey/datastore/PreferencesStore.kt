@@ -75,6 +75,7 @@ class PreferencesStore(
     private val dashboardFirstLaunchKey = booleanPreferencesKey("dashboardFirstLaunchKey")
     private val credentialsMigratedKey = booleanPreferencesKey("credentialsMigrated")
     private val localNetworkNoticeSeenKey = booleanPreferencesKey("localNetworkNoticeSeen")
+    private val localNetworkPermissionInfoDismissedKey = booleanPreferencesKey("localNetworkPermissionInfoDismissed")
 
     private fun infoCardKey(type: InstanceType): Preferences.Key<Boolean> = when (type) {
         InstanceType.Sonarr -> sonarrInfoCardKey
@@ -480,6 +481,17 @@ class PreferencesStore(
         scope.launch {
             dataStore.edit {
                 it[localNetworkNoticeSeenKey] = true
+            }
+        }
+    }
+
+    val localNetworkPermissionInfoDismissed: Flow<Boolean> = dataStore.data
+        .map { it[localNetworkPermissionInfoDismissedKey] ?: false }
+
+    fun dismissLocalNetworkPermissionInfo() {
+        scope.launch {
+            dataStore.edit {
+                it[localNetworkPermissionInfoDismissedKey] = true
             }
         }
     }
