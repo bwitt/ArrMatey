@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safePost
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safePost
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeJsonRpcRequest
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeJsonRpcResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.DelugeSessionStatus

@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.shared.MR

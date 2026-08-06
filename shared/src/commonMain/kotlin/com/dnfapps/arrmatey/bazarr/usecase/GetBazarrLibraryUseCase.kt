@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.bazarr.usecase
 
 import com.dnfapps.arrmatey.bazarr.state.BazarrLibrary
-import com.dnfapps.arrmatey.client.ErrorType
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.ErrorType
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope

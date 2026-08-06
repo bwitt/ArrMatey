@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.seerr.state
 
-import com.dnfapps.arrmatey.client.ErrorType
+import com.dnfapps.networking.ErrorType
 
 sealed interface RequestsState {
     object Initial: RequestsState

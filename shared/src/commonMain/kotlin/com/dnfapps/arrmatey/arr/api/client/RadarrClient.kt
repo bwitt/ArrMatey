@@ -11,8 +11,8 @@ import com.dnfapps.arrmatey.arr.api.model.MovieEditorBody
 import com.dnfapps.arrmatey.arr.api.model.MovieRelease
 import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate

@@ -1,6 +1,8 @@
 package com.dnfapps.arrmatey.downloadclient.usecase
 
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
+import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import com.dnfapps.arrmatey.downloadclient.state.DownloadQueueState
 import kotlinx.coroutines.currentCoroutineContext
@@ -40,11 +42,11 @@ class ObserveDownloadQueueUseCase(
             val transferInfoResult = api.getTransferInfo()
 
             val newState = when (downloadsResult) {
-                is NetworkResult.Success -> {
+                is NetworkResult.Success<*> -> {
                     when (transferInfoResult) {
-                        is NetworkResult.Success -> DownloadQueueState.Success(
-                            items = downloadsResult.data,
-                            transferInfo = transferInfoResult.data,
+                        is NetworkResult.Success<*> -> DownloadQueueState.Success(
+                            items = downloadsResult.data as List<DownloadItem>,
+                            transferInfo = transferInfoResult.data as DownloadTransferInfo,
                             isRefreshing = false
                         )
                         is NetworkResult.Error -> {

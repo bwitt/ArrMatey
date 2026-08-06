@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.arr.state.MediaDetailsUiState
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
@@ -35,26 +35,27 @@ class GetMediaDetailsUseCase(
                     is NetworkResult.Error -> {
                         send(MediaDetailsUiState.Error(detailsResult.message))
                     }
-                    is NetworkResult.Success -> {
+                    is NetworkResult.Success<*> -> {
+                        val data = detailsResult.data as ArrMedia
                         when (repository.instance.type) {
                             InstanceType.Sonarr -> {
-                                loadSonarrDetails(repository, mediaId, detailsResult.data)
+                                loadSonarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }
                             InstanceType.Radarr -> {
-                                loadRadarrDetails(repository, mediaId, detailsResult.data)
+                                loadRadarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }
                             InstanceType.Lidarr -> {
-                                loadLidarrDetails(repository, mediaId, detailsResult.data)
+                                loadLidarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }
                             InstanceType.Booksehelf -> {
-                                loadReadarrDetails(repository, mediaId, detailsResult.data)
+                                loadReadarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }
                             InstanceType.Listenarr -> {
-                                send(MediaDetailsUiState.Success(item = detailsResult.data))
+                                send(MediaDetailsUiState.Success(item = data))
                             }
                             else -> throw IllegalStateException("Unsupported instance type ${repository.instance.type}")
                         }

@@ -1,19 +1,14 @@
-package com.dnfapps.arrmatey.client
+package com.dnfapps.networking
 
-import com.dnfapps.arrmatey.arr.api.client.HasArrImages
-import com.dnfapps.arrmatey.client.NetworkResult.Error
-import com.dnfapps.arrmatey.client.NetworkResult.Loading
-import com.dnfapps.arrmatey.client.NetworkResult.Success
-
-sealed interface NetworkResult<out T> {
-    object Loading : NetworkResult<Nothing>
-    data class Success<T>(val data: T): NetworkResult<T>
+sealed class NetworkResult<out T> {
+    data object Loading : NetworkResult<Nothing>()
+    data class Success<out T>(val data: T) : NetworkResult<T>()
     data class Error(
         val code: Int? = null,
         val message: String? = null,
         val cause: Throwable? = null,
         val errorType: ErrorType = ErrorType.Unexpected
-    ): NetworkResult<Nothing>
+    ) : NetworkResult<Nothing>()
 
     fun <R> map(transform: (T) -> R): NetworkResult<R> {
         return when (this) {
@@ -26,17 +21,17 @@ sealed interface NetworkResult<out T> {
 
 fun <T, R> NetworkResult<List<T>>.mapValues(transform: (T) -> R): NetworkResult<List<R>> {
     return when (this) {
-        is Loading -> Loading
-        is Error -> Error(code, message, cause, errorType)
-        is Success -> Success(data = data.map(transform))
+        is NetworkResult.Loading -> NetworkResult.Loading
+        is NetworkResult.Error -> NetworkResult.Error(code, message, cause, errorType)
+        is NetworkResult.Success -> NetworkResult.Success(data = data.map(transform))
     }
 }
 
 fun <T> NetworkResult<List<T>>.filterValues(predicate: (T) -> Boolean): NetworkResult<List<T>> {
     return when (this) {
-        is Loading -> Loading
-        is Error -> Error(code, message, cause, errorType)
-        is Success -> Success(data = data.filter(predicate))
+        is NetworkResult.Loading -> NetworkResult.Loading
+        is NetworkResult.Error -> NetworkResult.Error(code, message, cause, errorType)
+        is NetworkResult.Success -> NetworkResult.Success(data = data.filter(predicate))
     }
 }
 
@@ -49,3 +44,9 @@ suspend fun <T> NetworkResult<T>.onError(action: suspend (code: Int?, message: S
     if (this is NetworkResult.Error) action(code, message, cause)
     return this
 }
+
+fun <T> NetworkResult<T>.asLoading(): NetworkResult.Loading? = this as? NetworkResult.Loading
+
+fun <T> NetworkResult<T>.asSuccess(): NetworkResult.Success<T>? = this as? NetworkResult.Success
+
+fun <T> NetworkResult<T>.asError(): NetworkResult.Error? = this as? NetworkResult.Error

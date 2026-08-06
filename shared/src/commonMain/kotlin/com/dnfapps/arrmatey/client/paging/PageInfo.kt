@@ -6,6 +6,5 @@ import kotlinx.serialization.Serializable
 data class PageInfo(
     val page: Int,
     val pages: Int,
-    val pageSize: Int,
     val results: Int
 )

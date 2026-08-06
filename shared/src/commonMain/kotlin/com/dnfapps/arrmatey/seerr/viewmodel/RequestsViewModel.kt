@@ -2,8 +2,8 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.arrmatey.client.OperationStatus
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.compose.SeerrTab

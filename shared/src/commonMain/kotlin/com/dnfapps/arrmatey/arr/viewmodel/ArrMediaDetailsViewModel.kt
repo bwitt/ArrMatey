@@ -20,9 +20,9 @@ import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
-import com.dnfapps.arrmatey.client.OperationStatus
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.instances.model.InstanceType

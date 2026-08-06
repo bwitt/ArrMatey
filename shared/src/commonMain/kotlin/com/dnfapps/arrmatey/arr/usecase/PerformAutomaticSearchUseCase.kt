@@ -2,7 +2,7 @@ package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.Book
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 

@@ -1,4 +1,4 @@
-package com.dnfapps.arrmatey.client
+package com.dnfapps.networking
 
 import io.ktor.network.sockets.SocketTimeoutException
 import io.ktor.util.network.UnresolvedAddressException

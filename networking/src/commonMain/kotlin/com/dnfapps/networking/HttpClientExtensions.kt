@@ -1,4 +1,4 @@
-package com.dnfapps.arrmatey.client
+package com.dnfapps.networking
 
 import io.ktor.client.*
 import io.ktor.client.call.body

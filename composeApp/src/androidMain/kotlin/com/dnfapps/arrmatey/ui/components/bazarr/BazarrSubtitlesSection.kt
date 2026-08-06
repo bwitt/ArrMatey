@@ -40,7 +40,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSubtitlesUiState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR

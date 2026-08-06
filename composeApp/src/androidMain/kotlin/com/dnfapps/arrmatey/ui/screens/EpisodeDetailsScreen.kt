@@ -44,7 +44,7 @@ import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.navigation.arrNavigator

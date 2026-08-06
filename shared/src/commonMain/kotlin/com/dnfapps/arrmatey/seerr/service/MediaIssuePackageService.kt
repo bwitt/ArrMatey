@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.seerr.service
 
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage

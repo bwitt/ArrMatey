@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.seerr.state
 
-import com.dnfapps.arrmatey.client.ErrorType
+import com.dnfapps.networking.ErrorType
 import com.dnfapps.arrmatey.seerr.api.model.ImdbRating
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating

@@ -7,7 +7,7 @@ class LazyPagingItems<T : Any>(
     private val onLoadMore: () -> Unit,
     private val onRefresh: () -> Unit,
     private val prefetchDistance: Int = 3
-) {// : LazyPagingItems<T> {
+) {
 
     private val pagedData: PagedData<T>
         get() = pagedDataState.value

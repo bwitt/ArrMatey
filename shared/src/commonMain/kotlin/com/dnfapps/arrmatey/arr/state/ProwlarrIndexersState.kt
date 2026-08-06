@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.arr.state
 
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrIndexer
-import com.dnfapps.arrmatey.client.ErrorType
+import com.dnfapps.networking.ErrorType
 
 sealed interface ProwlarrIndexersState {
     object Initial: ProwlarrIndexersState

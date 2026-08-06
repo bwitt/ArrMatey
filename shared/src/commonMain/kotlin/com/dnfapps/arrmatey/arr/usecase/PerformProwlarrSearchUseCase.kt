@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
-import com.dnfapps.arrmatey.client.ErrorType
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.ErrorType
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

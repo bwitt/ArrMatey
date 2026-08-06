@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.downloadclient.usecase
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import kotlinx.coroutines.flow.Flow

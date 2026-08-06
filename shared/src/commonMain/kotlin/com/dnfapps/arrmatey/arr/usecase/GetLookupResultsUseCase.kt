@@ -1,7 +1,8 @@
 package com.dnfapps.arrmatey.arr.usecase
 
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,8 +24,8 @@ class GetLookupResultsUseCase(
                         null -> ArrLibrary.Initial
                         is NetworkResult.Loading -> ArrLibrary.Loading
                         is NetworkResult.Error -> ArrLibrary.Error(result.message ?: "")
-                        is NetworkResult.Success ->
-                            ArrLibrary.Success(items = result.data)
+                        is NetworkResult.Success<*> ->
+                            ArrLibrary.Success(items = result.data as List<ArrMedia>)
                     }
                 }
             }

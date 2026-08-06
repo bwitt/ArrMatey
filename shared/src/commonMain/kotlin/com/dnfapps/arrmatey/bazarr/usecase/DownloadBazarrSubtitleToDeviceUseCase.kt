@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.bazarr.usecase
 
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.notifications.NotificationManager
 import com.dnfapps.arrmatey.shared.MR

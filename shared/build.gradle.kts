@@ -71,6 +71,7 @@ kotlin {
         }
 
         commonMain.dependencies {
+            implementation(project(":networking"))
             // Koin DI
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)

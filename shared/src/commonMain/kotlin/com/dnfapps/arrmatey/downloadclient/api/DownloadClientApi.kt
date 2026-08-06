@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo
 

@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.arr.api.client
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safeGet
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeGet
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import io.ktor.client.HttpClient

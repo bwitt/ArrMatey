@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.seerr.usecase
 
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import kotlinx.coroutines.flow.firstOrNull

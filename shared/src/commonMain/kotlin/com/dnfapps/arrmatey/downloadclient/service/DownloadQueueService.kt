@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.downloadclient.service
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.model.DownloadItem
 import com.dnfapps.arrmatey.downloadclient.model.DownloadTransferInfo

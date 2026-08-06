@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.api.model.ProviderStatus
 import com.dnfapps.arrmatey.bazarr.api.model.WantedEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.WantedMovie
-import com.dnfapps.arrmatey.client.ErrorType
+import com.dnfapps.networking.ErrorType
 
 sealed interface BazarrLibrary {
     data object Initial: BazarrLibrary

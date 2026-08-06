@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.downloadclient.state
 
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClientType
 import com.dnfapps.arrmatey.instances.model.InstanceHeader
 

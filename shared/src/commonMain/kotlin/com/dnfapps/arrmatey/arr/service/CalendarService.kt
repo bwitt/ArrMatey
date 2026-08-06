@@ -8,14 +8,15 @@ import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.CalendarItem
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.EpisodeGroup
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.notifications.NotificationCleanupUseCase
 import com.dnfapps.arrmatey.notifications.ScheduleNotificationUseCase
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.asSuccess
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -122,7 +123,7 @@ class CalendarService(
         // Notifications
         scope.launch {
             val enrichedItems = if (type == InstanceType.Booksehelf) {
-                val authors = (repository.client.getLibrary() as? NetworkResult.Success)?.data
+                val authors = repository.client.getLibrary().asSuccess()?.data
                     ?.filterIsInstance<Author>()?.associateBy { it.id } ?: emptyMap()
                 items.filterIsInstance<Book>().map { book ->
                     authors[book.authorId]?.let { author ->

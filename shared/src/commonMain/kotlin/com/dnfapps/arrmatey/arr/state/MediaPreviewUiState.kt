@@ -3,8 +3,8 @@ package com.dnfapps.arrmatey.arr.state
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
-import com.dnfapps.arrmatey.client.OperationStatus
 import com.dnfapps.arrmatey.datastore.InstancePreferences
+import com.dnfapps.networking.OperationStatus
 
 data class MediaPreviewUiState(
     val qualityProfiles: List<QualityProfile> = emptyList(),

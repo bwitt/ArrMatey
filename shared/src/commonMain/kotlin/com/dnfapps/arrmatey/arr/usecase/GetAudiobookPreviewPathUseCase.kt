@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import kotlinx.coroutines.flow.Flow

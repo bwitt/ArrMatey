@@ -8,8 +8,8 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
-import com.dnfapps.arrmatey.client.ErrorType
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.ErrorType
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
@@ -72,8 +72,8 @@ class GetLibraryUseCase(
             when (libraryResult) {
                 is NetworkResult.Loading -> ArrLibrary.Loading
                 is NetworkResult.Error -> ArrLibrary.Error(libraryResult.message ?: "")
-                is NetworkResult.Success -> {
-                    val sorted = applySorting(libraryResult.data, preferences)
+                is NetworkResult.Success<*> -> {
+                    val sorted = applySorting(libraryResult.data as List<ArrMedia>, preferences)
                     val filtered = applyFiltering(sorted, preferences, customFilters)
                     ArrLibrary.Success(filtered, preferences)
                 }

@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safeGet
-import com.dnfapps.arrmatey.client.safePost
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeGet
+import com.dnfapps.networking.safePost
 import com.dnfapps.arrmatey.compose.utils.toSeconds
 import com.dnfapps.arrmatey.downloadclient.api.model.SABnzbdHistoryResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.SABnzbdQueueResponse

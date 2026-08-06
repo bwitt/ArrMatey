@@ -1,9 +1,9 @@
 package com.dnfapps.arrmatey.instances.repository
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.OperationStatus
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.client.paging.BasePagingSource
 import com.dnfapps.arrmatey.client.paging.PageResult
 import com.dnfapps.arrmatey.client.paging.PagingSource
@@ -173,9 +173,9 @@ class SeerrInstanceRepository(
             RequestType.Tv -> client.getTvDetails(tmdbId)
         }
         when (result) {
-            is NetworkResult.Success -> {
+            is NetworkResult.Success<*> -> {
                 val currentCache = _mediaDetailsCache.value.toMutableMap()
-                currentCache[tmdbId] = result.data
+                currentCache[tmdbId] = (result as NetworkResult.Success<RequestMediaDetails>).data
                 _mediaDetailsCache.value = currentCache
             }
 

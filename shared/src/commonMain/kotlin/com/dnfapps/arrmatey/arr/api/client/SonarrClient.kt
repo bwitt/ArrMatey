@@ -20,8 +20,8 @@ import com.dnfapps.arrmatey.arr.api.model.SeriesMonitoringBody
 import com.dnfapps.arrmatey.arr.api.model.SeriesRelease
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryResponse
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate

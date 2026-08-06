@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.client.paging
 
-import com.dnfapps.arrmatey.client.ErrorType
-import com.dnfapps.arrmatey.client.NetworkException
+import com.dnfapps.networking.ErrorType
+import com.dnfapps.networking.NetworkException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,10 +27,10 @@ class PagingController<T: Any>(
             }
 
             when (val result = pagingSource?.load(1)) {
-                is LoadResult.Page -> {
+                is LoadResult.Page<*> -> {
                     _state.update {
                         PagedData(
-                            items = result.data,
+                            items = result.data as List<T>,
                             totalItemCount = result.totalItemCount,
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
@@ -39,7 +39,7 @@ class PagingController<T: Any>(
                         )
                     }
                 }
-                is LoadResult.Error -> {
+                is LoadResult.Error<*> -> {
                     _state.update {
                         PagedData(
                             isLoading = false,
@@ -70,10 +70,10 @@ class PagingController<T: Any>(
             val nextPage = currentState.currentPage + 1
 
             when (val result = pagingSource?.load(nextPage)) {
-                is LoadResult.Page -> {
+                is LoadResult.Page<*> -> {
                     _state.update {
                         it.copy(
-                            items = it.items + result.data,
+                            items = it.items + (result.data as List<T>),
                             currentPage = result.currentPage,
                             hasMore = result.hasNextPage,
                             isLoadingMore = false,
@@ -81,7 +81,7 @@ class PagingController<T: Any>(
                         )
                     }
                 }
-                is LoadResult.Error -> {
+                is LoadResult.Error<*> -> {
                     _state.update {
                         it.copy(
                             isLoadingMore = false,

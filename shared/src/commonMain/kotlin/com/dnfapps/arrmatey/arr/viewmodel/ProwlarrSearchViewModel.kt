@@ -6,7 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
 import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
 import com.dnfapps.arrmatey.arr.usecase.GrabProwlarrReleaseUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformProwlarrSearchUseCase
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.usecase.ObserveSelectedInstanceUseCase
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.seerr.state
 
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 
 data class RequestOperationsState(
     val approvalStates: Map<Long, OperationStatus> = emptyMap(),

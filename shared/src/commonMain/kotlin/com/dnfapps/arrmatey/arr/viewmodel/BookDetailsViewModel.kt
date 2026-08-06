@@ -11,8 +11,8 @@ import com.dnfapps.arrmatey.arr.usecase.GetBookEditionUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetBookHistoryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
-import com.dnfapps.arrmatey.client.OperationStatus
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase

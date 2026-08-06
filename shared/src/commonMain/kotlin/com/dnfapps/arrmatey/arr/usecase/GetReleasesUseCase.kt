@@ -7,7 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityInfo
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.state.ReleaseLibrary
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,15 +35,17 @@ class GetReleasesUseCase(
                                 type = result.errorType
                             )
 
-                        is NetworkResult.Success ->
+                        is NetworkResult.Success<*> -> {
+                            val data = result.data as List<ArrRelease>
                             ReleaseLibrary.Success(
-                                items = result.data,
-                                filterLanguages = parseLanguages(result.data),
-                                filterIndexers = parseIndexers(result.data),
-                                filterProtocols = parseProtocols(result.data),
-                                filterQualities = parseQualities(result.data),
-                                filterCustomFormats = parseCustomFormats(result.data)
+                                items = data,
+                                filterLanguages = parseLanguages(data),
+                                filterIndexers = parseIndexers(data),
+                                filterProtocols = parseProtocols(data),
+                                filterQualities = parseQualities(data),
+                                filterCustomFormats = parseCustomFormats(data)
                             )
+                        }
 
                     }
                 }

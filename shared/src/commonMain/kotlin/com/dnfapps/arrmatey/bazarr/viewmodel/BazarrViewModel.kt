@@ -7,7 +7,7 @@ import com.dnfapps.arrmatey.bazarr.state.BazarrSection
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrLibraryUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.RefreshBazarrBadgesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.ResetBazarrProvidersUseCase
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow

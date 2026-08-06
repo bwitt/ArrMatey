@@ -9,9 +9,9 @@ import com.dnfapps.arrmatey.bazarr.usecase.DownloadBazarrSubtitleToDeviceUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrEpisodesUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.GetBazarrMediaDetailsUseCase
 import com.dnfapps.arrmatey.bazarr.usecase.PerformBazarrAutomaticSearchUseCase
-import com.dnfapps.arrmatey.client.OperationStatus
-import com.dnfapps.arrmatey.client.onError
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

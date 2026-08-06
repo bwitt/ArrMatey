@@ -11,11 +11,11 @@ import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueuePage
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.Tag
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safeDelete
-import com.dnfapps.arrmatey.client.safeGet
-import com.dnfapps.arrmatey.client.safePost
-import com.dnfapps.arrmatey.client.safePut
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeDelete
+import com.dnfapps.networking.safeGet
+import com.dnfapps.networking.safePost
+import com.dnfapps.networking.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody

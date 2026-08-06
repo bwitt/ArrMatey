@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.instances.repository
 
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
 
 sealed interface InstanceScopedRepository {

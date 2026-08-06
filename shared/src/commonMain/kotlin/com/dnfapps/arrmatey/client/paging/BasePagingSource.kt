@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.client.paging
 
-import com.dnfapps.arrmatey.client.NetworkException
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkException
+import com.dnfapps.networking.NetworkResult
 
 class BasePagingSource<T : Any, R : Any>(
     private val fetcher: suspend (page: Int) -> NetworkResult<R>,
@@ -13,9 +13,9 @@ class BasePagingSource<T : Any, R : Any>(
             is NetworkResult.Loading -> {
                 LoadResult.Error(Exception("Unexpected loading state"))
             }
-            is NetworkResult.Success -> {
+            is NetworkResult.Success<*> -> {
                 try {
-                    val pageResult = processor(result.data)
+                    val pageResult = processor(result.data as R)
                     LoadResult.Page(
                         data = pageResult.items,
                         currentPage = page,

@@ -6,7 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.CustomFormat
 import com.dnfapps.arrmatey.arr.api.model.Language
 import com.dnfapps.arrmatey.arr.api.model.QualityInfo
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
-import com.dnfapps.arrmatey.client.ErrorType
+import com.dnfapps.networking.ErrorType
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 
 sealed interface ArrLibrary {

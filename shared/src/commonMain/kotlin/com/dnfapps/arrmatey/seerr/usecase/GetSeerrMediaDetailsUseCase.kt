@@ -1,7 +1,8 @@
 package com.dnfapps.arrmatey.seerr.usecase
 
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
@@ -29,8 +30,8 @@ class GetSeerrMediaDetailsUseCase {
                             detailsResult.message
                         ))
                     }
-                    is NetworkResult.Success -> {
-                        val mediaDetails = detailsResult.data
+                    is NetworkResult.Success<*> -> {
+                        val mediaDetails = (detailsResult as NetworkResult.Success<RequestMediaDetails>).data
 
                         if (type == RequestType.Tv && mediaDetails is TvDetails) {
                             val seasonCount = mediaDetails.numberOfSeasons

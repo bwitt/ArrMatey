@@ -33,7 +33,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.ProviderSubtitle
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.SubtitleSearchState
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString

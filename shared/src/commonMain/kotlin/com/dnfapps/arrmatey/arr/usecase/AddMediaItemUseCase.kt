@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadata
 import com.dnfapps.arrmatey.arr.api.model.AudiobookMetadataResponse
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
-import com.dnfapps.arrmatey.client.OperationStatus
+import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

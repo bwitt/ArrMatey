@@ -12,7 +12,7 @@ import com.dnfapps.arrmatey.arr.state.InstanceNetworkStatus
 import com.dnfapps.arrmatey.arr.state.NetworkStatusState
 import com.dnfapps.arrmatey.arr.state.ProwlarrDashboardState
 import com.dnfapps.arrmatey.arr.state.SeerrDashboardState
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.compose.DashboardCards
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.datastore.PreferencesStore

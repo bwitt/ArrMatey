@@ -1,4 +1,4 @@
-package com.dnfapps.arrmatey.client
+package com.dnfapps.networking
 
 import platform.Foundation.NSError
 import platform.Foundation.NSURLErrorDomain

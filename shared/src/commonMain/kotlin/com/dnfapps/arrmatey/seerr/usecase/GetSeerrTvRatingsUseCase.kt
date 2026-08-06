@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.seerr.usecase
 
-import com.dnfapps.arrmatey.client.onSuccess
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating

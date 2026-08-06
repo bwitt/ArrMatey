@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safeCall
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeCall
 import com.dnfapps.arrmatey.downloadclient.api.model.TransmissionRpcRequest
 import com.dnfapps.arrmatey.downloadclient.api.model.TransmissionRpcResponse
 import com.dnfapps.arrmatey.downloadclient.api.model.TransmissionSessionStats

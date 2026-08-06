@@ -35,9 +35,9 @@ import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.toEditBody
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.filterValues
-import com.dnfapps.arrmatey.client.mapValues
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.filterValues
+import com.dnfapps.networking.mapValues
 import com.dnfapps.arrmatey.extensions.isBetween
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient

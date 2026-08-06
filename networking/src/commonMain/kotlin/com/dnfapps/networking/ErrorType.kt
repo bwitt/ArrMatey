@@ -1,4 +1,4 @@
-package com.dnfapps.arrmatey.client
+package com.dnfapps.networking
 
 enum class ErrorType {
     Http,

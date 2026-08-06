@@ -2,7 +2,7 @@ package com.dnfapps.arrmatey.bazarr.usecase
 
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMedia
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMediaType
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

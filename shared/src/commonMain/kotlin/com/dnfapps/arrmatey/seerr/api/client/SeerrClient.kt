@@ -1,10 +1,10 @@
 package com.dnfapps.arrmatey.seerr.api.client
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safeDelete
-import com.dnfapps.arrmatey.client.safeGet
-import com.dnfapps.arrmatey.client.safePost
-import com.dnfapps.arrmatey.client.safePut
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeDelete
+import com.dnfapps.networking.safeGet
+import com.dnfapps.networking.safePost
+import com.dnfapps.networking.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings

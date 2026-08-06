@@ -1,8 +1,8 @@
 package com.dnfapps.arrmatey.downloadclient.api
 
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safeCall
-import com.dnfapps.arrmatey.client.safeGet
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeCall
+import com.dnfapps.networking.safeGet
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTorrent
 import com.dnfapps.arrmatey.downloadclient.api.model.QBittorrentTransferInfoResponse
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient

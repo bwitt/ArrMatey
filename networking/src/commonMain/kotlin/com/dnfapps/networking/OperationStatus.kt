@@ -1,4 +1,4 @@
-package com.dnfapps.arrmatey.client
+package com.dnfapps.networking
 
 sealed interface OperationStatus {
     object Idle: OperationStatus

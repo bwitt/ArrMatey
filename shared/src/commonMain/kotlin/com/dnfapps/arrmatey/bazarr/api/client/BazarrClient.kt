@@ -14,11 +14,11 @@ import com.dnfapps.arrmatey.bazarr.api.model.ProviderSubtitlesResponse
 import com.dnfapps.arrmatey.bazarr.api.model.ProvidersResponse
 import com.dnfapps.arrmatey.bazarr.api.model.WantedEpisodesResponse
 import com.dnfapps.arrmatey.bazarr.api.model.WantedMoviesResponse
-import com.dnfapps.arrmatey.client.NetworkResult
-import com.dnfapps.arrmatey.client.safeDelete
-import com.dnfapps.arrmatey.client.safeGet
-import com.dnfapps.arrmatey.client.safePatch
-import com.dnfapps.arrmatey.client.safePost
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.safeDelete
+import com.dnfapps.networking.safeGet
+import com.dnfapps.networking.safePatch
+import com.dnfapps.networking.safePost
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.timeout

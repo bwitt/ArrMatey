@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.seerr.usecase
 
-import com.dnfapps.arrmatey.client.NetworkResult
+import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 
 class RemoveSeerrMediaFileUseCase {
