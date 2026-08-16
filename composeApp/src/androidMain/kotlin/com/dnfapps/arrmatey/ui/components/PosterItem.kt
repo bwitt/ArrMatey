@@ -6,6 +6,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +21,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.RemoveCircle
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,15 +41,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
+import com.dnfapps.arrmatey.seerr.api.model.MediaStatus
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
@@ -161,6 +172,114 @@ fun PosterItem(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun PosterItem(
+    item: DiscoverResult,
+    modifier: Modifier = Modifier,
+    onItemClick: ((DiscoverResult) -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
+    elevation: PosterElevation = PosterElevation.Medium,
+    radius: PosterRadius = PosterRadius.Medium,
+    posterHeight: Dp? = null,
+    aspectRatio: AspectRatio = AspectRatio.Poster,
+    isSelected: Boolean = false,
+    showOverlays: Boolean = true,
+    includeCredits: Boolean = false
+) {
+    if (item.mediaType == RequestType.Person) {
+        CastCrewItem(
+            profilePath = item.fullPosterPath,
+            name = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+            credit = item.knownForDepartment ?: "",
+            modifier = modifier.clickable(enabled = onItemClick != null) {
+                onItemClick?.invoke(item)
+            }
+        )
+    } else {
+        var imageLoadError by remember { mutableStateOf(false) }
+
+        val model = rememberRemoteImageData(
+            url = item.fullPosterPath,
+            onError = { _, err ->
+                println(err.throwable.message)
+                imageLoadError = true
+            }
+        )
+
+        BasePosterItem(
+            model = model,
+            modifier = modifier,
+            isSelected = isSelected,
+            elevation = elevation,
+            radius = radius,
+            posterHeight = posterHeight,
+            aspectRatio = aspectRatio,
+            onClick = {
+                onItemClick?.invoke(item)
+            },
+            onLongClick = onLongClick,
+            additionalContent = {
+                if (showOverlays) {
+                    MediaTypeOverlay(item.mediaType)
+                    item.mediaInfo?.let { info ->
+                        StatusOverlay(MediaStatus.fromValue(info.status))
+                    }
+                }
+            },
+            footerVisible = true,
+            footerContent = {
+                Text(
+                    text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                    style = MaterialTheme.typography.labelLarge,
+                    minLines = 2,
+                    maxLines = 2
+                )
+                val subText = when (item.mediaType) {
+                    RequestType.Person -> item.knownForDepartment ?: ""
+                    else -> (item.releaseDate ?: item.firstAirDate)?.take(4) ?: ""
+                }
+                Text(
+                    text = subText,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1
+                )
+
+                if (includeCredits) {
+                    val credit = (item.character ?: item.job) ?: ""
+                    Text(
+                        text = credit,
+                        style = MaterialTheme.typography.labelMediumEmphasized,
+                        maxLines = 2,
+                        minLines = 2
+                    )
+                }
+            },
+            errorContent = {
+                if (imageLoadError) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center).padding(4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.BrokenImage,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Text(
+                            text = item.title ?: item.name ?: mokoString(MR.strings.unknown),
+                            style = MaterialTheme.typography.titleSmall,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        )
+    }
+}
+
 @Composable
 fun PosterItem(
     item: RequestMediaDetails,
@@ -171,7 +290,8 @@ fun PosterItem(
     radius: PosterRadius = PosterRadius.Medium,
     posterHeight: Dp? = null,
     aspectRatio: AspectRatio = AspectRatio.Poster,
-    isSelected: Boolean = false
+    isSelected: Boolean = false,
+    showOverlays: Boolean = true
 ) {
     var imageLoadError by remember { mutableStateOf(false) }
 
@@ -195,6 +315,14 @@ fun PosterItem(
             onItemClick?.invoke(item)
         },
         onLongClick = onLongClick,
+        additionalContent = {
+            if (showOverlays) {
+                MediaTypeOverlay(item.requestType)
+                item.mediaInfo?.let { info ->
+                    StatusOverlay(MediaStatus.fromValue(info.status))
+                }
+            }
+        },
         errorContent = {
             if (imageLoadError) {
                 Column (
@@ -216,6 +344,44 @@ fun PosterItem(
                 }
             }
         }
+    )
+}
+
+@Composable
+private fun BoxScope.MediaTypeOverlay(type: RequestType) {
+    val text = when (type) {
+        RequestType.Movie -> mokoString(MR.strings.type_movie)
+        RequestType.Tv -> mokoString(MR.strings.type_series)
+        RequestType.Person -> mokoString(MR.strings.type_person)
+    }.replaceFirstChar { it.uppercase() }
+
+    MediaRequestTypeChip(
+        text = text,
+        requestType = type,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .padding(8.dp)
+    )
+}
+
+@Composable
+private fun BoxScope.StatusOverlay(status: MediaStatus) {
+    val (icon, color) = when (status) {
+        MediaStatus.Available -> Icons.Default.CheckCircle to Color(0xFF50d27d)
+        MediaStatus.PartiallyAvailable -> Icons.Default.RemoveCircle to Color(0xFFfbbf24)
+        MediaStatus.Pending, MediaStatus.Processing -> Icons.Default.Schedule to Color(0xFF3b82f6)
+        else -> return
+    }
+
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = color,
+        modifier = Modifier
+            .align(Alignment.TopEnd)
+            .padding(8.dp)
+            .size(20.dp)
+            .background(Color.White, CircleShape)
     )
 }
 

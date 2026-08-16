@@ -18,12 +18,14 @@
     <string name="indexers">Indexers</string>
     <string name="home">Home</string>
     <string name="requests">Requests</string>
+    <string name="discover">Discover</string>
     <string name="issues">Issues</string>
 
     <string name="type_series">series</string>
     <string name="type_movie">movie</string>
     <string name="type_artist">artist</string>
     <string name="type_author">author</string>
+    <string name="type_person">person</string>
 
     <!-- Titles -->
     <string name="add_instance">Add instance</string>
@@ -32,6 +34,11 @@
     <string name="couldnt_connect">Couldn\'t Connect</string>
     <string name="no_type_instances">No %1$s instances</string>
     <string name="empty_library">Nothing here</string>
+    <string name="trending">Trending</string>
+    <string name="popular_movies">Popular Movies</string>
+    <string name="popular_series">Popular Series</string>
+    <string name="upcoming_movies">Upcoming Movies</string>
+    <string name="upcoming_series">Upcoming Series</string>
 
     <!-- Messages -->
     <string name="confirm_delete_instance">Are you sure you want to delete %1$s?</string>
@@ -298,6 +305,7 @@
     <string name="narrated_by">Narrated by: %1$s</string>
     <string name="selected_count">%1$d selected</string>
     <string name="done">Done</string>
+    <string name="born_on"> Born: %1$s  |  %2$s</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -565,7 +573,10 @@
     <string name="watch_trailer">Watch Trailer</string>
     <string name="view_request">View Request</string>
     <string name="request">Request</string>
+    <string name="request_more">Request More</string>
     <string name="requested_by">Requested by</string>
+    <string name="appearances">Appearances</string>
+    <string name="also_known_as">Also Known As</string>
     <string name="approved_by">Approved by</string>
     <string name="opened_by">Opened by</string>
     <string name="open">Open</string>

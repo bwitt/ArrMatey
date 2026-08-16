@@ -1,9 +1,5 @@
 package com.dnfapps.arrmatey.instances.repository
 
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.OperationStatus
-import com.dnfapps.networking.onError
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.client.paging.BasePagingSource
 import com.dnfapps.arrmatey.client.paging.PageResult
 import com.dnfapps.arrmatey.client.paging.PagingSource
@@ -12,12 +8,16 @@ import com.dnfapps.arrmatey.seerr.api.client.SeerrClient
 import com.dnfapps.arrmatey.seerr.api.client.SeerrClientImpl
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
+import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
+import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
@@ -28,6 +28,10 @@ import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +40,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 class SeerrInstanceRepository(
     override val instance: Instance,
@@ -76,6 +83,11 @@ class SeerrInstanceRepository(
             .onSuccess { _loggedInUser.value = it }
     }
 
+    suspend fun getUsers() {
+        client.getUsers()
+            .onSuccess { _users.value = it }
+    }
+
     suspend fun refreshCounts() {
         client.getRequests(page = 1, pageSize = 1).onSuccess {
             _pendingRequestsCount.value = it.pageInfo.results
@@ -101,11 +113,107 @@ class SeerrInstanceRepository(
         )
     }
 
+    fun getTrendingPaging(): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getTrending(page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun getDiscoverMoviesPaging(): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getDiscoverMovies(page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun getDiscoverTvPaging(): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getDiscoverTv(page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun getUpcomingMoviesPaging(): PagingSource<DiscoverResult> {
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getUpcomingMovies(page = page, today = today)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun getUpcomingTvPaging(): PagingSource<DiscoverResult> {
+        val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+        return BasePagingSource(
+            fetcher = { page ->
+                client.getUpcomingTv(page = page, today = today)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
+    fun searchPaging(query: String): PagingSource<DiscoverResult> {
+        return BasePagingSource(
+            fetcher = { page ->
+                client.search(query = query, page = page)
+            },
+            processor = { response ->
+                PageResult(
+                    items = response.results,
+                    totalItemCount = response.totalResults,
+                    hasNextPage = response.page < response.totalPages
+                )
+            }
+        )
+    }
+
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 10
     ): NetworkResult<RequestResponse> {
         return client.getRequests(page = page, pageSize = pageSize)
+    }
+
+    suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> {
+        return client.createRequest(request)
     }
 
     suspend fun setRequestStatus(
@@ -171,6 +279,7 @@ class SeerrInstanceRepository(
         val result = when (mediaType) {
             RequestType.Movie -> client.getMovieDetails(tmdbId)
             RequestType.Tv -> client.getTvDetails(tmdbId)
+            RequestType.Person -> client.getPersonDetails(tmdbId)
         }
         when (result) {
             is NetworkResult.Success<*> -> {
@@ -249,6 +358,14 @@ class SeerrInstanceRepository(
 
     suspend fun getSonarrDetails(serverId: Long): NetworkResult<ServiceDetails> {
         return client.getSonarrDetails(serverId)
+    }
+
+    suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> {
+        return client.getPersonDetails(personId)
+    }
+
+    suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits> {
+        return client.getPersonCredits(personId)
     }
 
     suspend fun closeIssue(issueId: Long): NetworkResult<Unit> {

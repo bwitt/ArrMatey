@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandCircleDown
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
@@ -60,10 +61,10 @@ import com.dnfapps.arrmatey.compose.utils.formatWithCommas
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.entensions.openLink
+import com.dnfapps.arrmatey.entensions.unlessEmpty
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.InfoItem
 import com.dnfapps.arrmatey.navigation.navigationManager
-import com.dnfapps.arrmatey.navigation.seerrNavigator
 import com.dnfapps.arrmatey.seerr.api.model.Episode
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
@@ -82,6 +83,7 @@ import com.dnfapps.arrmatey.ui.components.SeerrCreditsSection
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.ui.sheets.SeerrReportIssueSheet
+import com.dnfapps.arrmatey.ui.sheets.SeerrRequestSheet
 import com.dnfapps.arrmatey.ui.sheets.SeerrViewRequestSheet
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
@@ -99,19 +101,23 @@ import kotlin.math.roundToInt
 fun SeerrDetailsScreen(
     tmdbId: Long,
     requestType: RequestType,
+    onBack: () -> Unit,
     viewModel: SeerrMediaDetailsViewModel = koinInjectParams(tmdbId, requestType),
     moko: MokoStrings = koinInject()
 ) {
     val navManager = navigationManager
-    val navigation = seerrNavigator
     val context = LocalContext.current
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val selectedInstance by viewModel.selectedInstance.collectAsStateWithLifecycle()
     val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
 
+    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
+    val users by viewModel.users.collectAsStateWithLifecycle()
+
     val isViewRequestSheetVisible by viewModel.isViewRequestSheetVisible.collectAsStateWithLifecycle()
     val isReportIssueSheetVisible by viewModel.isReportIssueSheetVisible.collectAsStateWithLifecycle()
+    val isRequestSheetVisible by viewModel.isRequestSheetVisible.collectAsStateWithLifecycle()
     val reportIssueState by viewModel.reportIssueState.collectAsStateWithLifecycle()
 
     val serviceDetails by viewModel.serviceDetails.collectAsStateWithLifecycle()
@@ -163,11 +169,17 @@ fun SeerrDetailsScreen(
                             DetailsHeader(item)
 
                             Column(
-                                modifier = Modifier.padding(bottom = 24.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                modifier = Modifier
+                                    .padding(horizontal = 24.dp)
+                                    .padding(bottom = 24.dp)
+                                    .padding(top = 12.dp),
+                                verticalArrangement = Arrangement.spacedBy(24.dp)
                             ) {
+                                Text(
+                                    text = item.displayTitle,
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
                                 MediaDetailsActions(
-                                    modifier = Modifier.padding(horizontal = 24.dp),
                                     buttonState = buttonState,
                                     onWatchClicked = { url, provider ->
                                         handleWatchClick(
@@ -177,7 +189,7 @@ fun SeerrDetailsScreen(
                                             moko
                                         )
                                     },
-                                    onRequestClicked = { },
+                                    onRequestClicked = { viewModel.showRequestSheet() },
                                     onRequest4kClicked = { },
                                     onWatchTrailerClicked = { context.openLink(it) },
                                     onViewRequestClicked = { viewModel.showViewRequestSheet() },
@@ -185,25 +197,23 @@ fun SeerrDetailsScreen(
                                     onDeclineRequestClicked = { viewModel.declineRequest(it) },
                                 )
 
-                                item.tagline?.let {
+                                item.tagline?.unlessEmpty {
                                     Text(
                                         text = it,
                                         style = MaterialTheme.typography.headlineSmall,
                                         fontStyle = FontStyle.Italic,
-                                        color = MaterialTheme.colorScheme.tertiary,
-                                        modifier = Modifier.padding(horizontal = 24.dp),
+                                        color = MaterialTheme.colorScheme.tertiary
                                     )
                                 }
 
-                                item.overview?.let { overview ->
-                                    ItemDescriptionCard(overview, modifier = Modifier.padding(horizontal = 24.dp))
+                                item.overview?.unlessEmpty { overview ->
+                                    ItemDescriptionCard(overview)
                                 }
 
                                 (item as? TvDetails)?.let { series ->
                                     Text(
                                         text = mokoString(MR.strings.seasons_header),
-                                        style = MaterialTheme.typography.titleLarge,
-                                        modifier = Modifier.padding(horizontal = 24.dp)
+                                        style = MaterialTheme.typography.titleLarge
                                     )
                                     series.seasons.forEach { season ->
                                         var expanded by rememberSaveable { mutableStateOf(false) }
@@ -214,7 +224,6 @@ fun SeerrDetailsScreen(
                                         )
                                         ContainerCard(modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(horizontal = 24.dp)
                                             .clickable { expanded = !expanded }
                                         ) {
                                             Row(
@@ -269,7 +278,12 @@ fun SeerrDetailsScreen(
                                 }
 
                                 item.credits?.let { credits ->
-                                    SeerrCreditsSection(credits)
+                                    SeerrCreditsSection(
+                                        credits = credits,
+                                        onPersonClick = { personId ->
+                                            navManager.openSeerrDetails(personId, RequestType.Person)
+                                        }
+                                    )
                                 }
 
                                 val infoItems = buildList {
@@ -287,7 +301,6 @@ fun SeerrDetailsScreen(
                                     add(InfoItem(mokoString(MR.strings.studios), studiosText))
                                 }
                                 InfoArea(
-                                    modifier = Modifier.padding(horizontal = 24.dp),
                                     infoItems = infoItems,
                                     header = {
                                         Row(
@@ -325,7 +338,7 @@ fun SeerrDetailsScreen(
                 modifier = Modifier.align(Alignment.TopCenter),
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() },
+                        onClick = { onBack() },
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(
@@ -335,33 +348,60 @@ fun SeerrDetailsScreen(
                     }
                 },
                 actions = {
-                    if (buttonState.showReportIssueButton) {
+                    if (buttonState.showRequestButton) {
                         IconButton(
-                            onClick = { viewModel.showReportIssueSheet() },
+                            onClick = { viewModel.showRequestSheet() },
                             colors = IconButtonDefaults.headerBarColors()
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = mokoString(MR.strings.report_issue),
-                                tint = ArrOrange
+                                imageVector = Icons.Default.Add,
+                                contentDescription = mokoString(MR.strings.request)
                             )
                         }
-                    }
-                    if (isDebug()) {
-                        if (buttonState.showManageMenu) {
+                    } else {
+                        if (buttonState.showReportIssueButton) {
                             IconButton(
-                                onClick = { },
+                                onClick = { viewModel.showReportIssueSheet() },
                                 colors = IconButtonDefaults.headerBarColors()
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Settings,
-                                    contentDescription = mokoString(MR.strings.manage)
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = mokoString(MR.strings.report_issue),
+                                    tint = ArrOrange
                                 )
+                            }
+                        }
+                        if (isDebug()) {
+                            if (buttonState.showManageMenu) {
+                                IconButton(
+                                    onClick = { },
+                                    colors = IconButtonDefaults.headerBarColors()
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = mokoString(MR.strings.manage)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             )
+
+            if (isRequestSheetVisible) {
+                (uiState as? SeerrDetailsState.Success)?.item?.let { details ->
+                    SeerrRequestSheet(
+                        details = details,
+                        serviceDetails = serviceDetails,
+                        currentUser = currentUser,
+                        users = users,
+                        onDismissRequest = { viewModel.hideRequestSheet() },
+                        onSubmitRequest = { profileId, rootFolder, langId, seasons, userId ->
+                            viewModel.submitRequest(profileId, rootFolder, langId, seasons, userId = userId)
+                        }
+                    )
+                }
+            }
 
             if (isReportIssueSheetVisible) {
                 SeerrReportIssueSheet(

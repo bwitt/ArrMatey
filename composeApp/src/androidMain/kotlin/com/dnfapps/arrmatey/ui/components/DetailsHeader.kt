@@ -166,18 +166,20 @@ fun DetailsHeader(
     Box(modifier = Modifier.fillMaxWidth()) {
         DetailHeaderBanner(
             bannerUrl = item.fullBackdropPath,
-            gradientHeight = detailHeight.times(2).dp()
+            gradientHeight = detailHeight.times(3).dp()
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 170.dp)
                 .padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalAlignment = Alignment.Bottom
         ) {
             PosterItem(
                 item = item,
-                modifier = Modifier.width(150.dp)
+                modifier = Modifier.width(150.dp),
+                showOverlays = false
             )
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp),

@@ -8,10 +8,14 @@ import com.dnfapps.networking.safePut
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
 import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
+import com.dnfapps.arrmatey.seerr.api.model.DiscoverResponse
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
 import com.dnfapps.arrmatey.seerr.api.model.IssuesResponse
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
+import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
+import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
+import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
@@ -33,9 +37,19 @@ import org.koin.core.component.KoinComponent
 interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
+    suspend fun getUsers(): NetworkResult<List<SeerrUser>>
+    suspend fun getTrending(page: Int = 1): NetworkResult<DiscoverResponse>
+    suspend fun getDiscoverMovies(page: Int = 1): NetworkResult<DiscoverResponse>
+    suspend fun getUpcomingMovies(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
+    suspend fun getDiscoverTv(page: Int = 1): NetworkResult<DiscoverResponse>
+    suspend fun getUpcomingTv(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
+    suspend fun search(query: String, page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getRequests(page: Int = 1, pageSize: Int = 100): NetworkResult<RequestResponse>
+    suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest>
     suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails>
     suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails>
+    suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails>
+    suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits>
     suspend fun setRequestStatus(
         requestId: Long,
         status: ApprovalStatus,
@@ -74,6 +88,27 @@ class SeerrClientImpl(
     override suspend fun getUserInfo(): NetworkResult<SeerrUser> =
         get("auth/me")
 
+    override suspend fun getUsers(): NetworkResult<List<SeerrUser>> =
+        get("user")
+
+    override suspend fun getTrending(page: Int): NetworkResult<DiscoverResponse> =
+        get("discover/trending", mapOf("page" to page))
+
+    override suspend fun getDiscoverMovies(page: Int): NetworkResult<DiscoverResponse> =
+        get("discover/movies", mapOf("page" to page))
+
+    override suspend fun getUpcomingMovies(page: Int, today: String): NetworkResult<DiscoverResponse> =
+        get("discover/movies", mapOf("page" to page, "primaryReleaseDateGte" to today))
+
+    override suspend fun getDiscoverTv(page: Int): NetworkResult<DiscoverResponse> =
+        get("discover/tv", mapOf("page" to page))
+
+    override suspend fun getUpcomingTv(page: Int, today: String): NetworkResult<DiscoverResponse> =
+        get("discover/tv", mapOf("page" to page, "firstAirDateGte" to today))
+
+    override suspend fun search(query: String, page: Int): NetworkResult<DiscoverResponse> =
+        get("search", mapOf("query" to query, "page" to page))
+
     override suspend fun getRequests(
         page: Int,
         pageSize: Int
@@ -84,11 +119,20 @@ class SeerrClientImpl(
             "filter" to "pending"
         ))
 
+    override suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> =
+        post("request", request)
+
     override suspend fun getMovieDetails(tmdbId: Long): NetworkResult<MovieDetails> =
         get("movie/$tmdbId")
 
     override suspend fun getTvDetails(tmdbId: Long): NetworkResult<TvDetails> =
         get("tv/$tmdbId")
+
+    override suspend fun getPersonDetails(personId: Long): NetworkResult<PersonDetails> =
+        get("person/$personId")
+
+    override suspend fun getPersonCredits(personId: Long): NetworkResult<PersonCredits> =
+        get("person/$personId/combined_credits")
 
     override suspend fun setRequestStatus(
         requestId: Long,

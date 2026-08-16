@@ -75,16 +75,17 @@ fun MediaDetailsActions(
     onRequest4kClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-
-    Row(
-        modifier = modifier,
-//        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    if (
+        buttonState.showWatchButton || buttonState.showWatchTrailerOption ||
+        buttonState.showViewRequestButton || buttonState.showRequestMoreButton
     ) {
-        if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
-            WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)
-        }
-        if (isDebug()) {
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (buttonState.showWatchButton || buttonState.showWatchTrailerOption) {
+                WatchButton(buttonState, onWatchClicked, onWatchTrailerClicked)
+            }
             if (buttonState.showViewRequestButton) {
                 ViewRequestButton(
                     buttonState,
@@ -93,8 +94,11 @@ fun MediaDetailsActions(
                     onDeclineRequestClicked
                 )
             }
-            if (buttonState.showRequestButton) {
-                RequestButton(onRequestClicked)
+            if (buttonState.showRequestMoreButton) {
+                RequestButton(
+                    label = mokoString(MR.strings.request_more),
+                    onClick = onRequestClicked
+                )
             }
         }
     }
@@ -290,15 +294,16 @@ private fun ViewRequestButton(
 
 @Composable
 private fun RequestButton(
-    onRequestClicked: () -> Unit,
+    label: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Button(
-        onClick = onRequestClicked,
+        onClick = onClick,
         modifier = modifier
     ) {
         Icon(Icons.Default.Add, null)
         Spacer(Modifier.width(8.dp))
-        Text(mokoString(MR.strings.request))
+        Text(label)
     }
 }
