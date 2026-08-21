@@ -134,12 +134,10 @@
   <tr>
     <td><img src="screenshots/unified_series_details.png" alt="Unified Series Details (Android)" width="250"/><img src="screenshots/unified_series_details_ios.png" alt="Unified Series Details (iOS)" width="250"/></td>
     <td><img src="screenshots/unified_movie_details.png" alt="Unified Movie Details (Android)" width="250"/><img src="screenshots/unified_movie_details_ios.png" alt="Unified Movie Details (iOS)" width="250"/></td>
-    <td><img src="screenshots/episode_details.png" width="250"/><img src="screenshots/episode_details_ios.png" width="250"/></td>
   </tr>
   <tr>
-    <td align="center"><em>Unified Series Details (Placeholder: <code>screenshots/unified_series_details*.png</code>)</em></td>
-    <td align="center"><em>Unified Movie Details (Placeholder: <code>screenshots/unified_movie_details*.png</code>)</em></td>
-    <td align="center"><em>Episode Details</em></td>
+    <td align="center"><em>Unified Series Details</em></td>
+    <td align="center"><em>Unified Movie Details</em></td>
   </tr>
 </table>
 
@@ -150,8 +148,8 @@
     <td><img src="screenshots/person_details.png" alt="Person Details (Android)" width="250"/><img src="screenshots/person_details_ios.png" alt="Person Details (iOS)" width="250"/></td>
   </tr>
   <tr>
-    <td align="center"><em>Discover Tab (Placeholder: <code>screenshots/discover_tab*.png</code>)</em></td>
-    <td align="center"><em>Person Details & Filmography (Placeholder: <code>screenshots/person_details*.png</code>)</em></td>
+    <td align="center"><em>Discover Tab</em></td>
+    <td align="center"><em>Person Details & Filmography</em></td>
   </tr>
 </table>
 

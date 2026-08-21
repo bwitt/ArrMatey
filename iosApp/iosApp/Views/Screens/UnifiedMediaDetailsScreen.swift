@@ -51,6 +51,7 @@ struct UnifiedMediaDetailsScreen: View {
             contentForState()
             toastOverlay
         }
+        .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
         .task { viewModel.refresh() }
@@ -184,10 +185,10 @@ extension UnifiedMediaDetailsScreen {
                 .animation(.easeInOut(duration: 0.3), value: success.selectedInstanceId?.int64Value)
             }
         }
-        .ignoresSafeArea(edges: .top)
         .refreshable {
             viewModel.refresh()
         }
+        .ignoresSafeArea(edges: .top)
     }
 }
 
@@ -1003,7 +1004,7 @@ struct UnifiedMediaDetailsHeader: View {
         ZStack(alignment: .bottom) {
             MediaHeaderBanner(
                 bannerUrl: URL(string: success.bannerUrl ?? ""),
-                height: 350,
+                height: 400,
                 gradientHeight: infoHeight * 2
             )
             
@@ -1073,6 +1074,7 @@ struct UnifiedMediaDetailsHeader: View {
             .padding(.horizontal, 12)
             .padding(.bottom, 12)
         }
+        .frame(height: 400)
     }
 }
 
