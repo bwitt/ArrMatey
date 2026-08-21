@@ -35,6 +35,20 @@
 - Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances
 - Seamless integration with Prowlarr for indexer management, Seerr for requests and issues, and Bazarr for subtitles
 - Quick instance switching and custom instance labels
+- Live presence detection showing which instances contain a media item
+
+### Unified Media Details
+- Blends Arr library data, Seerr metadata, and Bazarr subtitle controls into a single cohesive view
+- **Instance Switching**: View media presence across multiple instances and switch between them instantly
+- **Smart Add & Requests**: Add media directly to any configured Arr instance or submit custom Seerr requests with custom profiles, root folders, and tags
+- **Seasons & Episodes**: Full episode monitoring, release search, and integrated Bazarr subtitle tracking
+- **Cast & Crew Filmography**: Browse actor and crew credits with one-tap navigation to detailed filmographies
+- **Information & Keywords**: Distinct metadata cards with instance indicators and staggered keyword tags
+
+### Discover & Requests (Seerr)
+- Dedicated Discover tab to browse trending, popular, and upcoming movies and TV shows
+- Search across movies, shows, and people with full credit filmography and backdrop previews
+- Submit requests, view pending requests, and manage media issues directly in the app
 
 ### Library Management
 - Browse your entire media library with list and grid views
@@ -115,17 +129,29 @@
   </tr>
 </table>
 
-### Media Details
+### Unified Media Details
 <table>
   <tr>
-    <td><img src="screenshots/series_details.png" width="250"/><img src="screenshots/series_details_ios.png" width="250"/></td>
-    <td><img src="screenshots/movie_details.png" width="250"/><img src="screenshots/movie_details_ios.png" width="250"/></td>
+    <td><img src="screenshots/unified_series_details.png" alt="Unified Series Details (Android)" width="250"/><img src="screenshots/unified_series_details_ios.png" alt="Unified Series Details (iOS)" width="250"/></td>
+    <td><img src="screenshots/unified_movie_details.png" alt="Unified Movie Details (Android)" width="250"/><img src="screenshots/unified_movie_details_ios.png" alt="Unified Movie Details (iOS)" width="250"/></td>
     <td><img src="screenshots/episode_details.png" width="250"/><img src="screenshots/episode_details_ios.png" width="250"/></td>
   </tr>
   <tr>
-    <td align="center"><em>Series Details</em></td>
-    <td align="center"><em>Movie Details</em></td>
+    <td align="center"><em>Unified Series Details (Placeholder: <code>screenshots/unified_series_details*.png</code>)</em></td>
+    <td align="center"><em>Unified Movie Details (Placeholder: <code>screenshots/unified_movie_details*.png</code>)</em></td>
     <td align="center"><em>Episode Details</em></td>
+  </tr>
+</table>
+
+### Discover & Person Details
+<table>
+  <tr>
+    <td><img src="screenshots/discover_tab.png" alt="Discover Tab (Android)" width="250"/><img src="screenshots/discover_tab_ios.png" alt="Discover Tab (iOS)" width="250"/></td>
+    <td><img src="screenshots/person_details.png" alt="Person Details (Android)" width="250"/><img src="screenshots/person_details_ios.png" alt="Person Details (iOS)" width="250"/></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Discover Tab (Placeholder: <code>screenshots/discover_tab*.png</code>)</em></td>
+    <td align="center"><em>Person Details & Filmography (Placeholder: <code>screenshots/person_details*.png</code>)</em></td>
   </tr>
 </table>
 
