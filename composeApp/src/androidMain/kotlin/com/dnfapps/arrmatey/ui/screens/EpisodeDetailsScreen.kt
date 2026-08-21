@@ -41,22 +41,24 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.state.HistoryState
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.entensions.copy
 import com.dnfapps.arrmatey.entensions.headerBarColors
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toSeriesRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.EpisodeDetailsHeader
 import com.dnfapps.arrmatey.ui.components.FileCard
 import com.dnfapps.arrmatey.ui.components.HistoryItemView
 import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
+import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
+import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
+import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
 
@@ -64,18 +66,23 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun EpisodeDetailsScreen(
     series: ArrSeries,
     episode: Episode,
+    onBack: () -> Unit = {},
+    onNavigateToSeriesRelease: (Long) -> Unit = {},
     viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode)
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
-    val navigation = arrNavigator
 
     val currentEpisode by viewModel.episode.collectAsStateWithLifecycle()
     val history by viewModel.history.collectAsStateWithLifecycle()
     val monitorStatus by viewModel.monitorStatus.collectAsStateWithLifecycle()
     val deleteStatus by viewModel.deleteStatus.collectAsStateWithLifecycle()
+    val queueItems by viewModel.queueItems.collectAsStateWithLifecycle()
+    val removeQueueItemStatus by viewModel.removeQueueItemStatus.collectAsStateWithLifecycle()
 
     var confirmDelete by remember { mutableStateOf(false) }
+    var selectedQueueItem by remember { mutableStateOf<QueueItem?>(null) }
+    var showConfirmRemoveQueueItem by remember { mutableStateOf(false) }
 
     LaunchedEffect(monitorStatus) {
         when (val status = monitorStatus) {
@@ -113,7 +120,7 @@ fun EpisodeDetailsScreen(
                 scrollState = scrollState,
                 navigationIcon = {
                     IconButton(
-                        onClick = { navigation.popBackStack() },
+                        onClick = onBack,
                         colors = IconButtonDefaults.headerBarColors()
                     ) {
                         Icon(
@@ -175,13 +182,20 @@ fun EpisodeDetailsScreen(
 
                     ReleaseDownloadButtons(
                         onInteractiveClicked = {
-                            navigation.toSeriesRelease(episodeId = currentEpisode.id)
+                            onNavigateToSeriesRelease(currentEpisode.id)
                         },
                         onAutomaticClicked = {
                             viewModel.executeAutomaticSearch()
                         },
                         automaticSearchEnabled = currentEpisode.monitored
                     )
+
+                    if (queueItems.isNotEmpty()) {
+                        MediaActivitySection(
+                            queueItems = queueItems,
+                            onQueueItemClicked = { selectedQueueItem = it }
+                        )
+                    }
 
                     Text(
                         text = mokoString(MR.strings.files),
@@ -258,6 +272,31 @@ fun EpisodeDetailsScreen(
                             viewModel.deleteEpisode()
                         }
                     ) { Text(mokoString(MR.strings.yes)) }
+                }
+            )
+        }
+
+        selectedQueueItem?.let { item ->
+            QueueItemInfoSheet(
+                item = item,
+                onDismiss = { selectedQueueItem = null },
+                onRemove = { showConfirmRemoveQueueItem = true }
+            )
+        }
+
+        if (showConfirmRemoveQueueItem && selectedQueueItem != null) {
+            ConfirmDeleteItemSheet(
+                onDismiss = { showConfirmRemoveQueueItem = false },
+                deleteInProgress = removeQueueItemStatus is OperationStatus.InProgress,
+                onDelete = { clientRemove, blocklist, skipRedownload ->
+                    viewModel.removeQueueItem(
+                        queueItem = selectedQueueItem!!,
+                        removeFromClient = clientRemove,
+                        addToBlocklist = blocklist,
+                        skipRedownload = skipRedownload
+                    )
+                    showConfirmRemoveQueueItem = false
+                    selectedQueueItem = null
                 }
             )
         }

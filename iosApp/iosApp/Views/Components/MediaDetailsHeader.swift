@@ -11,7 +11,10 @@ import SwiftUI
 struct ViewHeightKey: PreferenceKey {
     static var defaultValue: CGFloat = 0
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+        let next = nextValue()
+        if next > 0 {
+            value = next
+        }
     }
 }
 
@@ -41,7 +44,7 @@ struct MediaDetailsHeader: View {
             MediaHeaderBanner(
                 bannerUrl: URL(string: item.getBanner()?.remoteUrl ?? ""),
                 height: 350,
-                gradientHeight: infoHeight * 2
+                gradientHeight: infoHeight > 0 ? infoHeight + 24 : 150
             )
             
             HStack(alignment: .bottom, spacing: 24) {
@@ -90,11 +93,11 @@ struct MediaDetailsHeader: View {
                             .font(.system(size: 14))
                             .foregroundColor(.secondary)
                             .lineLimit(2)
-                            .background(GeometryReader { geometry in
-                                Color.clear.preference(key: ViewHeightKey.self, value: geometry.size.height)
-                            })
                     }
                 }
+                .background(GeometryReader { geometry in
+                    Color.clear.preference(key: ViewHeightKey.self, value: geometry.size.height)
+                })
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.horizontal, 12)
@@ -116,7 +119,7 @@ struct RequestMediaDetailsHeader: View {
             MediaHeaderBanner(
                 bannerUrl: URL(string: item.fullBackdropPath ?? ""),
                 height: 350,
-                gradientHeight: infoHeight * 2
+                gradientHeight: infoHeight > 0 ? infoHeight + 24 : 150
             )
             
             HStack(alignment: .bottom, spacing: 24) {

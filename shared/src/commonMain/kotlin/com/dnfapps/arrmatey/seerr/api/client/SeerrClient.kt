@@ -21,6 +21,7 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
+import com.dnfapps.arrmatey.seerr.api.model.UserResponse
 import com.dnfapps.arrmatey.seerr.api.model.Service
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
@@ -28,6 +29,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLQueryComponent
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -37,7 +39,7 @@ import org.koin.core.component.KoinComponent
 interface SeerrClient {
     suspend fun testConnection(): NetworkResult<Unit>
     suspend fun getUserInfo(): NetworkResult<SeerrUser>
-    suspend fun getUsers(): NetworkResult<List<SeerrUser>>
+    suspend fun getUsers(take: Int = 100, skip: Int = 0): NetworkResult<UserResponse>
     suspend fun getTrending(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getDiscoverMovies(page: Int = 1): NetworkResult<DiscoverResponse>
     suspend fun getUpcomingMovies(page: Int = 1, today: String): NetworkResult<DiscoverResponse>
@@ -60,6 +62,8 @@ interface SeerrClient {
     ): NetworkResult<MediaRequest>
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit>
     suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit>
+    suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit>
+    suspend fun markMediaAsAvailable(mediaId: Long, is4k: Boolean = false): NetworkResult<Unit>
     suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings>
     suspend fun getTvRatings(mediaId: Long): NetworkResult<RottenTomatoesRating>
     suspend fun getSeasonDetails(mediaId: Long, seasonNumber: Int): NetworkResult<Season>
@@ -88,8 +92,8 @@ class SeerrClientImpl(
     override suspend fun getUserInfo(): NetworkResult<SeerrUser> =
         get("auth/me")
 
-    override suspend fun getUsers(): NetworkResult<List<SeerrUser>> =
-        get("user")
+    override suspend fun getUsers(take: Int, skip: Int): NetworkResult<UserResponse> =
+        get("user", mapOf("take" to take, "skip" to skip))
 
     override suspend fun getTrending(page: Int): NetworkResult<DiscoverResponse> =
         get("discover/trending", mapOf("page" to page))
@@ -107,7 +111,7 @@ class SeerrClientImpl(
         get("discover/tv", mapOf("page" to page, "firstAirDateGte" to today))
 
     override suspend fun search(query: String, page: Int): NetworkResult<DiscoverResponse> =
-        get("search", mapOf("query" to query, "page" to page))
+        get("search", mapOf("query" to query.encodeURLQueryComponent(), "page" to page))
 
     override suspend fun getRequests(
         page: Int,
@@ -153,7 +157,15 @@ class SeerrClientImpl(
         delete("request/$requestId")
 
     override suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> =
-        delete("media/$mediaId", mapOf("is4k" to is4k))
+        delete("media/$mediaId/file", mapOf("is4k" to is4k))
+
+    override suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit> =
+        delete("media/$mediaId")
+
+    override suspend fun markMediaAsAvailable(mediaId: Long, is4k: Boolean): NetworkResult<Unit> =
+        post("media/$mediaId/available", buildJsonObject {
+            put("is4k", is4k)
+        })
 
     override suspend fun getMovieRatings(mediaId: Long): NetworkResult<CombinedRatings> =
         get("movie/$mediaId/ratingscombined")

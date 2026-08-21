@@ -85,7 +85,7 @@ class SeerrInstanceRepository(
 
     suspend fun getUsers() {
         client.getUsers()
-            .onSuccess { _users.value = it }
+            .onSuccess { _users.value = it.results }
     }
 
     suspend fun refreshCounts() {
@@ -250,6 +250,18 @@ class SeerrInstanceRepository(
             .onError { code, message, cause ->
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Error(code, message, cause))
             }
+    }
+
+    suspend fun deleteMediaFile(mediaId: Long, is4k: Boolean): NetworkResult<Unit> {
+        return client.deleteMediaFile(mediaId, is4k)
+    }
+
+    suspend fun clearMediaData(mediaId: Long): NetworkResult<Unit> {
+        return client.clearMediaData(mediaId)
+    }
+
+    suspend fun markMediaAsAvailable(mediaId: Long, is4k: Boolean = false): NetworkResult<Unit> {
+        return client.markMediaAsAvailable(mediaId, is4k)
     }
 
     private fun updateOperationsState(requestId: Long, status: ApprovalStatus, state: OperationStatus) {

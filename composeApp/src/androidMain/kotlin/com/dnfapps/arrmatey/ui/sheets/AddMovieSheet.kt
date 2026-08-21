@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -12,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -21,6 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
@@ -38,6 +43,8 @@ import com.dnfapps.arrmatey.utils.mokoPlural
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
+import com.dnfapps.arrmatey.instances.model.Instance
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalTime::class)
 @Composable
 fun AddMovieSheet(
@@ -49,7 +56,10 @@ fun AddMovieSheet(
     preferences: InstancePreferences,
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    instances: List<Instance> = emptyList(),
+    selectedInstance: Instance? = null,
+    onInstanceSelected: (Instance) -> Unit = {}
 ) {
     var monitored by remember(preferences.addMovieMonitored) { mutableStateOf(preferences.addMovieMonitored) }
     var minimumAvailability by remember(preferences.addMovieMinimumAvailability) { mutableStateOf(preferences.addMovieMinimumAvailability) }
@@ -75,9 +85,36 @@ fun AddMovieSheet(
         Column(
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = 24.dp)
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(bottom = 24.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            Column {
+                Text(
+                    text = mokoString(MR.strings.type_movie).uppercase(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = item.title ?: "",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (instances.size > 1 && selectedInstance != null) {
+                DropdownPicker(
+                    options = instances,
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedOption = selectedInstance,
+                    onOptionSelected = onInstanceSelected,
+                    getOptionLabel = { it.label },
+                    label = { Text(mokoString(MR.strings.instances)) }
+                )
+            }
+
             LabelledSwitch(
                 label = mokoString(MR.strings.monitored),
                 checked = monitored,

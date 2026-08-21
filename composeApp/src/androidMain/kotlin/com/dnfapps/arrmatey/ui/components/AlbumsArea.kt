@@ -56,10 +56,13 @@ fun AlbumsArea(
     onEditAlbum: (ArrAlbum) -> Unit,
     onAlbumAutomaticSearch: (Long) -> Unit,
     deleteAlbumFiles: (Long) -> Unit,
-    albumDeleteInProgress: Boolean
+    albumDeleteInProgress: Boolean,
+    onNavigateToAlbumRelease: (Long, Long) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier
     ) {
         Text(
             text = mokoString(MR.strings.albums_header),
@@ -152,7 +155,8 @@ fun AlbumsArea(
                             onDeleteAlbum = {
                                 deleteAlbumFiles(album.id)
                             },
-                            deleteInProgress = albumDeleteInProgress
+                            deleteInProgress = albumDeleteInProgress,
+                            onNavigateToAlbumRelease = onNavigateToAlbumRelease
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         albumTracks.forEachIndexed { index, track ->

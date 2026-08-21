@@ -9,205 +9,87 @@ import SwiftUI
 import Shared
 
 struct MediaInfoArea: View {
-    let item: ArrMedia
-    let qualityProfiles: [QualityProfile]
-    let tags: [Tag]
+    let arrItems: [InfoItem]
+    let seerrItems: [InfoItem]
+    let arrInstance: Instance?
+    let seerrInstance: Instance?
     
-    private var infoItems: [InfoItem] {
-        if let series = item as? ArrSeries {
-            seriesInfo(series)
-        } else if let movie = item as? ArrMovie {
-            movieInfo(movie)
-        } else if let artist = item as? Arrtist {
-            artistInfo(artist)
-        } else if let author = item as? Author {
-            authorInfo(author)
-        } else if let audiobook = item as? Audiobook {
-            audiobookInfo(audiobook)
-        } else { [] }
+    init(
+        arrItems: [InfoItem] = [],
+        seerrItems: [InfoItem] = [],
+        arrInstance: Instance? = nil,
+        seerrInstance: Instance? = nil
+    ) {
+        self.arrItems = arrItems
+        self.seerrItems = seerrItems
+        self.arrInstance = arrInstance
+        self.seerrInstance = seerrInstance
+    }
+    
+    init(infoItems: [InfoItem]) {
+        self.arrItems = infoItems
+        self.seerrItems = []
+        self.arrInstance = nil
+        self.seerrInstance = nil
+    }
+    
+    private var showFooters: Bool {
+        !arrItems.isEmpty && !seerrItems.isEmpty
     }
     
     var body: some View {
-        Section {
-            VStack(spacing: 12) {
-                ForEach(Array(infoItems), id: \.self) { info in
-                    HStack(alignment: .center) {
-                        Text(info.label)
-                            .font(.system(size: 14))
-                        Spacer(minLength: 2.0)
-                        Text(info.value)
-                            .font(.system(size: 14))
-                            .foregroundColor(.themePrimary)
-                            .lineLimit(2)
-                            .truncationMode(.tail)
-                            .multilineTextAlignment(.trailing)
-                            .frame(maxWidth: .infinity, alignment: .trailing)
-                    }
-                    
-                    if info != infoItems.last {
-                        Divider()
-                    }
+        if !arrItems.isEmpty || !seerrItems.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(MR.strings().information.localized())
+                    .font(.title3.bold())
+                
+                if !arrItems.isEmpty {
+                    infoCard(items: arrItems, instance: showFooters ? arrInstance : nil)
+                }
+                
+                if !seerrItems.isEmpty {
+                    infoCard(items: seerrItems, instance: showFooters ? seerrInstance : nil)
                 }
             }
-        } header: {
-            Text(MR.strings().information.localized())
-                .font(.system(size: 26, weight: .bold))
         }
     }
     
-    private func seriesInfo(_ series: ArrSeries) -> [InfoItem] {
-        let qualityProfile = qualityProfiles.first(where: { $0.id == series.qualityProfileId })
-        let qualityLabel = qualityProfile?.name ?? MR.strings().unknown.localized()
-        let tagsLabel = series.formatTags(availableTags: tags) ?? MR.strings().none.localized()
-        
-        let unknown = MR.strings().unknown.localized()
-        
-        let monitorLabel = if series.monitorNewItems == .all {
-            MR.strings().monitored.localized()
-        } else {
-            MR.strings().unmonitored.localized()
+    @ViewBuilder
+    private func infoCard(items: [InfoItem], instance: Instance?) -> some View {
+        VStack(spacing: 12) {
+            ForEach(Array(items), id: \.self) { info in
+                HStack(alignment: .center) {
+                    Text(info.label)
+                        .font(.system(size: 14))
+                    Spacer(minLength: 2.0)
+                    Text(info.value)
+                        .font(.system(size: 14))
+                        .foregroundColor(.themePrimary)
+                        .lineLimit(2)
+                        .truncationMode(.tail)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                }
+                
+                if info != items.last || instance != nil {
+                    Divider()
+                }
+            }
+            
+            if let instance = instance {
+                HStack(spacing: 12) {
+                    instance.type.icon.toImage(renderingMode: .original)
+                        .frame(width: 8, height: 8)
+                    Text(instance.label)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+            }
         }
-        
-        let seasonFolderLabel = if series.seasonFolder {
-            MR.strings().yes.localized()
-        } else {
-            MR.strings().no.localized()
-        }
-        
-        let diskSize = series.fileSize.bytesAsFileSizeString()
-        
-        return [
-            InfoItem(label: MR.strings().status.localized(), value: series.status.resource.localized()),
-            InfoItem(label: MR.strings().series_type.localized(), value: series.seriesType.name),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
-            InfoItem(label: MR.strings().root_folder.localized(), value: series.rootFolderPath ?? unknown),
-            InfoItem(label: MR.strings().path.localized(), value: series.path ?? unknown),
-            InfoItem(label: MR.strings().new_seasons.localized(), value: monitorLabel),
-            InfoItem(label: MR.strings().season_folders.localized(), value: seasonFolderLabel),
-            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
-            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
-        ]
-    }
-
-    private func movieInfo(_ movie: ArrMovie) -> [InfoItem] {
-        let unknown = MR.strings().unknown.localized()
-        
-        let qualityProfile = qualityProfiles.first(where: { $0.id == movie.qualityProfileId })
-        let qualityLabel = qualityProfile?.name ?? unknown
-        let tagsLabel = movie.formatTags(availableTags: tags) ?? MR.strings().none.localized()
-        
-        let rootFolderValue = movie.rootFolderPath.isEmpty ? unknown : movie.rootFolderPath
-        
-        var info: [InfoItem] = [
-            InfoItem(label: MR.strings().status.localized(), value: movie.status.resource.localized()),
-            InfoItem(label: MR.strings().minimum_availability.localized(), value: movie.minimumAvailability.name),
-            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
-            InfoItem(label: MR.strings().path.localized(), value: movie.path ?? unknown)
-        ]
-        
-        if let inCinemas = movie.inCinemas?.format(pattern: "MMM d, yyyy") {
-            info.append(InfoItem(label: MR.strings().in_cinemas.localized(), value: inCinemas))
-        }
-        
-        if let physicalRelease = movie.physicalRelease?.format(pattern: "MMM d, yyyy") {
-            info.append(InfoItem(label: MR.strings().physical_release.localized(), value: physicalRelease))
-        }
-        
-        if let digitalRelease = movie.digitalRelease?.format(pattern: "MMM d, yyyy") {
-            info.append(InfoItem(label: MR.strings().digital_release.localized(), value: digitalRelease))
-        }
-        
-        info.append(InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel))
-        info.append(InfoItem(label: MR.strings().tags.localized(), value: tagsLabel))
-        
-        return info
-    }
-
-    private func artistInfo(_ artist: Arrtist) -> [InfoItem] {
-        let unknown = MR.strings().unknown.localized()
-        
-        let qualityProfile = qualityProfiles.first(where: { $0.id == artist.qualityProfileId })
-        let qualityLabel = qualityProfile?.name ?? unknown
-        let tagsLabel = artist.formatTags(availableTags: tags) ?? MR.strings().none.localized()
-        
-        let monitorLabel = if artist.monitorNewItems == .all {
-            MR.strings().monitored.localized()
-        } else {
-            MR.strings().unmonitored.localized()
-        }
-        
-        let rootFolderValue = if let path = artist.rootFolderPath, !path.isEmpty {
-            path
-        } else {
-            unknown
-        }
-        
-        let diskSize = artist.fileSize.bytesAsFileSizeString()
-        
-        return [
-            InfoItem(label: MR.strings().status.localized(), value: artist.status.resource.localized()),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
-            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
-            InfoItem(label: MR.strings().path.localized(), value: artist.path ?? unknown),
-            InfoItem(label: MR.strings().new_albums.localized(), value: monitorLabel),
-            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
-            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
-        ]
-    }
-    
-    private func authorInfo(_ author: Author) -> [InfoItem] {
-        let unknown = MR.strings().unknown.localized()
-        
-        let qualityProfile = qualityProfiles.first(where: { $0.id == author.qualityProfileId })
-        let qualityLabel = qualityProfile?.name ?? unknown
-        let tagsLabel = author.formatTags(availableTags: tags) ?? MR.strings().none.localized()
-        
-        let monitorLabel = if author.monitorNewItems == .all {
-            MR.strings().monitored.localized()
-        } else {
-            MR.strings().unmonitored.localized()
-        }
-        
-        let rootFolderValue = if let path = author.rootFolderPath, !path.isEmpty {
-            path
-        } else {
-            unknown
-        }
-        
-        let diskSize = author.fileSize.bytesAsFileSizeString()
-        
-        return [
-            InfoItem(label: MR.strings().status.localized(), value: author.status.resource.localized()),
-            InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize),
-            InfoItem(label: MR.strings().root_folder.localized(), value: rootFolderValue),
-            InfoItem(label: MR.strings().path.localized(), value: author.path ?? unknown),
-            InfoItem(label: MR.strings().new_books.localized(), value: monitorLabel),
-            InfoItem(label: MR.strings().quality_profile.localized(), value: qualityLabel),
-            InfoItem(label: MR.strings().tags.localized(), value: tagsLabel)
-        ]
-    }
-    
-    private func audiobookInfo(_ audiobook: Audiobook) -> [InfoItem] {
-        let unknown = MR.strings().unknown.localized()
-        
-        let diskSize = audiobook.fileSize.bytesAsFileSizeString()
-        
-        let authorString = audiobook.authors.joined(separator: " • ")
-        let narratorsString = audiobook.narrators.joined(separator: " • ")
-        
-        var info = [
-            InfoItem(label: MR.strings().audiobook_info_authors.localized(), value: authorString),
-            InfoItem(label: MR.strings().audiobook_info_narrators.localized(), value: narratorsString),
-            InfoItem(label: MR.strings().publisher.localized(), value: audiobook.publisher ?? unknown)
-        ]
-        
-        if let language = audiobook.language {
-            info.append(InfoItem(label: MR.strings().language.localized(), value: language.capitalized))
-        }
-        
-        info.append(InfoItem(label: MR.strings().size_on_disk.localized(), value: diskSize))
-        info.append(InfoItem(label: MR.strings().path.localized(), value: audiobook.path ?? unknown))
-        
-        return info
+        .padding(.vertical, 12)
+        .padding(.horizontal, 18)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
     }
 }

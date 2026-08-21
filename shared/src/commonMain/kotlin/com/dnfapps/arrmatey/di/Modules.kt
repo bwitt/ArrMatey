@@ -41,10 +41,13 @@ import com.dnfapps.arrmatey.arr.usecase.PerformProwlarrSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetUnifiedMediaDetailsUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetInstancePresencesUseCase
+import com.dnfapps.arrmatey.arr.usecase.SmartAddMediaUseCase
+import com.dnfapps.arrmatey.viewmodel.UnifiedMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
-import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AudiobookFilesViewModel
@@ -153,8 +156,10 @@ import com.dnfapps.arrmatey.seerr.usecase.SearchSeerrUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMediaDetailsUseCase
 import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
+import com.dnfapps.arrmatey.seerr.usecase.ClearSeerrMediaDataUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrMovieRatingsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetSeerrTvRatingsUseCase
+import com.dnfapps.arrmatey.seerr.usecase.MarkSeerrMediaAsAvailableUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueCommentUseCase
@@ -295,6 +300,8 @@ val useCaseModule = module {
     factory { GrabProwlarrReleaseUseCase(get()) }
     factory { UpdateCalendarFilterPreferenceUseCase(get()) }
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
+    factory { SmartAddMediaUseCase(get(), get()) }
+    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
     factory { GetCurrentSeerrUserUseCase() }
     factory { GetRequestsUseCase() }
@@ -313,6 +320,8 @@ val useCaseModule = module {
     factory { CancelRequestUseCase() }
     factory { SetRequestApprovalStatusUseCase() }
     factory { RemoveSeerrMediaFileUseCase() }
+    factory { ClearSeerrMediaDataUseCase() }
+    factory { MarkSeerrMediaAsAvailableUseCase() }
     factory { GetSeerrMediaDetailsUseCase() }
     factory { GetSeerrMovieRatingsUseCase(get()) }
     factory { GetSeerrTvRatingsUseCase(get()) }
@@ -358,7 +367,10 @@ val useCaseModule = module {
     factory { CredentialMigrationUseCase(get(), get(), get()) }
     factory { ExportDataUseCase(get(), get(), get(), get(), get(), get()) }
     factory { ImportDataUseCase(get(), get(), get(), get(), get(), get()) }
+    factory { SmartAddMediaUseCase(get(), get()) }
+    factory { GetUnifiedMediaDetailsUseCase(get(), get(), get(), get(), get(), get(), get()) }
     factory { GetBazarrInstanceRepositoryUseCase(get()) }
+    factory { GetInstancePresencesUseCase() }
     factory { UpdateAllPreferencesUseCase(get(), get()) }
 }
 
@@ -368,8 +380,8 @@ val viewModelModule = module {
     factory { (type: InstanceType) ->
         ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),get())
     }
-    factory { (id: Long, type: InstanceType) ->
-        ArrMediaDetailsViewModel(id, type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
+    factory { (arrId: Long?, tmdbId: Long?, tvdbId: Long?, instanceType: InstanceType?, requestType: RequestType?) ->
+        UnifiedMediaDetailsViewModel(arrId, tmdbId, tvdbId, instanceType, requestType, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType) ->
         InstancesViewModel(type, get(), get(), get())
@@ -378,16 +390,16 @@ val viewModelModule = module {
         ArrSearchViewModel(type, get(), get(), get())
     }
     factory { (preview: ArrMedia, type: InstanceType) ->
-        MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get())
+        MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get())
     }
     factory { (type: InstanceType, defaultFilter: ReleaseFilterBy) ->
         InteractiveSearchViewModel(type, defaultFilter, get(), get(), get(), get())
     }
     factory { (movieId: Long) ->
-        MovieFilesViewModel(movieId, get())
+        MovieFilesViewModel(movieId, get(), get(), get())
     }
     factory { (seriesId: Long, episode: Episode) ->
-        EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get())
+        EpisodeDetailsViewModel(seriesId, episode, get(), get(), get(), get(), get(), get(), get())
     }
     factory { MoreScreenViewModel(get(), get(), get(), get(), get(), get()) }
     factory { AddInstanceViewModel(get(), get(), get(), get()) }
@@ -428,10 +440,10 @@ val viewModelModule = module {
         BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())
     }
     factory { (authorId: Long) ->
-        AuthorFilesViewModel(authorId, get())
+        AuthorFilesViewModel(authorId, get(), get(), get())
     }
     factory { (audiobookId: Long) ->
-        AudiobookFilesViewModel(audiobookId, get())
+        AudiobookFilesViewModel(audiobookId, get(), get(), get())
     }
     factory { (id: Long, type: BazarrMediaType) ->
         BazarrDetailsViewModel(id, type, get(), get(), get(), get(), get())

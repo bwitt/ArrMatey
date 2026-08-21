@@ -16,9 +16,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toAudiobookFiles
-import com.dnfapps.arrmatey.navigation.toAudiobookRelease
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.screens.AudiobookFileCard
 import com.dnfapps.arrmatey.utils.mokoString
@@ -27,25 +24,15 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun AudiobookFileView(
     audiobook: Audiobook,
     searchIds: Set<Long>,
-    onAutomaticSearch: () -> Unit
+    onAutomaticSearch: () -> Unit,
+    onNavigateToAudiobookFiles: (Audiobook) -> Unit,
+    onNavigateToAudiobookRelease: (Long?, String?) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val navigation = arrNavigator
-
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
     ) {
-        ReleaseDownloadButtons(
-            onInteractiveClicked = {
-                navigation.toAudiobookRelease(audiobook.id, audiobook.releaseQuery)
-            },
-            onAutomaticClicked = onAutomaticSearch,
-            automaticSearchEnabled = audiobook.monitored,
-            automaticSearchInProgress = searchIds.contains(audiobook.id),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-        )
-
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -61,10 +48,22 @@ fun AudiobookFileView(
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.clickable {
-                    navigation.toAudiobookFiles(audiobook)
+                    onNavigateToAudiobookFiles(audiobook)
                 }
             )
         }
+
+        ReleaseDownloadButtons(
+            onInteractiveClicked = {
+                onNavigateToAudiobookRelease(audiobook.id, audiobook.releaseQuery)
+            },
+            onAutomaticClicked = onAutomaticSearch,
+            automaticSearchEnabled = audiobook.monitored,
+            automaticSearchInProgress = searchIds.contains(audiobook.id),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        )
 
         audiobook.files.forEach { file ->
             AudiobookFileCard(file)

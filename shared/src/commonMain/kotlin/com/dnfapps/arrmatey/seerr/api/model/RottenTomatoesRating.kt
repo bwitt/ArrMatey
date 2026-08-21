@@ -3,23 +3,33 @@ package com.dnfapps.arrmatey.seerr.api.model
 import com.dnfapps.arrmatey.shared.MR
 import dev.icerock.moko.resources.ImageResource
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
 @Serializable
 data class RottenTomatoesRating(
     val title: String,
     val url: String,
-    val criticsRating: CriticsRating,
-    val criticsScore: Int,
-    val audienceRating: AudienceRating,
-    val audienceScore: Int,
+    val criticsRating: CriticsRating? = null,
+    val criticsScore: Int? = null,
+    val audienceRating: AudienceRating? = null,
+    val audienceScore: Int? = null,
 )
 
+
+@Serializable
 enum class CriticsRating(val icon: ImageResource) {
+    @SerialName("Rotten")
     Rotten(MR.images.rt_rotten),
-    Fresh(MR.images.rt_fresh)
+    @SerialName("Fresh")
+    Fresh(MR.images.rt_fresh),
+    @SerialName("Certified Fresh")
+    CertifiedFresh(MR.images.rt_fresh)
 }
 
+@Serializable
 enum class AudienceRating(val icon: ImageResource) {
+    @SerialName("Spilled")
     Spilled(MR.images.rt_aud_rotten),
+    @SerialName("Upright")
     Upright(MR.images.rt_aud_fresh)
 }

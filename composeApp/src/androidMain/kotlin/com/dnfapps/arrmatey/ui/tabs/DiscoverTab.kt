@@ -42,17 +42,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
-import com.dnfapps.arrmatey.navigation.LocalDiscoverNavigator
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
-import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
@@ -60,10 +60,9 @@ import com.dnfapps.arrmatey.ui.components.DiscoverSection
 import com.dnfapps.arrmatey.ui.components.PosterItem
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
-import com.dnfapps.arrmatey.ui.screens.SeerrDetailsScreen
-import com.dnfapps.arrmatey.ui.screens.SeerrPersonDetailsScreen
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 
@@ -74,35 +73,28 @@ fun DiscoverTab(
     wideRailIsVisible: Boolean,
     viewModel: TrendingViewModel = koinInject(),
     navigationManager: NavigationManager = koinInject(),
-    navigation: Navigator<DiscoverScreen> = navigationManager.discover
+    navigation: Navigator<NavKey> = navigationManager.discover
 ) {
-    CompositionLocalProvider(LocalDiscoverNavigator provides navigation) {
-        NavDisplay(
-            backStack = navigation.backStack,
-            onBack = { navigation.popBackStack() },
-            transitionSpec = { forwardSlideTransform() },
-            popTransitionSpec = { popSlideTransform() },
-            predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
-            entryProvider = entryProvider {
-                entry<DiscoverScreen.Home> {
-                    DiscoverHomeScreen(
-                        viewModel = viewModel,
-                        wideRailIsVisible = wideRailIsVisible,
-                        onItemClick = { result ->
-                            navigation.toDetails(result.id, result.mediaType)
-                        }
-                    )
-                }
-                entry<DiscoverScreen.Details> { details ->
-                    if (details.requestType == RequestType.Person) {
-                        SeerrPersonDetailsScreen(details.tmdbId, onBack = { navigation.popBackStack() })
-                    } else {
-                        SeerrDetailsScreen(details.tmdbId, details.requestType, onBack = { navigation.popBackStack() })
+    val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    NavDisplay(
+        backStack = navigation.backStack,
+        onBack = { navigation.popBackStack() },
+        transitionSpec = { forwardSlideTransform() },
+        popTransitionSpec = { popSlideTransform() },
+        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+        entryProvider = entryProvider {
+            entry<DiscoverScreen.Home> {
+                DiscoverHomeScreen(
+                    viewModel = viewModel,
+                    wideRailIsVisible = wideRailIsVisible,
+                    onItemClick = { result ->
+                        navigation.toDetails(tmdbId = result.id, requestType = result.mediaType)
                     }
-                }
+                )
             }
-        )
-    }
+            mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

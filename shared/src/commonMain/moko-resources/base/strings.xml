@@ -26,6 +26,7 @@
     <string name="type_artist">artist</string>
     <string name="type_author">author</string>
     <string name="type_person">person</string>
+    <string name="type_audiobook">audiobook</string>
 
     <!-- Titles -->
     <string name="add_instance">Add instance</string>
@@ -69,6 +70,7 @@
     <string name="forward">Forward</string>
     <string name="share">Share</string>
     <string name="save">Save</string>
+    <string name="submit">Submit</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="ok">Ok</string>
@@ -79,6 +81,10 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
+    <string name="item_edited_successfully">Item edited successfully</string>
+    <string name="error_editing_item">Error editing item</string>
+    <string name="item_deleted_successfully">Item deleted successfully</string>
+    <string name="error_deleting_item">Error deleting item</string>
     <string name="remove">Remove</string>
     <string name="manual_import">Manual Import</string>
     <string name="refresh">Refresh</string>
@@ -216,6 +222,7 @@
     <string name="continuing">Continuing</string>
     <string name="no_activity">Your queue is empty</string>
     <string name="tags">Tags</string>
+    <string name="keywords">Keywords</string>
     <string name="monitor_new_seasons">Monitor New Seasons</string>
     <string name="move_files">Move files</string>
     <string name="move_files_description">Whether to automatically move files to the new folder or not.</string>
@@ -306,6 +313,7 @@
     <string name="selected_count">%1$d selected</string>
     <string name="done">Done</string>
     <string name="born_on"> Born: %1$s  |  %2$s</string>
+    <string name="add_to_arr">Add to %1$s</string>
 
     <!-- History Event Type -->
     <string name="grabbed">Grabbed</string>
@@ -558,6 +566,13 @@
     <string name="cancel_request">Cancel Request</string>
     <string name="delete_request">Delete Request</string>
     <string name="remove_from_service">Remove from %1$s</string>
+    <string name="remove_from_radarr">Remove from Radarr</string>
+    <string name="remove_from_sonarr">Remove from Sonarr</string>
+    <string name="clear_data">Clear Data</string>
+    <string name="mark_as_available">Mark as Available</string>
+    <string name="mark_all_seasons_as_available">Mark all seasons as available</string>
+    <string name="remove_from_service_confirm">Are you sure you want to remove this media and its files from %1$s?</string>
+    <string name="clear_data_confirm">Are you sure you want to clear this media\'s data from Seerr?</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="pending">Pending</string>
     <string name="processing">Processing</string>
@@ -574,6 +589,7 @@
     <string name="view_request">View Request</string>
     <string name="request">Request</string>
     <string name="request_more">Request More</string>
+    <string name="request_in_4k">Request in 4K</string>
     <string name="requested_by">Requested by</string>
     <string name="appearances">Appearances</string>
     <string name="also_known_as">Also Known As</string>

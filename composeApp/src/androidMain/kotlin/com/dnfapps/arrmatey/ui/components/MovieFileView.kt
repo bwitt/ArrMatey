@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -17,9 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
-import com.dnfapps.arrmatey.navigation.arrNavigator
-import com.dnfapps.arrmatey.navigation.toMovieFiles
-import com.dnfapps.arrmatey.navigation.toMovieReleases
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
@@ -31,15 +29,45 @@ fun MovieFileView(
     movieExtraFiles: List<ExtraFile>,
     searchIds: Set<Long>,
     onAutomaticSearch: () -> Unit,
-    onDeleteFile: () -> Unit
+    onDeleteFile: () -> Unit,
+    onNavigateToMovieFiles: (ArrMovie) -> Unit,
+    onNavigateToMovieReleases: (Long) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val navigation = arrNavigator
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier
     ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = mokoString(MR.strings.files),
+                style = MaterialTheme.typography.titleLarge
+            )
+//            Image(
+//                painter = painterResource(MR.images.radarr),
+//                contentDescription = null,
+//                modifier = Modifier.size(24.dp)
+//            )
+            Spacer(modifier = Modifier.weight(1f))
+            if (movie.movieFile != null || movieExtraFiles.isNotEmpty()) {
+                Text(
+                    text = mokoString(MR.strings.history),
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable {
+                        onNavigateToMovieFiles(movie)
+                    }
+                )
+            }
+        }
         ReleaseDownloadButtons(
             onInteractiveClicked = {
-                navigation.toMovieReleases(movie.id!!)
+                onNavigateToMovieReleases(movie.id!!)
             },
             onAutomaticClicked = onAutomaticSearch,
             automaticSearchEnabled = movie.monitored,
@@ -48,26 +76,6 @@ fun MovieFileView(
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
         )
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = mokoString(MR.strings.files),
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = mokoString(MR.strings.history),
-                fontSize = 18.sp,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.clickable {
-                    navigation.toMovieFiles(movie)
-                }
-            )
-        }
         movie.movieFile?.let { file ->
             FileCard(file, onDelete = onDeleteFile)
         }
