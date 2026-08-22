@@ -224,16 +224,6 @@ class UnifiedMediaDetailsViewModel(
         else -> requestType
     }
 
-    val preferences: StateFlow<InstancePreferences> = if (resolvedInstanceType != null) {
-        observeInstancePreferencesUseCase(resolvedInstanceType)
-    } else {
-        flowOf(InstancePreferences())
-    }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = InstancePreferences()
-        )
 
     private val _selectedInstanceId = MutableStateFlow<Long?>(null)
     val selectedInstanceId: StateFlow<Long?> = _selectedInstanceId.asStateFlow()
@@ -353,6 +343,29 @@ class UnifiedMediaDetailsViewModel(
     private val _addSheetUiState = MutableStateFlow(AddSheetUiState())
     val addSheetUiState: StateFlow<AddSheetUiState> = _addSheetUiState.asStateFlow()
 
+    private val targetOrActiveRepoFlow: Flow<ArrInstanceRepository?> = combine(
+        activeArrRepoFlow,
+        _addSheetUiState
+    ) { activeRepo, addSheetState ->
+        val targetId = addSheetState.targetInstance?.id
+        if (targetId != null) {
+            getArrInstanceRepositoryUseCase(targetId) ?: activeRepo
+        } else {
+            activeRepo
+        }
+    }
+
+    val preferences: StateFlow<InstancePreferences> = targetOrActiveRepoFlow
+        .filterNotNull()
+        .flatMapLatest { repo ->
+            observeInstancePreferencesUseCase(repo.instance.id)
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = InstancePreferences()
+        )
+
     init {
         observeData()
         viewModelScope.launch {
@@ -374,6 +387,12 @@ class UnifiedMediaDetailsViewModel(
                 selectedInstanceId = instanceId,
                 queueItems = if (targetMedia == null) emptyList() else currentSuccess.queueItems
             )
+            val targetInst = availableInstances.value.firstOrNull { it.id == instanceId }
+                ?: currentSuccess.availableInstances.firstOrNull { it.id == instanceId }
+                ?: getArrInstanceRepositoryUseCase(instanceId)?.instance
+            if (targetMedia == null && targetInst != null) {
+                setAddSheetTargetInstance(targetInst)
+            }
         }
         viewModelScope.launch {
             activityQueueService.manualRefresh()
@@ -1030,9 +1049,11 @@ class UnifiedMediaDetailsViewModel(
 
     fun updatePreferences(preferences: InstancePreferences) {
         viewModelScope.launch {
-            val repository =
-                activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
-            updateInstancePreferencesUseCase(repository.instance.id, preferences)
+            val targetInstanceId = _addSheetUiState.value.targetInstance?.id
+                ?: activeInstance.value?.id
+            if (targetInstanceId != null) {
+                updateInstancePreferencesUseCase(targetInstanceId, preferences)
+            }
         }
     }
 

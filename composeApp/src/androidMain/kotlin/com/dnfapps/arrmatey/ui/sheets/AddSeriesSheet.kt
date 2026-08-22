@@ -61,23 +61,23 @@ fun AddSeriesSheet(
     selectedInstance: Instance? = null,
     onInstanceSelected: (Instance) -> Unit = {}
 ) {
-    var monitor by remember(preferences.addSeriesMonitor) { mutableStateOf(preferences.addSeriesMonitor) }
-    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
+    var monitor by remember(preferences.addSeriesMonitor, selectedInstance?.id) { mutableStateOf(preferences.addSeriesMonitor) }
+    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
                 ?: qualityProfiles.firstOrNull()
         )
     }
-    var seriesType by remember(preferences.addSeriesType) { mutableStateOf(preferences.addSeriesType) }
-    var seasonFolders by remember(preferences.addSeriesSeasonFolder) { mutableStateOf(preferences.addSeriesSeasonFolder) }
-    var rootFolder by remember(rootFolders, preferences.addRootFolderPath) {
+    var seriesType by remember(preferences.addSeriesType, selectedInstance?.id) { mutableStateOf(preferences.addSeriesType) }
+    var seasonFolders by remember(preferences.addSeriesSeasonFolder, selectedInstance?.id) { mutableStateOf(preferences.addSeriesSeasonFolder) }
+    var rootFolder by remember(rootFolders, preferences.addRootFolderPath, selectedInstance?.id) {
         mutableStateOf(
             rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
                 ?: rootFolders.firstOrNull()
         )
     }
-    val selectedTags = remember { mutableStateListOf<Int>() }
-    var searchOnAdd by remember(preferences.addSearchOnAdd) { mutableStateOf(preferences.addSearchOnAdd) }
+    val selectedTags = remember(selectedInstance?.id) { mutableStateListOf<Int>() }
+    var searchOnAdd by remember(preferences.addSearchOnAdd, selectedInstance?.id) { mutableStateOf(preferences.addSearchOnAdd) }
 
     ModalBottomSheet(
         onDismissRequest = {

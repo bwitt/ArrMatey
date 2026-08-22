@@ -61,22 +61,22 @@ fun AddMovieSheet(
     selectedInstance: Instance? = null,
     onInstanceSelected: (Instance) -> Unit = {}
 ) {
-    var monitored by remember(preferences.addMovieMonitored) { mutableStateOf(preferences.addMovieMonitored) }
-    var minimumAvailability by remember(preferences.addMovieMinimumAvailability) { mutableStateOf(preferences.addMovieMinimumAvailability) }
-    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
+    var monitored by remember(preferences.addMovieMonitored, selectedInstance?.id) { mutableStateOf(preferences.addMovieMonitored) }
+    var minimumAvailability by remember(preferences.addMovieMinimumAvailability, selectedInstance?.id) { mutableStateOf(preferences.addMovieMinimumAvailability) }
+    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
                 ?: qualityProfiles.firstOrNull()
         )
     }
-    var rootFolder by remember(rootFolders, preferences.addRootFolderPath) {
+    var rootFolder by remember(rootFolders, preferences.addRootFolderPath, selectedInstance?.id) {
         mutableStateOf(
             rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
                 ?: rootFolders.firstOrNull()
         )
     }
-    val selectedTags = remember { mutableStateListOf<Int>() }
-    var searchOnAdd by remember(preferences.addSearchOnAdd) { mutableStateOf(preferences.addSearchOnAdd) }
+    val selectedTags = remember(selectedInstance?.id) { mutableStateListOf<Int>() }
+    var searchOnAdd by remember(preferences.addSearchOnAdd, selectedInstance?.id) { mutableStateOf(preferences.addSearchOnAdd) }
 
     ModalBottomSheet(
         onDismissRequest = {

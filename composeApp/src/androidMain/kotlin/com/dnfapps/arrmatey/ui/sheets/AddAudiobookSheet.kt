@@ -54,22 +54,22 @@ fun AddAudiobookSheet(
     selectedInstance: Instance? = null,
     onInstanceSelected: (Instance) -> Unit = {}
 ) {
-    var monitored by remember(preferences.addAudiobookMonitored) { mutableStateOf(preferences.addAudiobookMonitored) }
-    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId) {
+    var monitored by remember(preferences.addAudiobookMonitored, selectedInstance?.id) { mutableStateOf(preferences.addAudiobookMonitored) }
+    var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
         mutableStateOf(
             qualityProfiles.firstOrNull { it.id == preferences.addQualityProfileId }
                 ?: qualityProfiles.firstOrNull()
         )
     }
-    var rootFolder by remember(rootFolders, preferences.addRootFolderPath) {
+    var rootFolder by remember(rootFolders, preferences.addRootFolderPath, selectedInstance?.id) {
         mutableStateOf(
             rootFolders.firstOrNull { it.path == preferences.addRootFolderPath }
                 ?: rootFolders.firstOrNull { it.isDefault }
                 ?: rootFolders.firstOrNull()
         )
     }
-    var relativePath by remember { mutableStateOf(relativePath) }
-    var searchOnAdd by remember(preferences.addSearchOnAdd) { mutableStateOf(preferences.addSearchOnAdd) }
+    var relativePath by remember(selectedInstance?.id) { mutableStateOf(relativePath) }
+    var searchOnAdd by remember(preferences.addSearchOnAdd, selectedInstance?.id) { mutableStateOf(preferences.addSearchOnAdd) }
 
     ModalBottomSheet(
         onDismissRequest = {

@@ -20,4 +20,7 @@ class ObserveInstancePreferencesUseCase(
             .flatMapLatest {
                 preferencesStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
             }
+
+    operator fun invoke(instanceId: Long): Flow<InstancePreferences> =
+        preferencesStoreRepository.getInstancePreferences(instanceId).observePreferences()
 }
