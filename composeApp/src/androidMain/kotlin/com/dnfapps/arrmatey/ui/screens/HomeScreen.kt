@@ -102,18 +102,19 @@ fun HomeScreen(
 
     val useServiceNavIcons by preferencesStore.useServiceNavLogos.collectAsStateWithLifecycle(false)
     val tabConfig by tabManager.tabConfiguration.collectAsStateWithLifecycle()
+    if (tabConfig.isInitialValue) return
+
     val visibleTabs = tabConfig.visibleTabs
     val drawerTabs = tabConfig.drawerTabs
 
+    val currentSelectedTab = selectedTab ?: visibleTabs.firstOrNull()
     val pagerState = rememberPagerState(
-        initialPage = remember(visibleTabs, selectedTab) {
-            visibleTabs.indexOf(selectedTab).coerceAtLeast(0)
+        initialPage = remember(visibleTabs, currentSelectedTab) {
+            visibleTabs.indexOf(currentSelectedTab).coerceAtLeast(0)
         }
     ) { visibleTabs.size }
 
-    LaunchedEffect(visibleTabs, overlayTab, tabConfig.isInitialValue) {
-        if (tabConfig.isInitialValue) return@LaunchedEffect
-
+    LaunchedEffect(visibleTabs, overlayTab) {
         if (overlayTab == null) {
             if (selectedTab == null || selectedTab !in visibleTabs) {
                 visibleTabs.firstOrNull()?.let {

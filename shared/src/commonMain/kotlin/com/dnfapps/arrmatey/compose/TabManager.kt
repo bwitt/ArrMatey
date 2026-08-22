@@ -43,7 +43,7 @@ class TabManager(
     }
         .stateIn(
             scope = CoroutineScope(Dispatchers.IO),
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = TabConfiguration(isInitialValue = true)
         )
 

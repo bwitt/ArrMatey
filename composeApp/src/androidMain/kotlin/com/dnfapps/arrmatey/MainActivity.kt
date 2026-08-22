@@ -7,9 +7,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.compose.TabItem
+import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
@@ -23,10 +25,16 @@ class MainActivity : ComponentActivity() {
 
     private val shortcutManager: AppShortcutManager by inject()
     private val navigationManager: NavigationManager by inject()
+    private val tabManager: TabManager by inject()
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        splashScreen.setKeepOnScreenCondition {
+            tabManager.tabConfiguration.value.isInitialValue
+        }
 
         lifecycleScope.launch {
             shortcutManager.updateShortcuts()
