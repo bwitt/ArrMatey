@@ -177,6 +177,7 @@ fun UnifiedMediaDetailsScreen(
     val qualityProfiles by viewModel.qualityProfiles.collectAsStateWithLifecycle()
     val rootFolders by viewModel.rootFolders.collectAsStateWithLifecycle()
     val tags by viewModel.tags.collectAsStateWithLifecycle()
+    val addItemStatus by viewModel.addItemStatus.collectAsStateWithLifecycle()
     val editStatus by viewModel.editStatus.collectAsStateWithLifecycle()
     val deleteStatus by viewModel.deleteStatus.collectAsStateWithLifecycle()
     val deleteSeasonStatus by viewModel.deleteSeasonStatus.collectAsStateWithLifecycle()
@@ -204,6 +205,8 @@ fun UnifiedMediaDetailsScreen(
     val activeSeerrInstance by viewModel.activeSeerrInstance.collectAsStateWithLifecycle()
     val searchQueuedMessage = mokoString(MR.strings.search_queued)
     val searchErrorMessage = mokoString(MR.strings.search_error)
+    val itemAddedSuccessfullyMessage = mokoString(MR.strings.item_added_successfully)
+    val errorAddingItemMessage = mokoString(MR.strings.error_adding_item)
     val itemEditedSuccessfullyMessage = mokoString(MR.strings.item_edited_successfully)
     val errorEditingItemMessage = mokoString(MR.strings.error_editing_item)
     val itemDeletedSuccessfullyMessage = mokoString(MR.strings.item_deleted_successfully)
@@ -213,6 +216,21 @@ fun UnifiedMediaDetailsScreen(
         when (lastSearchResult) {
             true -> Toast.makeText(context, searchQueuedMessage, Toast.LENGTH_SHORT).show()
             false -> Toast.makeText(context, searchErrorMessage, Toast.LENGTH_SHORT).show()
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(addItemStatus) {
+        when (addItemStatus) {
+            is OperationStatus.Success -> {
+                Toast.makeText(context, itemAddedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
+                showAddSheet = false
+            }
+
+            is OperationStatus.Error -> {
+                Toast.makeText(context, errorAddingItemMessage, Toast.LENGTH_SHORT).show()
+            }
+
             else -> {}
         }
     }
@@ -242,6 +260,17 @@ fun UnifiedMediaDetailsScreen(
 
             is OperationStatus.Error -> {
                 Toast.makeText(context, errorDeletingItemMessage, Toast.LENGTH_SHORT).show()
+            }
+
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(removeQueueItemStatus) {
+        when (removeQueueItemStatus) {
+            is OperationStatus.Success -> {
+                showConfirmRemoveQueueItem = false
+                selectedQueueItem = null
             }
 
             else -> {}
@@ -664,14 +693,13 @@ fun UnifiedMediaDetailsScreen(
                                     qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
                                     rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
                                     tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
                                     selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                        showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
                                     onDismiss = { showAddSheet = false }
@@ -682,14 +710,13 @@ fun UnifiedMediaDetailsScreen(
                                     qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
                                     rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
                                     tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
                                     selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                        showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
                                     onDismiss = { showAddSheet = false }
@@ -700,14 +727,13 @@ fun UnifiedMediaDetailsScreen(
                                     qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
                                     rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
                                     tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
                                     selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                        showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
                                     onDismiss = { showAddSheet = false }
@@ -718,14 +744,13 @@ fun UnifiedMediaDetailsScreen(
                                     qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
                                     rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
                                     tags = addSheetUiState.tags.ifEmpty { tags },
-                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
                                     selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                        showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
                                     onDismiss = { showAddSheet = false }
@@ -736,14 +761,13 @@ fun UnifiedMediaDetailsScreen(
                                     qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
                                     rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
                                     relativePath = "",
-                                    addInProgress = editStatus is OperationStatus.InProgress,
+                                    addInProgress = addItemStatus is OperationStatus.InProgress,
                                     preferences = preferences,
                                     instances = addSheetUiState.availableInstances,
                                     selectedInstance = addSheetUiState.targetInstance,
                                     onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                     onAddItem = { newItem, searchOnAdd ->
                                         viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                        showAddSheet = false
                                     },
                                     onUpdatePreferences = viewModel::updatePreferences,
                                     onDismiss = { showAddSheet = false }
@@ -761,14 +785,13 @@ fun UnifiedMediaDetailsScreen(
                                         qualityProfiles = addSheetUiState.qualityProfiles.ifEmpty { qualityProfiles },
                                         rootFolders = addSheetUiState.rootFolders.ifEmpty { rootFolders },
                                         relativePath = "",
-                                        addInProgress = editStatus is OperationStatus.InProgress,
+                                        addInProgress = addItemStatus is OperationStatus.InProgress,
                                         preferences = preferences,
                                         instances = addSheetUiState.availableInstances,
                                         selectedInstance = addSheetUiState.targetInstance,
                                         onInstanceSelected = { viewModel.setAddSheetTargetInstance(it) },
                                         onAddItem = { newItem, searchOnAdd ->
                                             viewModel.smartAdd(newItem, searchOnAdd, addSheetUiState.targetInstance?.id)
-                                            showAddSheet = false
                                         },
                                         onUpdatePreferences = viewModel::updatePreferences,
                                         onDismiss = { showAddSheet = false }
@@ -889,7 +912,6 @@ fun UnifiedMediaDetailsScreen(
                             editInProgress = editStatus is OperationStatus.InProgress,
                             onEditAlbum = {
                                 viewModel.updateAlbum(it)
-                                editAlbum = null
                             },
                             onDismiss = { editAlbum = null }
                         )
@@ -934,8 +956,6 @@ fun UnifiedMediaDetailsScreen(
                                     addToBlocklist = blocklist,
                                     skipRedownload = skipRedownload
                                 )
-                                showConfirmRemoveQueueItem = false
-                                selectedQueueItem = null
                             }
                         )
                     }

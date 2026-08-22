@@ -278,7 +278,7 @@ fun UnifiedLibraryScreen(
                 AnimatedVisibility(
                     visible = arrInstances.size > 1 && !isInSelectionMode,
                     enter = expandVertically(animationSpec = tween(200)) + fadeIn(animationSpec = tween(200)),
-                    exit = shrinkVertically(animationSpec = tween(150)) + fadeOut(animationSpec = tween(150))
+                    exit = shrinkVertically(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200))
                 ) {
                     val selectedIndex = arrInstances.indexOfFirst { it.id == currentInstance.id }.coerceAtLeast(0)
                     SecondaryScrollableTabRow(
@@ -298,11 +298,14 @@ fun UnifiedLibraryScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                                     ) {
-                                        Image(
-                                            painter = painterResource(tabInstance.type.icon),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                                        tabInstance.type.tabIcon?.let { icon ->
+                                            Icon(
+                                                painter = painterResource(icon),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(16.dp),
+                                                tint = MaterialTheme.colorScheme.onBackground
+                                            )
+                                        }
                                         Text(
                                             text = tabInstance.label,
                                             maxLines = 1,

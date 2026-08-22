@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.shared.MR
-import dev.icerock.moko.resources.compose.stringResource as mokoString
+import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +37,15 @@ fun ConfirmDeleteAlert(
     var addExclusion by remember { mutableStateOf(initialAddExclusion) }
     var deleteFiles by remember { mutableStateOf(initialDeleteFiles) }
     ModalBottomSheet(
-        onDismissRequest = onDismiss
+        onDismissRequest = {
+            if (!deleteInProgress) {
+                onDismiss()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !deleteInProgress }
+        )
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(24.dp),

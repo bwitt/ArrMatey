@@ -72,8 +72,15 @@ fun AddAudiobookSheet(
     var searchOnAdd by remember(preferences.addSearchOnAdd) { mutableStateOf(preferences.addSearchOnAdd) }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        onDismissRequest = {
+            if (!addInProgress) {
+                onDismiss()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !addInProgress }
+        )
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()

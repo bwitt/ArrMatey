@@ -81,6 +81,8 @@
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
     <string name="edit">Edit</string>
+    <string name="item_added_successfully">Item added successfully</string>
+    <string name="error_adding_item">Error adding item</string>
     <string name="item_edited_successfully">Item edited successfully</string>
     <string name="error_editing_item">Error editing item</string>
     <string name="item_deleted_successfully">Item deleted successfully</string>

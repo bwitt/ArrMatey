@@ -4,10 +4,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -40,7 +46,17 @@ fun EditAudiobookSheet(
     var selectedRootFolder by remember { mutableStateOf(rootFolders.first { item.path?.startsWith(it.path) == true }) }
     var relativePath by remember { mutableStateOf(item.path?.removePrefix(selectedRootFolder.path) ?: "") }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = {
+            if (!editInProgress) {
+                onDismiss()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !editInProgress }
+        )
+    ) {
         Column(
             modifier = Modifier
                 .padding(horizontal = 24.dp)
@@ -94,7 +110,15 @@ fun EditAudiobookSheet(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !editInProgress
             ) {
-                Text(mokoString(MR.strings.save))
+                if (editInProgress) {
+                    CircularProgressIndicator(Modifier.size(24.dp))
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null
+                    )
+                    Text(mokoString(MR.strings.save))
+                }
             }
         }
     }

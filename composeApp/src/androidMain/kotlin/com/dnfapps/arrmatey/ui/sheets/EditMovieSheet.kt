@@ -53,8 +53,15 @@ fun EditMovieSheet(
     val selectedTags = remember { item.tags.toMutableStateList() }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        onDismissRequest = {
+            if (!editInProgress) {
+                onDismiss()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !editInProgress }
+        )
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -138,7 +145,8 @@ fun EditMovieSheet(
                         tags = selectedTags
                     )
                     onEditItem(updatedItem)
-                }
+                },
+                enabled = !editInProgress
             ) {
                 if (editInProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))

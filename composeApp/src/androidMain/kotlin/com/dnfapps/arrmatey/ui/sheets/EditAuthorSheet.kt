@@ -58,8 +58,15 @@ fun EditAuthorSheet(
     val selectedTags = remember { item.tags.toMutableStateList() }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        onDismissRequest = {
+            if (!editInProgress) {
+                onDismiss()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !editInProgress }
+        )
     ) {
         Column(
             modifier = Modifier

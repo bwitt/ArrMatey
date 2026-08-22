@@ -507,8 +507,15 @@ fun ConfirmDeleteItemSheet(
     var skipRedownload by remember { mutableStateOf(true) }
 
     ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        onDismissRequest = {
+            if (!deleteInProgress) {
+                onDismiss()
+            }
+        },
+        sheetState = rememberModalBottomSheetState(
+            skipPartiallyExpanded = true,
+            confirmValueChange = { !deleteInProgress }
+        )
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),

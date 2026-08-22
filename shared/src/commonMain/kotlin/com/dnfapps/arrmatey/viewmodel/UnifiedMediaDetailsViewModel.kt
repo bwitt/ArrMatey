@@ -136,6 +136,9 @@ class UnifiedMediaDetailsViewModel(
     private val _tags = MutableStateFlow<List<Tag>>(emptyList())
     val tags: StateFlow<List<Tag>> = _tags.asStateFlow()
 
+    private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
+
     private val _editStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val editStatus: StateFlow<OperationStatus> = _editStatus.asStateFlow()
 
@@ -484,6 +487,9 @@ class UnifiedMediaDetailsViewModel(
                         activeRepo.tags.collect { _tags.value = it }
                     }
                     launch {
+                        activeRepo.addItemStatus.collect { _addItemStatus.value = it }
+                    }
+                    launch {
                         activeRepo.editItemStatus.collect { _editStatus.value = it }
                     }
                 }
@@ -710,6 +716,18 @@ class UnifiedMediaDetailsViewModel(
             val effectiveInstanceId =
                 targetInstanceId ?: _addSheetUiState.value.targetInstance?.id ?: _selectedInstanceId.value
 
+            val targetRepo = if (effectiveInstanceId != null) {
+                getArrInstanceRepositoryUseCase(effectiveInstanceId)
+            } else {
+                activeArrRepoFlow.filterNotNull().flatMapLatest { flowOf(it) }.stateIn(viewModelScope).value
+            }
+
+            val collectJob = if (targetRepo != null) {
+                launch {
+                    targetRepo.addItemStatus.collect { _addItemStatus.value = it }
+                }
+            } else null
+
             smartAddMediaUseCase(
                 instanceType = resolvedInstanceType ?: return@launch,
                 item = item,
@@ -719,6 +737,7 @@ class UnifiedMediaDetailsViewModel(
                 targetInstanceId = effectiveInstanceId
             )
             refresh()
+            collectJob?.cancel()
         }
     }
 
