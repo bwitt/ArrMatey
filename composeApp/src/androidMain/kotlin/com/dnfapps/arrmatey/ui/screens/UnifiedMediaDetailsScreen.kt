@@ -834,10 +834,45 @@ fun UnifiedMediaDetailsScreen(
                                 rootFolders = rootFolders,
                                 tags = tags,
                                 editInProgress = editStatus is OperationStatus.InProgress,
-                                onEditItem = { viewModel.editItem(it) },
+                                onEditItem = {
+                                    if (arrMedia.rootFolderPath != it.rootFolderPath) {
+                                        moveFilesItem = it
+                                    } else {
+                                        viewModel.editItem(it)
+                                    }
+                                },
                                 onDismiss = { showEditSheet = false }
                             )
                         }
+                    }
+
+                    moveFilesItem?.let { item ->
+                        AlertDialog(
+                            onDismissRequest = { moveFilesItem = null },
+                            title = {
+                                Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
+                            },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        viewModel.editItem(item, moveFiles = true)
+                                        moveFilesItem = null
+                                    }
+                                ) {
+                                    Text(mokoString(MR.strings.yes))
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = {
+                                        viewModel.editItem(item)
+                                        moveFilesItem = null
+                                    }
+                                ) {
+                                    Text(mokoString(MR.strings.no))
+                                }
+                            }
+                        )
                     }
 
                     if (confirmDelete) {
