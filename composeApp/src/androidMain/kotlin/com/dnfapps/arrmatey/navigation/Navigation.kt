@@ -69,6 +69,7 @@ open class BaseNavigator<T : NavKey>(initialScreen: T) : Navigator<T> {
 }
 
 // Marker classes for type-safe DI
+class LibraryTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class SeriesTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class MoviesTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class MusicTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
@@ -97,6 +98,24 @@ fun Navigator<*>.toDetails(
     requestType: RequestType? = null,
     type: InstanceType? = null
 ) = nav().navigateTo(MediaScreen.Details(id, tmdbId, tvdbId, requestType, type))
+
+fun Navigator<*>.toMediaDetails(
+    media: com.dnfapps.arrmatey.arr.api.model.ArrMedia,
+    type: InstanceType? = null
+) {
+    val tmdbId = when (media) {
+        is ArrMovie -> media.tmdbId.takeIf { it > 0 }
+        is ArrSeries -> media.tmdbId?.takeIf { it > 0 }
+        else -> null
+    }
+    val tvdbId = (media as? ArrSeries)?.tvdbId?.takeIf { it > 0 }
+    toDetails(
+        id = media.id,
+        tmdbId = tmdbId,
+        tvdbId = tvdbId,
+        type = type
+    )
+}
 
 fun <T> Navigator<*>.toPreview(item: T) = nav().navigateTo(MediaScreen.Preview(item))
 fun Navigator<*>.toSearch(query: String = "") = nav().navigateTo(MediaScreen.Search(query))
