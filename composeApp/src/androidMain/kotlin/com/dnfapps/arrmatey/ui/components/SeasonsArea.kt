@@ -93,32 +93,48 @@ fun SeasonsArea(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = if (season.seasonNumber == 0) {
-                                mokoString(MR.strings.specials)
-                            } else {
-                                mokoString(MR.strings.season_label, season.seasonNumber)
-                            },
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                        val statsText = season.episodeFileCount?.let {
-                            "$it/${season.totalEpisodeCount}"
-                        } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (season.seasonNumber == 0) {
+                                        mokoString(MR.strings.specials)
+                                    } else {
+                                        mokoString(MR.strings.season_label, season.seasonNumber)
+                                    },
+                                    style = MaterialTheme.typography.titleLarge
+                                )
+                                val statsText = season.episodeFileCount?.let {
+                                    "$it/${season.totalEpisodeCount}"
+                                } ?: mokoPlural(MR.plurals.episodes, season.totalEpisodeCount)
 
-                        AnimatedContent(
-                            targetState = statsText,
-                            transitionSpec = {
-                                (fadeIn() + slideInVertically { it }).togetherWith(fadeOut() + slideOutVertically { -it })
-                            },
-                            label = "SeasonStatsTextAnimation"
-                        ) { text ->
-                            Text(
-                                text = text,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                                AnimatedContent(
+                                    targetState = statsText,
+                                    transitionSpec = {
+                                        (fadeIn() + slideInVertically { it }).togetherWith(fadeOut() + slideOutVertically { -it })
+                                    },
+                                    label = "SeasonStatsTextAnimation"
+                                ) { text ->
+                                    Text(
+                                        text = text,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+
+                            if (season.infoString.isNotBlank()) {
+                                Text(
+                                    text = season.infoString,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-
-                        Spacer(modifier = Modifier.weight(1f))
 
                         AnimatedVisibility(
                             visible = season.monitored != null && seriesId != null && seriesId > 0,
@@ -159,17 +175,19 @@ fun SeasonsArea(
                     exit = shrinkVertically()
                 ) {
                     Column {
-                        Spacer(modifier = Modifier.height(6.dp))
-                        SeasonHeader(
-                            season = season,
-                            seriesId = seriesId,
-                            onPerformAutomaticSearch = onSeasonAutomaticSearch,
-                            searchInProgress = { searchIds.contains(it.toLong()) },
-                            onDeleteSeason = { deleteSeasonFiles(season.seasonNumber) },
-                            deleteInProgress = seasonDeleteInProgress,
-                            onNavigateToSeriesRelease = onNavigateToSeriesRelease
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        if (seriesId != null && season.arrSeason != null) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            SeasonHeader(
+                                season = season,
+                                seriesId = seriesId,
+                                onPerformAutomaticSearch = onSeasonAutomaticSearch,
+                                searchInProgress = { searchIds.contains(it.toLong()) },
+                                onDeleteSeason = { deleteSeasonFiles(season.seasonNumber) },
+                                deleteInProgress = seasonDeleteInProgress,
+                                onNavigateToSeriesRelease = onNavigateToSeriesRelease
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                        }
 
                         season.episodes.forEachIndexed { index, episode ->
                             val arrEp = episode.arrEpisode

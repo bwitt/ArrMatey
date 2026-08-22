@@ -2,9 +2,6 @@
 //  SeasonsArea.swift
 //  iosApp
 //
-//  A unified seasons component that mirrors Android's SeasonsArea.kt.
-//  Takes a List<SeasonWrapper> that combines arr and seerr season data and
-//  shows arr controls (monitor, delete, search) only when applicable.
 //
 
 import SwiftUI
@@ -91,42 +88,26 @@ struct SeasonAreaRow: View {
         season.arrSeason != nil && (seriesId ?? 0) > 0
     }
 
-    private var year: String {
-        season.episodes.compactMap { $0.airDateUtc }
-            .compactMap { $0.format(pattern: "yyyy") }
-            .min()
-        ?? season.episodes.compactMap { $0.airDate?.year }.min().map { String($0) }
-        ?? MR.strings().tba.localized()
-    }
-
-    private var runtime: String? {
-        let items = season.episodes.compactMap { $0.arrEpisode?.runtime?.intValue }.filter { $0 > 0 }
-        guard !items.isEmpty else { return nil }
-        let sorted = items.sorted()
-        let median = sorted[sorted.count / 2]
-        return median.formatAsRuntime()
-    }
-
-    private var sizeOnDisk: String? {
-        season.arrSeason?.statistics?.sizeOnDisk.bytesAsFileSizeString()
-    }
-
-    private var seasonInfoString: String {
-        [year, runtime, sizeOnDisk]
-            .compactMap { $0 }
-            .joined(separator: " • ")
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Tappable header card
             HStack(spacing: 12) {
-                Text(seasonTitle)
-                    .font(.system(size: 20, weight: .medium))
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 12) {
+                        Text(seasonTitle)
+                            .font(.system(size: 20, weight: .medium))
 
-                Text(statsText)
-                    .font(.system(size: 15))
-                    .foregroundColor(.secondary)
+                        Text(statsText)
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                    }
+
+                    if !season.infoString.isEmpty {
+                        Text(season.infoString)
+                            .font(.system(size: 14))
+                            .foregroundColor(.secondary)
+                    }
+                }
 
                 Spacer()
 
@@ -162,13 +143,6 @@ struct SeasonAreaRow: View {
             // Expanded content
             if expanded {
                 VStack(alignment: .leading, spacing: 10) {
-                    if !seasonInfoString.isEmpty {
-                        Text(seasonInfoString)
-                            .font(.system(size: 16))
-                            .foregroundColor(.primary)
-                            .padding(.top, 4)
-                            .padding(.horizontal, 4)
-                    }
 
                     if showArrControls, let sId = seriesId {
                         ReleaseDownloadButtons(
