@@ -22,6 +22,7 @@ class NavigationManager: ObservableObject {
     @Published var dashboardPath = NavigationPath()
     @Published var bazarrPath = NavigationPath()
     @Published var libraryPath = NavigationPath()
+    @Published var calendarPath = NavigationPath()
     
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemSettings.shared)
     @Published var selectedDrawerTab: AnyTabItem? = nil
@@ -38,6 +39,11 @@ class NavigationManager: ObservableObject {
 
         if selectedTab.key == TabItemStandard.library.key {
             libraryPath.append(route)
+            return
+        }
+
+        if selectedTab.key == TabItemStandard.calendar.key {
+            calendarPath.append(route)
             return
         }
 
@@ -65,6 +71,12 @@ class NavigationManager: ObservableObject {
         if selectedTab.key == TabItemStandard.library.key {
             if !libraryPath.isEmpty { libraryPath.removeLast() }
             libraryPath.append(route)
+            return
+        }
+
+        if selectedTab.key == TabItemStandard.calendar.key {
+            if !calendarPath.isEmpty { calendarPath.removeLast() }
+            calendarPath.append(route)
             return
         }
 
@@ -152,6 +164,7 @@ class NavigationManager: ObservableObject {
         launcherPath = NavigationPath()
         bazarrPath = NavigationPath()
         libraryPath = NavigationPath()
+        calendarPath = NavigationPath()
     }
     
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
@@ -179,6 +192,7 @@ class NavigationManager: ObservableObject {
         self.bookPath = NavigationPath()
         self.audiobookPath = NavigationPath()
         self.libraryPath = NavigationPath()
+        self.calendarPath = NavigationPath()
         
         self.seerrPath = NavigationPath()
     }
@@ -287,7 +301,8 @@ enum MediaRoute: Hashable {
         tmdbId: Int64? = nil,
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
-        requestType: RequestType? = nil
+        requestType: RequestType? = nil,
+        instanceId: Int64? = nil
     )
     case search(query: String, type: InstanceType)
     case preview(_ json : String, type: InstanceType)
