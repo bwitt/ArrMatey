@@ -117,10 +117,8 @@ class BookshelfClient(
     suspend fun getBookFiles(bookId: Long): NetworkResult<List<BookFile>> =
         get("bookFile", mapOf("bookId" to bookId))
 
-    suspend fun getBooks(authorId: Long? = null): NetworkResult<List<Book>> =
-        get("book", buildMap {
-            authorId?.let { put("authorId", it) }
-        })
+    suspend fun getBooks(): NetworkResult<List<Book>> =
+        get("book")
 
     suspend fun updateBook(book: Book): NetworkResult<Book> =
         put("book/${book.id}", book)
@@ -144,7 +142,9 @@ class BookshelfClient(
         get<List<Book>>("calendar", mapOf(
             "start" to start.toString(),
             "end" to end.toString(),
-            "unmonitored" to true
+            "unmonitored" to true,
+            "includeAuthor" to true,
+            "includeBookFile" to true
         )).map { it.map { bk -> bk.copy(instanceId = instance.id) } }
 
     override suspend fun updateMonitoring(ids: List<Long>, monitor: Any): NetworkResult<Unit> {

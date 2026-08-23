@@ -18,7 +18,6 @@ import com.dnfapps.arrmatey.arr.usecase.DeleteMovieFileUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.DeleteSeasonFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.DownloadReleaseUseCase
-import com.dnfapps.arrmatey.arr.usecase.FindMatchingInstancesForMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookFilesUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookMetadataUseCase
@@ -302,7 +301,6 @@ val useCaseModule = module {
     factory { GetProwlarrIndexersUseCase(get()) }
     factory { PerformProwlarrSearchUseCase(get()) }
     factory { GrabProwlarrReleaseUseCase(get()) }
-    factory { FindMatchingInstancesForMediaUseCase(get()) }
     factory { UpdateCalendarFilterPreferenceUseCase(get()) }
     factory { GetSeerrInstanceRepositoryUseCase(get()) }
     factory { SmartAddMediaUseCase(get(), get()) }
@@ -381,19 +379,44 @@ val useCaseModule = module {
 
 val viewModelModule = module {
     factory { TrendingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
-    factory { ActivityQueueViewModel(get(), get(), get(), get(), get()) }
+    factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
         ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),get())
     }
     factory { params ->
         UnifiedMediaDetailsViewModel(
-            arrId = params.getOrNull(),
-            tmdbId = params.getOrNull(),
-            tvdbId = params.getOrNull(),
-            instanceType = params.getOrNull(),
-            requestType = params.getOrNull(),
-            initialInstanceIdFromNav = params.getOrNull(),
-            get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()
+            arrId = if (params.size() > 0) params[0] else null,
+            tmdbId = if (params.size() > 1) params[1] else null,
+            tvdbId = if (params.size() > 2) params[2] else null,
+            instanceType = if (params.size() > 3) params[3] else null,
+            requestType = if (params.size() > 4) params[4] else null,
+            initialForcedInstanceId = if (params.size() > 5) params[5] else null,
+            getUnifiedMediaDetailsUseCase = get(),
+            smartAddMediaUseCase = get(),
+            getArrInstanceRepositoryUseCase = get(),
+            getSeerrInstanceRepositoryUseCase = get(),
+            getBazarrInstanceRepositoryUseCase = get(),
+            toggleMonitorUseCase = get(),
+            updateMediaUseCase = get(),
+            deleteMediaUseCase = get(),
+            performRefreshUseCase = get(),
+            performAutomaticSearchUseCase = get(),
+            submitRequestUseCase = get(),
+            cancelRequestUseCase = get(),
+            setRequestApprovalStatusUseCase = get(),
+            deleteSeasonFilesUseCase = get(),
+            deleteAlbumFilesUseCase = get(),
+            deleteMovieFileUseCase = get(),
+            submitIssueUseCase = get(),
+            observeInstancePreferencesUseCase = get(),
+            updateInstancePreferencesUseCase = get(),
+            observeScopedReposByTypeUseCase = get(),
+            getInstancePresencesUseCase = get(),
+            deleteQueueItemUseCase = get(),
+            activityQueueService = get(),
+            removeSeerrMediaFileUseCase = get(),
+            clearSeerrMediaDataUseCase = get(),
+            markSeerrMediaAsAvailableUseCase = get()
         )
     }
     factory { (type: InstanceType) ->
@@ -422,7 +445,7 @@ val viewModelModule = module {
     factory { (instanceId: Long) ->
         ArrInstanceDashboardViewModel(instanceId, get())
     }
-    factory { CalendarViewModel(get(), get(), get(), get(), get()) }
+    factory { CalendarViewModel(get(), get(), get(), get()) }
     factory { RequestsViewModel(get(), get(), get(), get(), get(), get(), get()) }
     factory { (tmdbId: Long, mediaType: RequestType) ->
         SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get(), get())
@@ -450,7 +473,7 @@ val viewModelModule = module {
         IssueDetailsViewModel(issuePackage, get(), get(), get())
     }
     factory { (authorId: Long, book: Book) ->
-        BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get(), get())
+        BookDetailsViewModel(authorId, book, get(), get(), get(), get(), get(), get())
     }
     factory { (authorId: Long) ->
         AuthorFilesViewModel(authorId, get(), get(), get())

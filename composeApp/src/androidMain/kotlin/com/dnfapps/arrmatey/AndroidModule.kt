@@ -40,11 +40,11 @@ val androidModule = module {
     single { MusicTabNavigator() }
     single { RequestsTabNavigator() }
     single { DiscoverTabNavigator() }
+    single { CalendarTabNavigator() }
     single { BooksTabNavigator() }
     single { AudiobooksTabNavigator() }
     single { DashboardTabNavigator() }
     single { BazarrTabNavigator() }
-    single { CalendarTabNavigator() }
 
     // Navigation Manager
     single {
@@ -55,11 +55,11 @@ val androidModule = module {
             TabItem.Standard.MUSIC to get<MusicTabNavigator>(),
             TabItem.Standard.REQUESTS to get<RequestsTabNavigator>(),
             TabItem.Standard.DISCOVER to get<DiscoverTabNavigator>(),
+            TabItem.Standard.CALENDAR to get<CalendarTabNavigator>(),
             TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
             TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
-            TabItem.Standard.CALENDAR to get<CalendarTabNavigator>()
         )
-        NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get())//, get())
+        NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get())
     }
 
     // Others

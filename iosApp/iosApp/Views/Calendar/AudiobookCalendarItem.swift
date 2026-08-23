@@ -10,6 +10,8 @@ import Shared
 
 struct AudiobookCalendarItem: View {
     let audiobook: Audiobook
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var statusIcon: String? {
         if audiobook.isDownloaded {
@@ -31,30 +33,36 @@ struct AudiobookCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            GenericPosterItem(posterUrl: audiobook.getPoster()?.remoteUrl, aspectRatio: .cover)
-                .frame(width: 50)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(audiobook.title ?? "")
-                    .font(.headline)
-                    .foregroundColor(.black)
+        SlidableCalendarItem(
+            instanceIds: audiobook.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                GenericPosterItem(posterUrl: audiobook.getPoster()?.remoteUrl, aspectRatio: .cover)
+                    .frame(width: 50)
                 
-                Text(statusText)
-                    .font(.subheadline)
-                    .foregroundColor(.black)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(audiobook.title ?? "")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                    
+                    Text(statusText)
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                }
+                
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.black)
+                }
             }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.black)
-            }
+            .padding()
+            .background(.arrLightPurple)
+            .cornerRadius(12)
         }
-        .padding()
-        .background(.arrLightPurple)
-        .cornerRadius(12)
     }
 }

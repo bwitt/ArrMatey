@@ -53,8 +53,10 @@ class EpisodeDetailsViewModel(
     val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
         .map { tasks ->
             tasks.filterIsInstance<SonarrQueueItem>().filter { task ->
-                task.calcEpisodeId == episode.id ||
+                task.instanceId == episode.instanceId && (
+                    task.calcEpisodeId == episode.id ||
                     (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
+                )
             }
         }
         .stateIn(
@@ -69,18 +71,22 @@ class EpisodeDetailsViewModel(
     private var currentRepository: ArrInstanceRepository? = null
 
     init {
-        observeSelectedInstance()
+        val forcedInstanceId = episode.instanceId
+        if (forcedInstanceId != null) {
+            getArrInstanceRepositoryUseCase(forcedInstanceId)?.let { repository ->
+                currentRepository = repository
+                observeData(repository)
+                refreshHistory()
+            } ?: observeSelectedInstance()
+        } else {
+            observeSelectedInstance()
+        }
     }
 
     private fun observeSelectedInstance() {
-        val repoFlow = if (episode.value.instanceId != null) {
-            getArrInstanceRepositoryUseCase.observeById(episode.value.instanceId!!)
-        } else {
-            getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Sonarr)
-        }
-
         viewModelScope.launch {
-            repoFlow.filterNotNull()
+            getArrInstanceRepositoryUseCase.observeSelected(InstanceType.Sonarr)
+                .filterNotNull()
                 .collectLatest { repository ->
                     currentRepository = repository
                     observeData(repository)
@@ -90,12 +96,6 @@ class EpisodeDetailsViewModel(
     }
 
     private fun observeData(repository: ArrInstanceRepository) {
-        viewModelScope.launch {
-            repository.getMediaDetails(seriesId)
-        }
-        viewModelScope.launch {
-            repository.getEpisodes(seriesId)
-        }
         viewModelScope.launch {
             repository.episodes
                 .map { episodesMap ->

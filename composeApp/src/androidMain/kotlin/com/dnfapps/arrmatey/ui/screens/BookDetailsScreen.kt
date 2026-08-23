@@ -89,7 +89,6 @@ fun BookDetailsScreen(
     val scrollState = rememberScrollState()
 
     val currentBook by viewModel.book.collectAsStateWithLifecycle()
-    val currentAuthor by viewModel.author.collectAsStateWithLifecycle()
     val bookFiles by viewModel.bookFiles.collectAsStateWithLifecycle()
     val bookEdition by viewModel.bookEdition.collectAsStateWithLifecycle()
 
@@ -196,7 +195,7 @@ fun BookDetailsScreen(
                             text = currentBook.title.breakable(),
                             style = MaterialTheme.typography.headlineMedium
                         )
-                        currentAuthor.title?.let { title ->
+                        currentBook.author?.title?.let { title ->
                             Text(
                                 text = title,
                                 style = MaterialTheme.typography.bodyLarge

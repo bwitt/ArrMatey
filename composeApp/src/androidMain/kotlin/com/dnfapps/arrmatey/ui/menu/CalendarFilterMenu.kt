@@ -100,8 +100,7 @@ fun CalendarFilterMenu(
             )
 
             DropdownMenuGroup(
-                shapes = MenuDefaults.groupShape(1, 2),
-                interactionSource = groupInteractionSource
+                shapes = MenuDefaults.groupShape(1, 2)
             ) {
                 toggles.forEachIndexed { index, (resource, pair, icon) ->
                     val (isChecked, action) = pair

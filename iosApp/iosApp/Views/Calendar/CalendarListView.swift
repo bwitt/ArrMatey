@@ -10,8 +10,9 @@ import Shared
 
 struct CalendarListView: View {
     let state: CalendarState
+    let instances: [Instance]
+    let onItemClick: (CalendarItem, Int64?) -> Void
     let onLoadMore: () -> Void
-    var onItemClick: ((CalendarItem) -> Void)? = nil
     
     @State private var scrollProxy: ScrollViewProxy?
     @State private var showScrollToToday = false
@@ -89,6 +90,7 @@ struct CalendarListView: View {
             date: date,
             items: state.items[date] ?? [],
             isToday: isToday,
+            instances: instances,
             onItemClick: onItemClick
         )
         .id(date)

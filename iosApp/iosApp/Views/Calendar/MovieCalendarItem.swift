@@ -11,6 +11,8 @@ import Shared
 struct MovieCalendarItem: View {
     let movie: ArrMovie
     let date: LocalDate
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var statusIcon: String? {
         if movie.isDownloaded {
@@ -44,40 +46,46 @@ struct MovieCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            PosterItem(item: movie)
-                .frame(width: 50)
-            
-            VStack(alignment: .leading, spacing: 6) {
-                Text(movie.title ?? MR.strings().unknown.localized())
-                    .font(.headline)
-                    .foregroundColor(.black)
+        SlidableCalendarItem(
+            instanceIds: movie.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                PosterItem(item: movie)
+                    .frame(width: 50)
                 
-                if let releaseType = releaseTypeText {
-                    HStack(spacing: 8) {
-                        Text(releaseType)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(movie.title ?? MR.strings().unknown.localized())
+                        .font(.headline)
+                        .foregroundColor(.black)
+                    
+                    if let releaseType = releaseTypeText {
+                        HStack(spacing: 8) {
+                            Text(releaseType)
+                                .font(.footnote)
+                                .foregroundColor(.black)
+                        }
+                    }
+                    
+                    if !infoString.isEmpty {
+                        Text(infoString)
                             .font(.footnote)
                             .foregroundColor(.black)
                     }
                 }
                 
-                if !infoString.isEmpty {
-                    Text(infoString)
-                        .font(.footnote)
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 20))
                         .foregroundColor(.black)
                 }
             }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 20))
-                    .foregroundColor(.black)
-            }
+            .padding()
+            .background(.arrOrange)
+            .cornerRadius(12)
         }
-        .padding()
-        .background(.arrOrange)
-        .cornerRadius(12)
     }
 }

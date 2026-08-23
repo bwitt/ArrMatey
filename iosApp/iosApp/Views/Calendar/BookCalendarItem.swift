@@ -10,6 +10,8 @@ import Shared
 
 struct BookCalendarItem: View {
     let book: Book
+    let instances: [Instance]
+    let onNavigate: (Int64?) -> Void
     
     private var statusIcon: String? {
         if book.isDownloaded {
@@ -32,30 +34,36 @@ struct BookCalendarItem: View {
     }
     
     var body: some View {
-        HStack(spacing: 12) {
-            GenericPosterItem(posterUrl: book.getCover()?.remoteUrl, aspectRatio: .poster)
-                .frame(width: 50)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(book.title)
-                    .font(.headline)
-                    .foregroundColor(.black)
+        SlidableCalendarItem(
+            instanceIds: book.instanceIds,
+            instances: instances,
+            onInstanceSelected: onNavigate
+        ) {
+            HStack(spacing: 12) {
+                GenericPosterItem(posterUrl: book.getCover()?.remoteUrl, aspectRatio: .poster)
+                    .frame(width: 50)
                 
-                Text(statusText)
-                    .font(.subheadline)
-                    .foregroundColor(.black)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(book.title)
+                        .font(.headline)
+                        .foregroundColor(.black)
+                    
+                    Text(statusText)
+                        .font(.subheadline)
+                        .foregroundColor(.black)
+                }
+                
+                Spacer()
+                
+                if let icon = statusIcon {
+                    Image(systemName: icon)
+                        .font(.system(size: 18))
+                        .foregroundColor(.black)
+                }
             }
-            
-            Spacer()
-            
-            if let icon = statusIcon {
-                Image(systemName: icon)
-                    .font(.system(size: 18))
-                    .foregroundColor(.black)
-            }
+            .padding()
+            .background(.arrRed)
+            .cornerRadius(12)
         }
-        .padding()
-        .background(.arrRed)
-        .cornerRadius(12)
     }
 }

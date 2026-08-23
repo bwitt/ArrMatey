@@ -42,11 +42,6 @@ class NavigationManager: ObservableObject {
             return
         }
 
-        if selectedTab.key == TabItemStandard.calendar.key {
-            calendarPath.append(route)
-            return
-        }
-
         navigateToTab(tabFor(type))
 
         switch type {
@@ -71,12 +66,6 @@ class NavigationManager: ObservableObject {
         if selectedTab.key == TabItemStandard.library.key {
             if !libraryPath.isEmpty { libraryPath.removeLast() }
             libraryPath.append(route)
-            return
-        }
-
-        if selectedTab.key == TabItemStandard.calendar.key {
-            if !calendarPath.isEmpty { calendarPath.removeLast() }
-            calendarPath.append(route)
             return
         }
 
@@ -164,7 +153,6 @@ class NavigationManager: ObservableObject {
         launcherPath = NavigationPath()
         bazarrPath = NavigationPath()
         libraryPath = NavigationPath()
-        calendarPath = NavigationPath()
     }
     
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
@@ -192,7 +180,6 @@ class NavigationManager: ObservableObject {
         self.bookPath = NavigationPath()
         self.audiobookPath = NavigationPath()
         self.libraryPath = NavigationPath()
-        self.calendarPath = NavigationPath()
         
         self.seerrPath = NavigationPath()
     }

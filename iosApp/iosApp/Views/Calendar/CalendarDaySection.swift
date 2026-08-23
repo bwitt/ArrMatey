@@ -12,7 +12,8 @@ struct CalendarDaySection: View {
     let date: LocalDate
     let items: [CalendarItem]
     let isToday: Bool
-    var onItemClick: ((CalendarItem) -> Void)? = nil
+    let instances: [Instance]
+    let onItemClick: (CalendarItem, Int64?) -> Void
     
     private var totalItems: Int {
         items.count(where: { !($0 is EpisodeGroup) })
@@ -55,25 +56,33 @@ struct CalendarDaySection: View {
             }
             
             ForEach(items, id: \.calendarId) { item in
+                let onNavigate: (Int64?) -> Void = { instanceId in
+                    onItemClick(item, instanceId)
+                }
+
                 switch item {
                 case let movie as ArrMovie:
-                    MovieCalendarItem(movie: movie, date: date)
-                        .onTapGesture { onItemClick?(movie) }
+                    MovieCalendarItem(movie: movie, date: date, instances: instances, onNavigate: onNavigate)
                 case let epGroup as EpisodeGroup:
-                    EpisodeCalendarItem(item: epGroup)
-                        .onTapGesture { onItemClick?(epGroup) }
+                    EpisodeCalendarItem(
+                        episode: epGroup.first,
+                        additional: epGroup.additional,
+                        instances: instances,
+                        onNavigate: onNavigate
+                    )
                 case let episode as Episode:
-                    EpisodeCalendarItem(item: episode)
-                        .onTapGesture { onItemClick?(episode) }
+                    EpisodeCalendarItem(
+                        episode: episode,
+                        additional: [],
+                        instances: instances,
+                        onNavigate: onNavigate
+                    )
                 case let album as ArrAlbum:
-                    AlbumCalendarItem(album: album)
-                        .onTapGesture { onItemClick?(album) }
+                    AlbumCalendarItem(album: album, instances: instances, onNavigate: onNavigate)
                 case let book as Book:
-                    BookCalendarItem(book: book)
-                        .onTapGesture { onItemClick?(book) }
+                    BookCalendarItem(book: book, instances: instances, onNavigate: onNavigate)
                 case let audiobook as Audiobook:
-                    AudiobookCalendarItem(audiobook: audiobook)
-                        .onTapGesture { onItemClick?(audiobook) }
+                    AudiobookCalendarItem(audiobook: audiobook, instances: instances, onNavigate: onNavigate)
                 default: EmptyView()
                 }
             }

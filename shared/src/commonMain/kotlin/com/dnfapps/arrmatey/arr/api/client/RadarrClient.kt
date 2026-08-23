@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.arr.api.model.MovieRelease
 import com.dnfapps.arrmatey.arr.api.model.RadarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.networking.NetworkResult
+import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.model.Instance
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
@@ -22,7 +23,20 @@ class RadarrClient(
 ): BaseArrClient(httpClient), ArrClient {
 
     override suspend fun getLibrary(): NetworkResult<List<ArrMovie>> =
-        get("movie")
+        get<List<ArrMovie>>("movie")
+            .onSuccess { movies ->
+                movies.map { movie ->
+                    movie.copy(
+                        images = movie.images.map { image ->
+                            if (image.remoteUrl?.startsWith("/") == true) {
+                                image.copy(remoteUrl = "$baseUrl${image.remoteUrl}")
+                            } else {
+                                image
+                            }
+                        }
+                    )
+                }
+            }
 
     override suspend fun getDetail(id: Long): NetworkResult<ArrMovie> =
         get("movie/$id")
@@ -105,7 +119,8 @@ class RadarrClient(
         get<List<ArrMovie>>("calendar", mapOf(
             "start" to start.toString(),
             "end" to end.toString(),
-            "unmonitored" to true
+            "unmonitored" to true,
+            "includeMoveiFile" to true
         )).map { it.map { movie -> movie.copy(instanceId = instance.id) } }
 
     suspend fun getMovieExtraFile(id: Long): NetworkResult<List<ExtraFile>> =

@@ -48,11 +48,7 @@ sealed interface DiscoverScreen: NavKey {
 }
 
 sealed interface CalendarScreen: NavKey {
-    data object Calendar: CalendarScreen
-}
-
-sealed interface ActivityScreen: NavKey {
-    data object Queue: ActivityScreen
+    data object Home: CalendarScreen
 }
 
 sealed interface SettingsScreen : NavKey {
