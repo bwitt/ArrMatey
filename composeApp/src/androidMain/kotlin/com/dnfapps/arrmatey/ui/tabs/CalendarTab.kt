@@ -5,13 +5,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarViewDay
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -21,6 +24,7 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -134,7 +138,7 @@ fun CalendarTab(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CalendarHomeScreen(
     viewModel: CalendarViewModel,
@@ -182,51 +186,62 @@ private fun CalendarHomeScreen(
         },
         contentWindowInsets = WindowInsets.statusBars
     ) { paddingValues ->
-        PullToRefreshBox(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            isRefreshing = calendarState.isLoading,
-            onRefresh = { viewModel.load() }
+            contentAlignment = Alignment.Center
         ) {
-            if (isExpanded) {
-                Row(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        CalendarMonthView(
-                            state = calendarState,
-                            instances = instances,
-                            onItemClick = onItemClick,
-                            onLoadMore = { viewModel.loadMore() }
-                        )
-                    }
-                    VerticalDivider(modifier = Modifier.padding(horizontal = 8.dp))
-                    Box(modifier = Modifier.weight(1f)) {
-                        CalendarListView(
-                            state = calendarState,
-                            instances = instances,
-                            onItemClick = onItemClick,
-                            onLoadMore = { viewModel.loadMore() }
-                        )
-                    }
-                }
+            if (!calendarState.hasLoaded && calendarState.isLoading && calendarState.items.isEmpty()) {
+                LoadingIndicator(
+                    modifier = Modifier.size(96.dp)
+                )
             } else {
-                when (calendarState.filterState.viewMode) {
-                    CalendarViewMode.List -> {
-                        CalendarListView(
-                            state = calendarState,
-                            instances = instances,
-                            onItemClick = onItemClick,
-                            onLoadMore = { viewModel.loadMore() }
-                        )
-                    }
+                PullToRefreshBox(
+                    modifier = Modifier.fillMaxSize(),
+                    isRefreshing = calendarState.isLoading,
+                    onRefresh = { viewModel.load() }
+                ) {
+                    if (isExpanded) {
+                        Row(modifier = Modifier.fillMaxSize()) {
+                            Box(modifier = Modifier.weight(1f)) {
+                                CalendarMonthView(
+                                    state = calendarState,
+                                    instances = instances,
+                                    onItemClick = onItemClick,
+                                    onLoadMore = { viewModel.loadMore() }
+                                )
+                            }
+                            VerticalDivider(modifier = Modifier.padding(horizontal = 8.dp))
+                            Box(modifier = Modifier.weight(1f)) {
+                                CalendarListView(
+                                    state = calendarState,
+                                    instances = instances,
+                                    onItemClick = onItemClick,
+                                    onLoadMore = { viewModel.loadMore() }
+                                )
+                            }
+                        }
+                    } else {
+                        when (calendarState.filterState.viewMode) {
+                            CalendarViewMode.List -> {
+                                CalendarListView(
+                                    state = calendarState,
+                                    instances = instances,
+                                    onItemClick = onItemClick,
+                                    onLoadMore = { viewModel.loadMore() }
+                                )
+                            }
 
-                    CalendarViewMode.Month -> {
-                        CalendarMonthView(
-                            state = calendarState,
-                            instances = instances,
-                            onItemClick = onItemClick,
-                            onLoadMore = { viewModel.loadMore() }
-                        )
+                            CalendarViewMode.Month -> {
+                                CalendarMonthView(
+                                    state = calendarState,
+                                    instances = instances,
+                                    onItemClick = onItemClick,
+                                    onLoadMore = { viewModel.loadMore() }
+                                )
+                            }
+                        }
                     }
                 }
             }

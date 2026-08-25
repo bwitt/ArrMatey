@@ -55,6 +55,9 @@ class CalendarService(
     private val _isLoadingFuture = MutableStateFlow(false)
     val isLoadingFuture: StateFlow<Boolean> = _isLoadingFuture.asStateFlow()
 
+    private val _hasLoaded = MutableStateFlow(false)
+    val hasLoaded: StateFlow<Boolean> = _hasLoaded.asStateFlow()
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
@@ -70,9 +73,12 @@ class CalendarService(
         val start = now.minus(daysRange, DateTimeUnit.DAY)
         val end = now.plus(daysRange, DateTimeUnit.DAY)
 
+        insertDates(start, end)
+
         fetch(start, end)
 
         _isLoading.value = false
+        _hasLoaded.value = true
     }
 
     suspend fun loadMoreDates() {
@@ -87,6 +93,8 @@ class CalendarService(
 
         val start = lastDate.plus(1, DateTimeUnit.DAY)
         val end = lastDate.plus(daysRange, DateTimeUnit.DAY)
+
+        insertDates(start, end)
 
         fetch(start, end)
 
@@ -109,8 +117,6 @@ class CalendarService(
                 }
             }
         }
-
-        insertDates(start, end)
     }
 
     private fun handleCalendarItems(
@@ -132,19 +138,23 @@ class CalendarService(
             }
         }
 
-        // Notifications
-        scope.launch {
-            val enrichedItems = if (type == InstanceType.Booksehelf) {
-                val authors = repository.client.getLibrary().asSuccess()?.data
-                    ?.filterIsInstance<Author>()?.associateBy { it.id } ?: emptyMap()
-                itemsWithId.filterIsInstance<Book>().map { book ->
-                    authors[book.authorId]?.let { author ->
-                        book.copy(authorTitle = author.title, author = author)
-                    } ?: book
+        // State updates immediately as this repository succeeds
+        _items.update { current ->
+            val next = current.toMutableMap()
+            itemsWithId.forEach { item ->
+                item.getCalendarDates().forEach { date ->
+                    upsertItem(next, item, date.toLocalDate())
                 }
-            } else itemsWithId
+            }
+            if (type == InstanceType.Sonarr) {
+                applyGrouping(next)
+            }
+            next
+        }
 
-            val fetchedIds = enrichedItems.map { it.calendarId.toInt() }.toSet()
+        // Notifications in background scope
+        scope.launch {
+            val fetchedIds = itemsWithId.map { it.calendarId.toInt() }.toSet()
 
             val snapshot: List<CalendarItem> = _items.value.values.flatten().filter {
                 isItemOfInstanceType(it, type)
@@ -158,7 +168,7 @@ class CalendarService(
                 getInstanceId = { it.instanceId }
             )
 
-            enrichedItems.forEach { item ->
+            itemsWithId.forEach { item ->
                 item.notificationScheduledTime?.let { scheduledTime ->
                     scheduleNotificationUseCase(
                         instance = instance,
@@ -168,20 +178,6 @@ class CalendarService(
                         releaseType = item.notificationReleaseType
                     )
                 }
-            }
-
-            // State updates
-            _items.update { current ->
-                val next = current.toMutableMap()
-                enrichedItems.forEach { item ->
-                    item.getCalendarDates().forEach { date ->
-                        upsertItem(next, item, date.toLocalDate())
-                    }
-                }
-                if (type == InstanceType.Sonarr) {
-                    applyGrouping(next)
-                }
-                next
             }
         }
     }
@@ -354,6 +350,7 @@ class CalendarService(
         _items.value = emptyMap()
         _dates.value = emptyList()
         _error.value = null
+        _hasLoaded.value = false
     }
 
     fun cleanup() {

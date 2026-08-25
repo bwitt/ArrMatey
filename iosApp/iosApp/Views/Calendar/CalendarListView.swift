@@ -77,6 +77,11 @@ struct CalendarListView: View {
             ForEach(Array(state.dates.enumerated()), id: \.element) { index, date in
                 daySectionView(for: date, at: index)
             }
+            if state.isLoadingFuture {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            }
         }
         .padding()
     }

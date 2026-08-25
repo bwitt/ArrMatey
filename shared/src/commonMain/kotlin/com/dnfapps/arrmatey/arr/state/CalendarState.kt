@@ -17,6 +17,7 @@ data class CalendarState(
     val dates: List<LocalDate> = emptyList(),
     val isLoading: Boolean = false,
     val isLoadingFuture: Boolean = false,
+    val hasLoaded: Boolean = false,
     val error: String? = null,
     val today: LocalDate = Clock.localToday()
 ) {
