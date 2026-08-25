@@ -45,6 +45,7 @@ kotlin {
             implementation(libs.kmp.logger)
         }
         commonMain.dependencies {
+            implementation(project.dependencies.platform(libs.koin.bom))
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -72,6 +73,16 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
+            implementation(libs.koin.test)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.mockk)
+            implementation(libs.robolectric)
+            implementation(libs.androidx.compose.ui.test.junit4)
+            implementation(libs.androidx.test.monitor)
         }
     }
 }
