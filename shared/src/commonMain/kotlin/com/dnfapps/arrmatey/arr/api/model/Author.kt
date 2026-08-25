@@ -123,4 +123,7 @@ data class Author(
         path = "${rootFolderPath}/${folder}",
         tags = tags
     )
+
+    override fun withNewRoot(rootFolderPath: String, currentRootFolderPath: String?): ArrMedia =
+        copy(rootFolderPath = rootFolderPath)
 }
