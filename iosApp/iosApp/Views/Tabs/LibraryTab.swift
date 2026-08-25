@@ -21,8 +21,6 @@ struct LibraryTabContent: View {
     @ObservedObject var libraryViewModel: UnifiedLibraryViewModelS
     @EnvironmentObject private var navigationManager: NavigationManager
     
-    @ObservedObject private var activityQueueViewModel = ActivityQueueViewModelS()
-    
     @State private var searchPresented: Bool = false
     @State private var customizationSheetPresented: Bool = false
     @State private var confirmDelete: Bool = false
@@ -45,10 +43,6 @@ struct LibraryTabContent: View {
     
     private var preferences: InstancePreferences {
         libraryViewModel.preferences
-    }
-    
-    private var queueItems: [QueueItem] {
-        activityQueueViewModel.queueItems
     }
 
     var body: some View {
@@ -228,7 +222,8 @@ struct LibraryTabContent: View {
                         }
                     },
                     itemIsActive: { item in
-                        queueItems.contains(where: { $0.mediaId == item.id })
+                        guard let instanceId = selectedInstance?.id, let itemId = item.id?.int64Value else { return false }
+                        return libraryViewModel.isItemActive(instanceId: instanceId, mediaId: itemId)
                     }
                 )
             }

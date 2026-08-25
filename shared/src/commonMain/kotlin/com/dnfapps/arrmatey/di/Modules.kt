@@ -381,7 +381,7 @@ val viewModelModule = module {
     factory { TrendingViewModel(get(), get(), get(), get(), get(), get(), get(), get()) }
     factory { ActivityQueueViewModel(get(), get(), get(), get()) }
     factory { (type: InstanceType) ->
-        ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),get())
+        ArrMediaViewModel(type, get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { params ->
         UnifiedMediaDetailsViewModel(
@@ -423,7 +423,7 @@ val viewModelModule = module {
         InstancesViewModel(type, get(), get(), get())
     }
     factory { (type: InstanceType, instanceId: Long?) ->
-        ArrSearchViewModel(type, instanceId, get(), get(), get())
+        ArrSearchViewModel(type, instanceId, get(), get(), get(), get())
     }
     factory { (preview: ArrMedia, type: InstanceType) ->
         MediaPreviewViewModel(preview, type, get(), get(), get(), get(), get(), get(), get())
@@ -486,7 +486,7 @@ val viewModelModule = module {
     }
     factory { CombinedDashboardViewModel(get(), get(), get(), get(), get(), get()) }
     factory { BackupViewModel(get(), get(), get(), get()) }
-    factory { UnifiedLibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
+    factory { UnifiedLibraryViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
 }
 
 val resourcesModule = module {

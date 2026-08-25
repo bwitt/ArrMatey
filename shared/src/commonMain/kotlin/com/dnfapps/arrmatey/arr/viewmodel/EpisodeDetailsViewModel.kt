@@ -52,8 +52,9 @@ class EpisodeDetailsViewModel(
 
     val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
         .map { tasks ->
+            val targetInstanceId = episode.instanceId ?: currentRepository?.instance?.id
             tasks.filterIsInstance<SonarrQueueItem>().filter { task ->
-                task.instanceId == episode.instanceId && (
+                (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) && (
                     task.calcEpisodeId == episode.id ||
                     (task.calcSeriesId == seriesId && task.seasonNumber == episode.seasonNumber && task.calcEpisodeId == null)
                 )

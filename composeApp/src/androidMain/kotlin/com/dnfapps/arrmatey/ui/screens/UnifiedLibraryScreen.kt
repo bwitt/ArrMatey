@@ -56,7 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
-import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.UnifiedLibraryViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.navigationManager
@@ -85,8 +84,7 @@ fun UnifiedLibraryScreen(
     wideRailIsVisible: Boolean = false,
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
     onNavigateToDetails: (ArrMedia, InstanceType, Long?) -> Unit,
-    unifiedLibraryViewModel: UnifiedLibraryViewModel = koinInject(),
-    activityQueueViewModel: ActivityQueueViewModel = koinInject()
+    unifiedLibraryViewModel: UnifiedLibraryViewModel = koinInject()
 ) {
     val context = LocalContext.current
     val navigationManager = navigationManager
@@ -97,7 +95,7 @@ fun UnifiedLibraryScreen(
     val uiState by unifiedLibraryViewModel.currentLibraryState.collectAsStateWithLifecycle()
     val instanceData by unifiedLibraryViewModel.instanceData.collectAsStateWithLifecycle()
     val preferences by unifiedLibraryViewModel.preferences.collectAsStateWithLifecycle()
-    val queueItems by activityQueueViewModel.queueItems.collectAsStateWithLifecycle()
+    val activeMediaIdsByInstance by unifiedLibraryViewModel.activeMediaIdsByInstance.collectAsStateWithLifecycle()
 
     val isInSelectionMode by unifiedLibraryViewModel.selectionState.isInSelectionMode.collectAsStateWithLifecycle()
     val selectionCount by unifiedLibraryViewModel.selectionState.selectionCount.collectAsStateWithLifecycle()
@@ -376,7 +374,7 @@ fun UnifiedLibraryScreen(
                                         },
                                         preferences = preferences,
                                         itemIsActive = { item ->
-                                            queueItems.any { it.mediaId == item.id }
+                                            activeMediaIdsByInstance[currentInstance.id]?.contains(item.id) == true
                                         },
                                         multiSelectState = unifiedLibraryViewModel.selectionState
                                     )

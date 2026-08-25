@@ -33,6 +33,7 @@ class ArrMediaViewModelS: ObservableObject {
     @Published private(set) var selectedItems: Set<Int64> = []
     @Published private(set) var selectedItem: ArrMedia? = nil
     @Published private(set) var selectedInstance: Instance? = nil
+    @Published private(set) var activeMediaIds: Set<Int64> = []
 
     private var cancellables = Set<AnyCancellable>()
     
@@ -66,6 +67,9 @@ class ArrMediaViewModelS: ObservableObject {
         }
         viewModel.selectedItem.observeAsync(on: self, to: \.selectedItem)
         viewModel.selectedInstance.observeAsync(on: self, to: \.selectedInstance)
+        viewModel.activeMediaIds.observeAsync(on: self) { owner, activeMediaIds in
+            owner.activeMediaIds = Set(activeMediaIds.compactMap { ($0 as? NSNumber)?.int64Value })
+        }
     }
     
     func executeAutomaticSearch(_ seriesId: Int64) {

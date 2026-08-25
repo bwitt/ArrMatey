@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
@@ -70,7 +71,8 @@ class ArrMediaViewModel(
     private val updateMediaUseCase: UpdateMediaUseCase,
     private val deleteMediaUseCase: DeleteMediaUseCase,
     private val performRefreshUseCase: PerformRefreshUseCase,
-    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase
+    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    getActivityTasksUseCase: GetActivityTasksUseCase
 ): ViewModel() {
 
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
@@ -131,6 +133,23 @@ class ArrMediaViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
+
+    val activeMediaIds: StateFlow<Set<Long>> = combine(
+        selectedRepository.filterNotNull(),
+        getActivityTasksUseCase()
+    ) { repository, tasks ->
+        val instanceId = repository.instance.id
+        tasks.filter { it.instanceId == instanceId }
+            .mapNotNull { it.mediaId }
+            .toSet()
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptySet()
+    )
+
+    fun isItemActive(mediaId: Long): Boolean =
+        activeMediaIds.value.contains(mediaId)
 
     val preferences: StateFlow<InstancePreferences> = selectedRepository
         .filterNotNull()

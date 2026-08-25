@@ -29,8 +29,8 @@ class MovieFilesViewModel(
 
     val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
         .map { tasks ->
-            tasks.filter { task ->
-                (task as? RadarrQueueItem)?.movieId == movieId || task.mediaId == movieId
+            tasks.filterIsInstance<RadarrQueueItem>().filter { task ->
+                task.movieId == movieId || task.mediaId == movieId
             }
         }
         .stateIn(

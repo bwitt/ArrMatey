@@ -14,7 +14,6 @@ struct ArrTab: View {
     
     @ObservedObject private var arrMediaViewModel: ArrMediaViewModelS
     @ObservedObject private var instancesViewModel: InstancesViewModelS
-    @ObservedObject private var activityQueueViewModel: ActivityQueueViewModelS = ActivityQueueViewModelS()
     @ObservedObject private var networkViewModel: NetworkConnectivityViewModel = NetworkConnectivityViewModel()
     @ObservedObject private var globalPreferences = PreferencesViewModel()
     
@@ -29,10 +28,6 @@ struct ArrTab: View {
     
     private var instanceState: InstancesState {
         instancesViewModel.instancesState
-    }
-    
-    private var queueItems: [QueueItem] {
-        activityQueueViewModel.queueItems
     }
     
     private var preferences: InstancePreferences {

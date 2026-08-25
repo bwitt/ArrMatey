@@ -30,11 +30,8 @@ class AudiobookFilesViewModel(
 
     val queueItems: StateFlow<List<QueueItem>> = getActivityTasksUseCase()
         .map { tasks ->
-            tasks.filter { task ->
-                (task as? ListenarrQueueItem)?.audiobookId == audiobookId ||
-                    (task as? ReadarrQueueItem)?.bookId == audiobookId ||
-                    (task as? ReadarrQueueItem)?.book?.id == audiobookId ||
-                    task.mediaId == audiobookId
+            tasks.filterIsInstance<ListenarrQueueItem>().filter { task ->
+                task.audiobookId == audiobookId || task.mediaId == audiobookId
             }
         }
         .stateIn(

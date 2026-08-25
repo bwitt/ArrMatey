@@ -20,12 +20,6 @@ struct SeriesFilesView: View {
     let onDeleteSeasonFiles: (Int32) -> Void
     let seasonDeleteInProgress: Bool
     
-    @ObservedObject private var activityQueueViewModel = ActivityQueueViewModelS()
-    
-    private var queueItems: [QueueItem] {
-        activityQueueViewModel.queueItems
-    }
-    
     private var seasonEpisodes: [Int32:[Episode]] {
         Dictionary(grouping: episodes, by: { $0.seasonNumber })
     }

@@ -2,6 +2,9 @@ package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Arrtist
+import com.dnfapps.arrmatey.arr.api.model.Audiobook
+import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.LidarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.ListenarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
@@ -190,7 +193,10 @@ class GetUnifiedMediaDetailsUseCase(
         val arrEpMap = arrEpisodes.groupBy { it.seasonNumber }
         val seerrEpMap = seerrEpisodes.groupBy { it.seasonNumber }
 
-        val sonarrTasks = activityTasks.filterIsInstance<SonarrQueueItem>()
+        val targetInstanceId = arrRepository?.instance?.id
+        val sonarrTasks = activityTasks.filterIsInstance<SonarrQueueItem>().filter { task ->
+            targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId
+        }
 
         val bazarrEpisodeMap = bazarr.episodes.associateBy { it.sonarrEpisodeId }
         val bazarrSeasonEpMap = bazarr.episodes.associateBy { it.season to it.episode }
@@ -244,9 +250,15 @@ class GetUnifiedMediaDetailsUseCase(
         val targetItem = arrSuccess?.item
         val targetId = targetItem?.id
         val mediaQueueItems = if (targetId != null && targetId > 0) {
-            val targetInstanceId = arrRepository?.instance?.id
+            val targetType = arrRepository?.instance?.type
+                ?: (targetItem as? ArrMovie)?.let { InstanceType.Radarr }
+                ?: (targetItem as? ArrSeries)?.let { InstanceType.Sonarr }
+                ?: (targetItem as? Arrtist)?.let { InstanceType.Lidarr }
+                ?: (targetItem as? Author)?.let { InstanceType.Booksehelf }
+                ?: (targetItem as? Audiobook)?.let { InstanceType.Listenarr }
             activityTasks.filter { task ->
                 (targetInstanceId == null || task.instanceId == null || task.instanceId == targetInstanceId) &&
+                    (targetType == null || task.type == targetType) &&
                     (task.mediaId == targetId ||
                         (task as? SonarrQueueItem)?.calcSeriesId == targetId ||
                         (task as? RadarrQueueItem)?.movieId == targetId ||

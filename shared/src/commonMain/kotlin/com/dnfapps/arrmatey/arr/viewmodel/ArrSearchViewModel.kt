@@ -6,6 +6,7 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
+import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLookupResultsUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformLookupUseCase
@@ -14,9 +15,12 @@ import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class ArrSearchViewModel(
@@ -24,7 +28,8 @@ class ArrSearchViewModel(
     private val instanceId: Long? = null,
     private val getLookupResultsUseCase: GetLookupResultsUseCase,
     private val getLibraryUseCase: GetLibraryUseCase,
-    private val performLookupUseCase: PerformLookupUseCase
+    private val performLookupUseCase: PerformLookupUseCase,
+    getActivityTasksUseCase: GetActivityTasksUseCase
 ): ViewModel() {
 
     private val _sortBy = MutableStateFlow(SortBy.Relevance)
@@ -32,6 +37,21 @@ class ArrSearchViewModel(
 
     private val _sortOrder = MutableStateFlow(SortOrder.Asc)
     val sortOrder: StateFlow<SortOrder> = _sortOrder.asStateFlow()
+
+    val activeMediaIds: StateFlow<Set<Long>> = getActivityTasksUseCase()
+        .map { tasks ->
+            tasks.filter { task ->
+                (instanceId == null || task.instanceId == instanceId) && task.type == instanceType
+            }.mapNotNull { it.mediaId }.toSet()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptySet()
+        )
+
+    fun isItemActive(mediaId: Long): Boolean =
+        activeMediaIds.value.contains(mediaId)
 
     private val _lookupUiState = MutableStateFlow<ArrLibrary>(ArrLibrary.Initial)
     val lookupUiState: StateFlow<ArrLibrary> = _lookupUiState.asStateFlow()

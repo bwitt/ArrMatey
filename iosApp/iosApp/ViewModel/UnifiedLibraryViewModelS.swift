@@ -34,6 +34,7 @@ class UnifiedLibraryViewModelS: ObservableObject {
     @Published private(set) var selectionCount: Int32 = 0
     @Published private(set) var selectedItems: Set<Int64> = []
     @Published private(set) var selectedItem: ArrMedia? = nil
+    @Published private(set) var activeMediaIdsByInstance: [Int64: Set<Int64>] = [:]
     
     init() {
         let vm = KoinBridge.shared.getUnifiedLibraryViewModel()
@@ -52,6 +53,11 @@ class UnifiedLibraryViewModelS: ObservableObject {
         self.selectionCount = vm.selectionState.selectionCount.value.int32Value
         self.selectedItems = Set(vm.selectionState.selectedItems.value.compactMap { ($0 as? NSNumber)?.int64Value })
         self.selectedItem = vm.selectedItem.value
+        self.activeMediaIdsByInstance = vm.activeMediaIdsByInstance.value.reduce(into: [Int64: Set<Int64>]()) { result, entry in
+            let key = entry.key.int64Value
+            let values = Set(entry.value.compactMap { ($0 as? NSNumber)?.int64Value })
+            result[key] = values
+        }
         startObserving()
     }
     
@@ -73,6 +79,13 @@ class UnifiedLibraryViewModelS: ObservableObject {
         }
         viewModel.preferences.observeAsync(on: self) { owner, prefs in
             owner.preferences = prefs
+        }
+        viewModel.activeMediaIdsByInstance.observeAsync(on: self) { owner, map in
+            owner.activeMediaIdsByInstance = map.reduce(into: [Int64: Set<Int64>]()) { result, entry in
+                let key = entry.key.int64Value
+                let values = Set(entry.value.compactMap { ($0 as? NSNumber)?.int64Value })
+                result[key] = values
+            }
         }
         viewModel.hasBazarr.observeAsync(on: self) { owner, hasBazarr in
             owner.hasBazarr = hasBazarr.boolValue
@@ -106,6 +119,10 @@ class UnifiedLibraryViewModelS: ObservableObject {
     
     func isInstanceOffline(_ instanceId: Int64) -> Bool {
         offlineInstanceIds.contains(instanceId)
+    }
+
+    func isItemActive(instanceId: Int64, mediaId: Int64) -> Bool {
+        activeMediaIdsByInstance[instanceId]?.contains(mediaId) ?? false
     }
     
     func refreshSelected() {

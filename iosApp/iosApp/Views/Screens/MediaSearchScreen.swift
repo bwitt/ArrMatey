@@ -12,7 +12,6 @@ struct MediaSearchScreen: View {
     private let type: InstanceType
     
     @ObservedObject private var viewModel: ArrSearchViewModelS
-    @ObservedObject private var activityQueueViewModel = ActivityQueueViewModelS()
     
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject private var navigation: NavigationManager
@@ -28,10 +27,6 @@ struct MediaSearchScreen: View {
     
     private var uiState: ArrLibrary {
         viewModel.uiState
-    }
-    
-    private var queueItems: [QueueItem] {
-        activityQueueViewModel.queueItems
     }
     
     var body: some View {
@@ -74,7 +69,7 @@ struct MediaSearchScreen: View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(state.items, id: \.guid) { item in
-                    MediaItemView(item: item, aspectRatio: type.aspectRatio, isActive: queueItems.contains(where: { $0.mediaId == item.id }), includeOverview: true)
+                    MediaItemView(item: item, aspectRatio: type.aspectRatio, isActive: viewModel.activeMediaIds.contains(item.id?.int64Value ?? 0), includeOverview: true)
                         .id(item.guid)
                         .onTapGesture {
                             if let id = item.id?.int64Value {

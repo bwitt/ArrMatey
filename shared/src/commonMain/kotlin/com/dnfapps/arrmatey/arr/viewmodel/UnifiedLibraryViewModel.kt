@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
+import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetLibraryUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
@@ -60,8 +61,27 @@ class UnifiedLibraryViewModel(
     private val performRefreshUseCase: PerformRefreshUseCase,
     private val updateMediaUseCase: UpdateMediaUseCase,
     private val deleteMediaUseCase: DeleteMediaUseCase,
-    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase
+    private val getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+    getActivityTasksUseCase: GetActivityTasksUseCase
 ) : ViewModel() {
+
+    val activeMediaIdsByInstance: StateFlow<Map<Long, Set<Long>>> = getActivityTasksUseCase()
+        .map { tasks ->
+            tasks.groupBy { it.instanceId }
+                .mapNotNull { (instanceId, instanceTasks) ->
+                    instanceId?.let { id ->
+                        id to instanceTasks.mapNotNull { it.mediaId }.toSet()
+                    }
+                }.toMap()
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
+
+    fun isItemActive(instanceId: Long, mediaId: Long): Boolean =
+        activeMediaIdsByInstance.value[instanceId]?.contains(mediaId) == true
 
     private val arrOrder = InstanceType.arrs()
 

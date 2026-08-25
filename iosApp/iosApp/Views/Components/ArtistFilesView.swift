@@ -20,12 +20,6 @@ struct ArtistFilesView: View {
     let deleteAlbumFiles: (ArrAlbum) -> Void
     let albumDeleteInProgress: Bool
     
-    @ObservedObject private var activityQueueViewModel = ActivityQueueViewModelS()
-    
-    private var queueItems: [QueueItem] {
-        activityQueueViewModel.queueItems
-    }
-    
     var body: some View {
         Section {
             ForEach(albums, id: \.id) { album in

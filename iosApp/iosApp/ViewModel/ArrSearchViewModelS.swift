@@ -15,6 +15,7 @@ class ArrSearchViewModelS: ObservableObject {
     @Published private(set) var uiState: ArrLibrary = ArrLibraryInitial()
     @Published private(set) var sortBy: SortBy = .relevance
     @Published private(set) var sortOrder: Shared.SortOrder = .asc
+    @Published private(set) var activeMediaIds: Set<Int64> = []
     
     init(type: InstanceType, instanceId: Int64? = nil) {
         self.viewModel = KoinBridge.shared.getArrSearchViewModel(type: type, instanceId: instanceId?.asKotlinLong)
@@ -25,6 +26,9 @@ class ArrSearchViewModelS: ObservableObject {
         viewModel.lookupUiState.observeAsync(on: self, to: \.uiState)
         viewModel.sortBy.observeAsync(on: self, to: \.sortBy)
         viewModel.sortOrder.observeAsync(on: self, to: \.sortOrder)
+        viewModel.activeMediaIds.observeAsync(on: self) { owner, activeMediaIds in
+            owner.activeMediaIds = Set(activeMediaIds.compactMap { ($0 as? NSNumber)?.int64Value })
+        }
     }
     
     func performLookup(_ query: String) {

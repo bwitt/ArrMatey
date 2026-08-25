@@ -29,7 +29,6 @@ import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
-import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrSearchViewModel
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.shared.MR
@@ -57,14 +56,13 @@ fun ArrSearchScreen(
     onNavigateToUnifiedDetails: (Long?, Long?, Long?, InstanceType) -> Unit,
     onNavigateToPreview: (ArrMedia) -> Unit,
     instanceId: Long? = null,
-    viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId),
-    activityQueueViewModel: ActivityQueueViewModel = koinInject()
+    viewModel: ArrSearchViewModel = koinInjectParams(type, instanceId)
 ) {
     val sortBy by viewModel.sortBy.collectAsStateWithLifecycle()
     val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
 
     val lookupState by viewModel.lookupUiState.collectAsStateWithLifecycle()
-    val queueItems by activityQueueViewModel.queueItems.collectAsStateWithLifecycle()
+    val activeMediaIds by viewModel.activeMediaIds.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState(initialQuery)
     val searchBarState = rememberSearchBarState()
@@ -148,7 +146,7 @@ fun ArrSearchScreen(
                                      onNavigateToDetails(item.id!!)
                                  }
                             },
-                            itemIsActive = { item -> queueItems.any { it.mediaId == item.id } },
+                            itemIsActive = { item -> item.id in activeMediaIds },
                             includeOverview = true
                         )
                     }

@@ -95,7 +95,6 @@ import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
-import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.networking.OperationStatus
@@ -138,13 +137,12 @@ fun ArrLibraryScreen(
     onNavigateToDetails: (ArrMedia, Long?) -> Unit,
     arrMediaViewModel: ArrMediaViewModel = koinInjectParams(type),
     instancesViewModel: InstancesViewModel = koinInjectParams(type),
-    activityQueueViewModel: ActivityQueueViewModel = koinInject(),
     globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
     val context = LocalContext.current
     val navigationManager = navigationManager
 
-    val queueItems by activityQueueViewModel.queueItems.collectAsStateWithLifecycle()
+    val activeMediaIds by arrMediaViewModel.activeMediaIds.collectAsStateWithLifecycle()
     val uiState by arrMediaViewModel.uiState.collectAsStateWithLifecycle()
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val instanceData by arrMediaViewModel.instanceData.collectAsStateWithLifecycle()
@@ -356,7 +354,7 @@ fun ArrLibraryScreen(
                                     },
                                     preferences = preferences,
                                     itemIsActive = { item ->
-                                        queueItems.any { it.mediaId == item.id }
+                                        item.id in activeMediaIds
                                     },
                                     multiSelectState = arrMediaViewModel.selectionState
                                 )

@@ -17,14 +17,8 @@ struct ArrLibraryView: View {
     
     @EnvironmentObject private var navigation: NavigationManager
     
-    @ObservedObject private var activityQueueViewModel = ActivityQueueViewModelS()
-    
     @State private var confirmDelete: Bool = false
     @State private var showMonitorOptions: Bool = false
-
-    private var queueItems: [QueueItem] {
-        activityQueueViewModel.queueItems
-    }
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -238,7 +232,7 @@ struct ArrLibraryView: View {
                         }
                     },
                     itemIsActive: { item in
-                        queueItems.contains(where: { $0.mediaId == item.id })
+                        viewModel.activeMediaIds.contains(item.id?.int64Value ?? 0)
                     }
                 )
             }
