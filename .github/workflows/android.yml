@@ -64,14 +64,3 @@ jobs:
         with:
           name: app-debug
           path: composeApp/build/outputs/apk/debug/composeApp-debug.apk
-
-      - name: Upload to AutoBuild
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: automated
-          name: "Automated Android DEBUG Build (${{ github.event.repository.updated_at }})"
-          body: "Automated workflow triggered build from the latest main branch."
-          draft: false
-          prerelease: true
-          files: composeApp/build/outputs/apk/debug/composeApp-debug.apk
