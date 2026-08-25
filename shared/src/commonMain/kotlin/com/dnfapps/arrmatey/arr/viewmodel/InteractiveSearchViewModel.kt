@@ -220,6 +220,8 @@ class InteractiveSearchViewModel(
 
     fun resetDownloadState() {
         _downloadReleaseState.value = DownloadState.Initial
+        _downloadStatus.value = null
+        selectedRepository.value?.resetDownloadStatus()
     }
 
     fun updateSearchQuery(query: String) {
@@ -284,6 +286,7 @@ class InteractiveSearchViewModel(
         viewModelScope.launch {
             getReleasesUseCase.clear(instanceType)
         }
+        resetDownloadState()
         super.onCleared()
     }
 }

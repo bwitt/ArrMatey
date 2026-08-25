@@ -108,8 +108,14 @@ fun InteractiveSearchScreen(
 
     LaunchedEffect(downloadStatus) {
         when (downloadStatus) {
-            true -> Toast.makeText(context, downloadQueueSuccessMessage, Toast.LENGTH_SHORT).show()
-            false -> Toast.makeText(context, downloadQueueErrorMessage, Toast.LENGTH_SHORT).show()
+            true -> {
+                Toast.makeText(context, downloadQueueSuccessMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetDownloadState()
+            }
+            false -> {
+                Toast.makeText(context, downloadQueueErrorMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetDownloadState()
+            }
             else -> {}
         }
     }

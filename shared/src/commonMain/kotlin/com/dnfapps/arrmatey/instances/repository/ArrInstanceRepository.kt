@@ -396,6 +396,10 @@ class ArrInstanceRepository(
             }
     }
 
+    fun resetDownloadStatus() {
+        _downloadStatus.value = DownloadState.Initial
+    }
+
     suspend fun deleteActivityTask(
         releaseId: Int,
         removeFromClient: Boolean,
