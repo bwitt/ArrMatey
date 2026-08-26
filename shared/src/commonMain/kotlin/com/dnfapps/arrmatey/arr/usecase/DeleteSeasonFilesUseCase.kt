@@ -17,6 +17,7 @@ class DeleteSeasonFilesUseCase {
         repository.deleteSeasonFiles(seriesId, seasonNumber)
             .onSuccess {
                 repository.getEpisodes(seriesId)
+                repository.getMediaDetails(seriesId)
                 emit(OperationStatus.Success("Files deleted successfully"))
             }
             .onError { code, message, cause ->

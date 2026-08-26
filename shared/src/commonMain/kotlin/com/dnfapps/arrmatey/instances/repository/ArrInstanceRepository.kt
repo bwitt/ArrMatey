@@ -803,9 +803,22 @@ class ArrInstanceRepository(
         seasonNumber: Int
     ): NetworkResult<Unit> =
         safePerformSonarr {
-            val episodes = _episodes.value[seriesId]?.filter { it.seasonNumber == seasonNumber } ?: emptyList()
+            var episodes = _episodes.value[seriesId]?.filter { it.seasonNumber == seasonNumber } ?: emptyList()
+            if (episodes.isEmpty()) {
+                val fetchResult = getEpisodes(seriesId)
+                if (fetchResult is NetworkResult.Success) {
+                    episodes = fetchResult.data.filter { it.seasonNumber == seasonNumber }
+                }
+            }
+            val fileIds = episodes
+                .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
+                .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
+            if (fileIds.isEmpty()) {
+                return@safePerformSonarr NetworkResult.Success(Unit)
+            }
             deleteEpisodes(seriesId, episodes)
                 .onSuccess {
+                    getEpisodes(seriesId)
                     getMediaDetails(seriesId)
                 }
         }
@@ -816,14 +829,14 @@ class ArrInstanceRepository(
     ): NetworkResult<Unit> =
         safePerformSonarr { client ->
             val fileIds = episodes
-                .filter { it.episodeFile != null }
-                .mapNotNull { it.episodeFileId }
+                .filter { it.hasFile || it.episodeFile != null || (it.episodeFileId != null && it.episodeFileId != 0L) }
+                .mapNotNull { it.episodeFileId?.takeIf { id -> id != 0L } ?: it.episodeFile?.id }
+            if (fileIds.isEmpty()) {
+                return@safePerformSonarr NetworkResult.Success(Unit)
+            }
             client.deleteEpisodes(fileIds)
                 .onSuccess {
-                    val currentMap = _episodes.value.toMutableMap()
-                    val currentEpisodes = currentMap[seriesId] ?: emptyList()
-                    currentMap[seriesId] = currentEpisodes.filter { !fileIds.contains(it.id) }
-                    _episodes.value = currentMap
+                    getEpisodes(seriesId)
                 }
         }
 
