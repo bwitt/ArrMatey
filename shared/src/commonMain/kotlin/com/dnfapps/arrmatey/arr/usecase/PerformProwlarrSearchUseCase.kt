@@ -1,9 +1,9 @@
 package com.dnfapps.arrmatey.arr.usecase
 
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
-import com.dnfapps.networking.ErrorType
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -23,7 +23,7 @@ class PerformProwlarrSearchUseCase(
 
         val repository = instanceManager.getProwlarrRepository(instanceId)
         if (repository == null) {
-            emit(ProwlarrSearchState.Error("Instance not found", ErrorType.Unexpected))
+            emit(ProwlarrSearchState.Error("Instance not found", HttpErrorType.Unexpected))
             return@flow
         }
 
@@ -38,7 +38,7 @@ class PerformProwlarrSearchUseCase(
             is NetworkResult.Error -> emit(
                 ProwlarrSearchState.Error(
                     message = result.message ?: "Failed to load search results",
-                    type = if (result.code == null) ErrorType.Network else ErrorType.Http
+                    type = if (result.code == null) HttpErrorType.Network else HttpErrorType.Http
                 )
             )
             is NetworkResult.Loading -> emit(ProwlarrSearchState.Loading)

@@ -53,7 +53,7 @@ import com.dnfapps.arrmatey.ui.sheets.AddMovieSheet
 import com.dnfapps.arrmatey.ui.sheets.AddSeriesSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

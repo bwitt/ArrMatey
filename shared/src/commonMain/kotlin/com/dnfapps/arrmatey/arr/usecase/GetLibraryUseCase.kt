@@ -8,8 +8,7 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.CustomFilter
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
-import com.dnfapps.networking.ErrorType
-import com.dnfapps.networking.NetworkResult
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.datastore.InstancePreferenceStoreRepository
@@ -17,6 +16,7 @@ import com.dnfapps.arrmatey.datastore.InstancePreferences
 import com.dnfapps.arrmatey.extensions.orderedSortedWith
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
+import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -26,9 +26,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.doubleOrNull
 import kotlin.time.Instant
 
 class GetLibraryUseCase(
@@ -49,7 +46,7 @@ class GetLibraryUseCase(
         val repository = instanceManager.getArrRepository(instanceId)
         if (repository == null) {
             logger.error { "Instance not found: $instanceId" }
-            emit(ArrLibrary.Error("Instance not found", ErrorType.Unexpected))
+            emit(ArrLibrary.Error("Instance not found", HttpErrorType.Unexpected))
             return@flow
         }
         val preferencesRepository = preferencesStoreRepository.getInstancePreferences(instanceId)

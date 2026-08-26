@@ -2,28 +2,21 @@ package com.dnfapps.arrmatey.downloadclient.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.downloadclient.model.DownloadClient
 import com.dnfapps.arrmatey.downloadclient.service.DownloadClientsState
-import com.dnfapps.arrmatey.downloadclient.state.DownloadClientConfigurationUiState
-import com.dnfapps.arrmatey.downloadclient.state.DownloadClientConnectionState
 import com.dnfapps.arrmatey.downloadclient.state.DownloadClientMutationState
-import com.dnfapps.arrmatey.downloadclient.usecase.CreateDownloadClientUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.DeleteDownloadClientUseCase
-import com.dnfapps.arrmatey.downloadclient.usecase.GetDownloadClientByIdUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ObserveDownloadClientsUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.ObserveSelectedDownloadClientsUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.SetDownloadClientActiveUseCase
 import com.dnfapps.arrmatey.downloadclient.usecase.TestDownloadClientConnectionUseCase
-import com.dnfapps.arrmatey.downloadclient.usecase.UpdateDownloadClientUseCase
-import io.ktor.util.reflect.instanceOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class DownloadClientsViewModel(

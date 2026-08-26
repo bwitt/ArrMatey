@@ -18,8 +18,6 @@ kotlin {
     
     sourceSets {
         androidMain.dependencies {
-            implementation(project(":networking"))
-
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.core.splashscreen)

@@ -29,7 +29,7 @@ import com.dnfapps.arrmatey.seerr.service.MediaIssuePackageService
 import com.dnfapps.arrmatey.seerr.service.MediaRequestPackageService
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient

@@ -71,7 +71,7 @@ import com.dnfapps.arrmatey.arr.api.model.RadarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReadarrQueueItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrQueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.entensions.bullet
 import com.dnfapps.arrmatey.isDebug

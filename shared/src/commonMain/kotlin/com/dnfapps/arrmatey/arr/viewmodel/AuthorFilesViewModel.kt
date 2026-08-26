@@ -8,7 +8,7 @@ import com.dnfapps.arrmatey.arr.state.AuthorFilesState
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAuthorFilesUseCase
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

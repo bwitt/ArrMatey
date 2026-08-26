@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.arr.state.AuthorFilesState
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import kotlinx.coroutines.flow.Flow

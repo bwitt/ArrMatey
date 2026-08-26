@@ -24,43 +24,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.networking.ErrorType
 
 @Composable
 fun ErrorView(
-    errorType: ErrorType,
+    errorType: HttpErrorType,
     message: String,
     onOpenSettings: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // 1. Map properties based on error type
     val icon = when (errorType) {
-        ErrorType.Timeout -> Icons.Default.Timer
-        ErrorType.Network -> Icons.Default.WifiOff
+        HttpErrorType.Timeout -> Icons.Default.Timer
+        HttpErrorType.Network -> Icons.Default.WifiOff
         else -> Icons.Default.Warning
     }
 
     val iconColor = when (errorType) {
-        ErrorType.Timeout, ErrorType.Network -> Color(0xFFFFA500)
+        HttpErrorType.Timeout, HttpErrorType.Network -> Color(0xFFFFA500)
         else -> MaterialTheme.colorScheme.error
     }
 
     val title = when (errorType) {
-        ErrorType.Timeout -> MR.strings.error_timeout_title
-        ErrorType.Network -> MR.strings.error_network_title
+        HttpErrorType.Timeout -> MR.strings.error_timeout_title
+        HttpErrorType.Network -> MR.strings.error_network_title
         else -> MR.strings.error_generic_title
     }
 
-    val detailMessage = if (errorType == ErrorType.Timeout) {
+    val detailMessage = if (errorType == HttpErrorType.Timeout) {
         mokoString(MR.strings.error_timeout_description)
     } else {
         message
     }
 
-    // 2. Build the Layout
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -88,7 +86,6 @@ fun ErrorView(
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 
-        // Button Group
         Column(
             modifier = Modifier
                 .padding(horizontal = 32.dp)
@@ -96,7 +93,7 @@ fun ErrorView(
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (errorType == ErrorType.Timeout) {
+            if (errorType == HttpErrorType.Timeout) {
                 Button(
                     onClick = onOpenSettings,
                     modifier = Modifier.fillMaxWidth()
@@ -117,7 +114,7 @@ fun ErrorView(
             }
         }
 
-        if (errorType == ErrorType.Timeout) {
+        if (errorType == HttpErrorType.Timeout) {
             Text(
                 text = mokoString(MR.strings.error_timeout_tip,  mokoString(MR.strings.slow_instance)),
                 style = MaterialTheme.typography.labelSmall,

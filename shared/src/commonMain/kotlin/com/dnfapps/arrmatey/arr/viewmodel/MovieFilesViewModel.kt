@@ -8,7 +8,7 @@ import com.dnfapps.arrmatey.arr.state.MovieFilesState
 import com.dnfapps.arrmatey.arr.usecase.DeleteQueueItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetMovieFilesUseCase
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

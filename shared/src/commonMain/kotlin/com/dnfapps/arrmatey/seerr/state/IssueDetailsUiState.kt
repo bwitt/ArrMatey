@@ -1,6 +1,6 @@
 package com.dnfapps.arrmatey.seerr.state
 
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 
 data class IssueDetailsUiState(

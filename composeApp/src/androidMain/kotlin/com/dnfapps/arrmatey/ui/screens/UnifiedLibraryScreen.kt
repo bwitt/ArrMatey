@@ -71,7 +71,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.menu.LibraryFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ArrViewCustomizationSheet
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
 import com.skydoves.flexible.core.FlexibleSheetSize
 import com.skydoves.flexible.core.FlexibleSheetValue

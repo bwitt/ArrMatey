@@ -20,7 +20,7 @@ import com.dnfapps.arrmatey.ui.components.ConfirmableButton
 import com.dnfapps.arrmatey.ui.theme.onPrimaryDark
 import com.dnfapps.arrmatey.ui.theme.primaryDark
 import com.dnfapps.arrmatey.utils.mokoString
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.delay
 
 @Composable

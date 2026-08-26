@@ -2,7 +2,7 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.client.paging.PagedData
@@ -11,7 +11,6 @@ import com.dnfapps.arrmatey.compose.SeerrTab
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
-import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
@@ -23,7 +22,6 @@ import com.dnfapps.arrmatey.seerr.usecase.GetIssuesUseCase
 import com.dnfapps.arrmatey.seerr.usecase.GetRequestsUseCase
 import com.dnfapps.arrmatey.seerr.usecase.RemoveSeerrMediaFileUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
-import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueCommentUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

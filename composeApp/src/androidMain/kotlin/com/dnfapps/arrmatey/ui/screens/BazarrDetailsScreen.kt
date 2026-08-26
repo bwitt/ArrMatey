@@ -71,7 +71,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitle
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.entensions.headerBarColors
 import com.dnfapps.arrmatey.model.toInfoList
 import com.dnfapps.arrmatey.shared.MR

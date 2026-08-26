@@ -54,7 +54,7 @@ import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.state.ProwlarrSearchState
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrSearchViewModel
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.bytesAsFileSizeString
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoString

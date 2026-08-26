@@ -1,9 +1,10 @@
 package com.dnfapps.arrmatey.bazarr.usecase
 
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
+import com.dnfapps.arrmatey.arr.state.toHttpError
 import com.dnfapps.arrmatey.bazarr.state.BazarrLibrary
-import com.dnfapps.networking.ErrorType
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
+import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -51,9 +52,9 @@ class GetBazarrLibraryUseCase() {
                 ).filterIsInstance<NetworkResult.Error>().firstOrNull()
 
                 if (error != null) {
-                    emit(BazarrLibrary.Error(error.message ?: "An error occurred", error.errorType))
+                    emit(BazarrLibrary.Error(error.message ?: "An error occurred", error.errorType.toHttpError()))
                 } else {
-                    emit(BazarrLibrary.Error("An unknown error occurred", ErrorType.Unexpected))
+                    emit(BazarrLibrary.Error("An unknown error occurred", HttpErrorType.Unexpected))
                 }
             }
         }

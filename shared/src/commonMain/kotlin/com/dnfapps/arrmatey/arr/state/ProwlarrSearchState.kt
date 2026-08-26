@@ -1,7 +1,6 @@
 package com.dnfapps.arrmatey.arr.state
 
 import com.dnfapps.arrmatey.arr.api.model.ProwlarrSearchResult
-import com.dnfapps.networking.ErrorType
 
 sealed interface ProwlarrSearchState {
     object Initial: ProwlarrSearchState
@@ -9,6 +8,6 @@ sealed interface ProwlarrSearchState {
     data class Success(val items: List<ProwlarrSearchResult>): ProwlarrSearchState
     data class Error(
         val message: String,
-        val type: ErrorType = ErrorType.Http
+        val type: HttpErrorType = HttpErrorType.Http
     ): ProwlarrSearchState
 }

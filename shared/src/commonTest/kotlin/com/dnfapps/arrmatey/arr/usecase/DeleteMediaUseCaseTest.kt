@@ -5,7 +5,7 @@ import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine

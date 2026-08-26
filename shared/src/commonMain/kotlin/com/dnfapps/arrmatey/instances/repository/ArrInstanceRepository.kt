@@ -35,7 +35,6 @@ import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.arr.api.model.ListenarrConfiguration
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
-import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
@@ -46,8 +45,7 @@ import com.dnfapps.arrmatey.arr.state.DownloadState
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.OperationStatus
-import com.dnfapps.networking.filterValues
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.mapValues
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess

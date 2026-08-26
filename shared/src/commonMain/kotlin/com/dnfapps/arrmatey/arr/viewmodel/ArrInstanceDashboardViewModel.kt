@@ -3,12 +3,12 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.state.ArrDashboardState
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.arr.usecase.ExecuteArrCommandUseCase
-import com.dnfapps.networking.ErrorType
-import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetArrInstanceRepositoryUseCase
+import com.dnfapps.networking.NetworkResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,7 +47,7 @@ class ArrInstanceDashboardViewModel(
             val currentRepo = repository
             if (currentRepo == null) {
                 _state.value = ArrDashboardState.Error(
-                    type = ErrorType.Unexpected,
+                    type = HttpErrorType.Unexpected,
                     message = "Could not connect to instance repository"
                 )
                 return@launch
@@ -83,7 +83,7 @@ class ArrInstanceDashboardViewModel(
                 repository?.refreshInstanceStatuses()
             } catch (e: Exception) {
                 if (_state.value is ArrDashboardState.Initial) {
-                    _state.value = ArrDashboardState.Error(ErrorType.Unexpected, e.message)
+                    _state.value = ArrDashboardState.Error(HttpErrorType.Unexpected, e.message)
                 }
             } finally {
                 _isRefreshing.value = false

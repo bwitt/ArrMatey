@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.seerr.usecase
 
+import com.dnfapps.arrmatey.arr.state.toHttpError
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
@@ -26,7 +27,7 @@ class GetSeerrMediaDetailsUseCase {
                     is NetworkResult.Loading -> send(SeerrDetailsState.Loading)
                     is NetworkResult.Error -> {
                         send(SeerrDetailsState.Error(
-                            detailsResult.errorType,
+                            detailsResult.errorType.toHttpError(),
                             detailsResult.message
                         ))
                     }

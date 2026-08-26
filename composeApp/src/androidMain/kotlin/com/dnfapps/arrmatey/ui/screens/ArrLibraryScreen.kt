@@ -97,11 +97,11 @@ import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
-import com.dnfapps.networking.OperationStatus
 import com.dnfapps.arrmatey.compose.utils.breakable
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.navigation.navigationManager
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch

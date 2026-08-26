@@ -1,11 +1,11 @@
 package com.dnfapps.arrmatey.bazarr.state
 
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrMovie
 import com.dnfapps.arrmatey.bazarr.api.model.BazarrSeries
 import com.dnfapps.arrmatey.bazarr.api.model.ProviderStatus
 import com.dnfapps.arrmatey.bazarr.api.model.WantedEpisode
 import com.dnfapps.arrmatey.bazarr.api.model.WantedMovie
-import com.dnfapps.networking.ErrorType
 
 sealed interface BazarrLibrary {
     data object Initial: BazarrLibrary
@@ -19,6 +19,6 @@ sealed interface BazarrLibrary {
     ): BazarrLibrary
     data class Error(
         val message: String,
-        val type: ErrorType = ErrorType.Http
+        val type: HttpErrorType = HttpErrorType.Http
     ): BazarrLibrary
 }

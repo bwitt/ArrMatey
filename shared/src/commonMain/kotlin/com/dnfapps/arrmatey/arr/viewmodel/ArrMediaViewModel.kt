@@ -3,16 +3,8 @@ package com.dnfapps.arrmatey.arr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
-import com.dnfapps.arrmatey.arr.api.model.ArrMovie
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Arrtist
-import com.dnfapps.arrmatey.arr.api.model.ArtistMonitorType
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
-import com.dnfapps.arrmatey.arr.api.model.Author
-import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
-import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
-import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
+import com.dnfapps.arrmatey.arr.state.HttpErrorType
 import com.dnfapps.arrmatey.arr.usecase.DeleteMediaUseCase
 import com.dnfapps.arrmatey.arr.usecase.ExecuteArrCommandUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetActivityTasksUseCase
@@ -21,11 +13,6 @@ import com.dnfapps.arrmatey.arr.usecase.PerformAutomaticSearchUseCase
 import com.dnfapps.arrmatey.arr.usecase.PerformRefreshUseCase
 import com.dnfapps.arrmatey.arr.usecase.ToggleMonitorUseCase
 import com.dnfapps.arrmatey.arr.usecase.UpdateMediaUseCase
-import com.dnfapps.networking.ErrorType
-import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.OperationStatus
-import com.dnfapps.networking.onError
-import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.compose.utils.FilterBy
 import com.dnfapps.arrmatey.compose.utils.SortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
@@ -47,6 +34,10 @@ import com.dnfapps.arrmatey.utils.GridSpacing
 import com.dnfapps.arrmatey.utils.MultiSelectState
 import com.dnfapps.arrmatey.utils.PosterElevation
 import com.dnfapps.arrmatey.utils.PosterRadius
+import com.dnfapps.networking.NetworkResult
+import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.networking.onError
+import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -270,7 +261,7 @@ class ArrMediaViewModel(
 
     private fun handleErrorState(state: ArrLibrary.Error) {
         _errorMessage.value = state.message
-        _hasServerConnectivityError.value = (state.type == ErrorType.Network)
+        _hasServerConnectivityError.value = (state.type == HttpErrorType.Network)
     }
 
     fun resetErrorMessage() {

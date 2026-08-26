@@ -7,7 +7,7 @@ import com.dnfapps.arrmatey.bazarr.api.model.BazarrSubtitleLanguage
 import com.dnfapps.arrmatey.bazarr.state.BazarrMediaTarget
 import com.dnfapps.arrmatey.bazarr.state.BazarrSubtitlesUiState
 import com.dnfapps.arrmatey.bazarr.usecase.DownloadBazarrSubtitleToDeviceUseCase
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase

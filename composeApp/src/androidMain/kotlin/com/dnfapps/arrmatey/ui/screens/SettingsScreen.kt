@@ -70,7 +70,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.ReleaseNotesSheet
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.backup.viewmodel.BackupViewModel
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.extensions.nowTimestamp
 import com.dnfapps.arrmatey.instances.model.InstanceType

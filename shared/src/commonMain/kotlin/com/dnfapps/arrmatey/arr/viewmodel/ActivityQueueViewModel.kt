@@ -14,7 +14,7 @@ import com.dnfapps.arrmatey.compose.utils.QueueSortBy
 import com.dnfapps.arrmatey.compose.utils.SortOrder
 import com.dnfapps.arrmatey.database.InstanceRepository
 import com.dnfapps.arrmatey.extensions.orderedSortedBy
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

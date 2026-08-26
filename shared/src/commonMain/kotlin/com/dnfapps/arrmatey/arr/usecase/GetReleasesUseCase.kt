@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.QualityInfo
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
 import com.dnfapps.arrmatey.arr.state.ReleaseLibrary
+import com.dnfapps.arrmatey.arr.state.toHttpError
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -32,7 +33,7 @@ class GetReleasesUseCase(
                         is NetworkResult.Error ->
                             ReleaseLibrary.Error(
                                 message = result.message ?: "",
-                                type = result.errorType
+                                type = result.errorType.toHttpError()
                             )
 
                         is NetworkResult.Success<*> -> {

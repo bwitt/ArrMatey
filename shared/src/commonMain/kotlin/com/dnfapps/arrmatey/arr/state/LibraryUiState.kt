@@ -6,7 +6,6 @@ import com.dnfapps.arrmatey.arr.api.model.CustomFormat
 import com.dnfapps.arrmatey.arr.api.model.Language
 import com.dnfapps.arrmatey.arr.api.model.QualityInfo
 import com.dnfapps.arrmatey.arr.api.model.ReleaseProtocol
-import com.dnfapps.networking.ErrorType
 import com.dnfapps.arrmatey.datastore.InstancePreferences
 
 sealed interface ArrLibrary {
@@ -18,7 +17,7 @@ sealed interface ArrLibrary {
     ): ArrLibrary
     data class Error(
         val message: String,
-        val type: ErrorType = ErrorType.Http
+        val type: HttpErrorType = HttpErrorType.Http
     ): ArrLibrary
 }
 
@@ -35,6 +34,6 @@ sealed interface ReleaseLibrary {
     ): ReleaseLibrary
     data class Error(
         val message: String,
-        val type: ErrorType = ErrorType.Http
+        val type: HttpErrorType = HttpErrorType.Http
     ): ReleaseLibrary
 }

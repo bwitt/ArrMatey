@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.downloadclient.usecase
 
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.downloadclient.repository.DownloadClientManager
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.flow.Flow

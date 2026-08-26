@@ -1,7 +1,7 @@
 package com.dnfapps.arrmatey.arr.usecase
 
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
-import com.dnfapps.networking.OperationStatus
+import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import kotlinx.coroutines.flow.Flow
