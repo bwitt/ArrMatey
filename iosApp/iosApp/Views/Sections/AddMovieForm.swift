@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AddMovieForm: View {
     let movie: ArrMovie
-    let addItemStatus: NetworkingOperationStatus
+    let addItemStatus: OperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -31,7 +31,7 @@ struct AddMovieForm: View {
     
     init(
         movie: ArrMovie,
-        addItemStatus: NetworkingOperationStatus,
+        addItemStatus: OperationStatus,
         qualityProfiles: [QualityProfile],
         rootFolders: [RootFolder],
         tags: [Tag],
@@ -78,7 +78,7 @@ struct AddMovieForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is NetworkingOperationStatusInProgress
+        addItemStatus is OperationStatusInProgress
     }
     
     var body: some View {

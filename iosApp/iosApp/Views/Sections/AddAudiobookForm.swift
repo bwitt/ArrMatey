@@ -10,7 +10,7 @@ import Shared
 
 struct AddAudiobookForm: View {
     let audiobook: SearchAudiobook
-    let addItemStatus: NetworkingOperationStatus
+    let addItemStatus: OperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let relativePath: String
@@ -33,12 +33,12 @@ struct AddAudiobookForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is NetworkingOperationStatusInProgress
+        addItemStatus is OperationStatusInProgress
     }
     
     init(
         audiobook: SearchAudiobook,
-        addItemStatus: NetworkingOperationStatus,
+        addItemStatus: OperationStatus,
         qualityProfiles: [QualityProfile],
         rootFolders: [RootFolder],
         relativePath: String,

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AddArtistForm: View {
     let artist: Arrtist
-    let addItemStatus: NetworkingOperationStatus
+    let addItemStatus: OperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -31,7 +31,7 @@ struct AddArtistForm: View {
     
     init(
         artist: Arrtist,
-        addItemStatus: NetworkingOperationStatus,
+        addItemStatus: OperationStatus,
         qualityProfiles: [QualityProfile],
         rootFolders: [RootFolder],
         tags: [Tag],
@@ -74,7 +74,7 @@ struct AddArtistForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is NetworkingOperationStatusInProgress
+        addItemStatus is OperationStatusInProgress
     }
     
     var body: some View {

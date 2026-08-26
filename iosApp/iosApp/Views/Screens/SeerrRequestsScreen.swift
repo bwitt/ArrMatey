@@ -77,8 +77,8 @@ struct SeerrTabContent: View {
         .refreshable {
             viewModel.refresh()
         }
-        .onChange(of: viewModel.requestActionStatus) { _, status in
-            if let success = status as? NetworkingOperationStatusSuccess {
+        .onReceive(viewModel.$requestActionStatus) { status in
+            if let success = status as? OperationStatusSuccess {
                 let msg: String
                 if success.message == "Request approved" {
                     msg = MR.strings().request_approved.localized()
@@ -93,7 +93,7 @@ struct SeerrTabContent: View {
                     toastMessage = msg
                 }
                 viewModel.resetRequestActionStatus()
-            } else if let error = status as? NetworkingOperationStatusError {
+            } else if let error = status as? OperationStatusError {
                 withAnimation {
                     toastMessage = error.message
                 }
@@ -127,20 +127,24 @@ struct SeerrTabContent: View {
         }
     }
     
-    private var requestsTabLabel: Text {
+    @ViewBuilder
+    private var requestsTabLabel: some View {
         let count = viewModel.requestsState.totalItemCount
         if count > 0 {
-            return Text("\(MR.strings().requests.localized()) (\(count))")
+            Text("\(MR.strings().requests.localized()) (\(count))")
+        } else {
+            Text(MR.strings().requests.localized())
         }
-        return Text(MR.strings().requests.localized())
     }
     
-    private var issuesTabLabel: Text {
+    @ViewBuilder
+    private var issuesTabLabel: some View {
         let count = viewModel.issuesState.totalItemCount
         if count > 0 {
-            return Text("\(MR.strings().issues.localized()) (\(count))")
+            Text("\(MR.strings().issues.localized()) (\(count))")
+        } else {
+            Text(MR.strings().issues.localized())
         }
-        return Text(MR.strings().issues.localized())
     }
 }
 

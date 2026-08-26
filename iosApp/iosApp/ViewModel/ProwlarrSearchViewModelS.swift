@@ -14,7 +14,7 @@ class ProwlarrSearchViewModelS: ObservableObject {
     
     @Published private(set) var searchResults: ProwlarrSearchState = ProwlarrSearchStateInitial()
     @Published private(set) var searchQuery: String = ""
-    @Published private(set) var grabStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var grabStatus: OperationStatus = OperationStatusIdle()
     
     init() {
         self.viewModel = KoinBridge.shared.getProwlarrSearchViewModel()

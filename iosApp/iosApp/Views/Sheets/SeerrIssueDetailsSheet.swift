@@ -35,8 +35,12 @@ struct SeerrIssueDetailsSheet: View {
         return Array(commentsList.dropFirst())
     }
     
+    private var navigationTitleText: String {
+        viewModel.uiState.issuePackage.details?.displayTitle ?? MR.strings().issues.localized()
+    }
+    
     private var isSubmitting: Bool {
-        viewModel.uiState.commentSubmissionStatus is NetworkingOperationStatusInProgress
+        viewModel.uiState.commentSubmissionStatus is OperationStatusInProgress
     }
     
     var body: some View {
@@ -59,7 +63,7 @@ struct SeerrIssueDetailsSheet: View {
                 Divider()
                 commentInputBar
             }
-            .navigationTitle(viewModel.uiState.issuePackage.details?.displayTitle ?? MR.strings().issues.localized())
+            .navigationTitle(navigationTitleText)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -74,19 +78,18 @@ struct SeerrIssueDetailsSheet: View {
                 }
                 Button(MR.strings().no.localized(), role: .cancel) {}
             }
-            .onChange(of: isSubmitting) { _, submitting in
-                if !submitting && viewModel.uiState.commentSubmissionStatus is NetworkingOperationStatusSuccess {
-                    newComment = ""
-                }
-            }
-            .onChange(of: viewModel.uiState.issueCloseStatus) { _, status in
-                if status is NetworkingOperationStatusSuccess {
+            .onReceive(viewModel.$uiState) { state in
+                if state.issueCloseStatus is OperationStatusSuccess {
                     showCloseConfirmation = false
                     if let onIssueClosed = onIssueClosed {
                         onIssueClosed()
                     } else {
                         onDismiss()
                     }
+                }
+                
+                if state.commentSubmissionStatus is OperationStatusSuccess {
+                    newComment = ""
                 }
             }
         }

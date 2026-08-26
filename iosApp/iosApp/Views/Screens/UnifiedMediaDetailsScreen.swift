@@ -212,7 +212,7 @@ extension UnifiedMediaDetailsScreen {
             onEpisodeAutomaticSearch: { viewModel.performEpisodeAutomaticLookup(episodeId: $0) },
             onSeasonAutomaticSearch: { viewModel.performSeasonAutomaticLookup(seasonNumber: $0) },
             deleteSeasonFiles: { confirmDeleteSeasonNumber = $0 },
-            seasonDeleteInProgress: viewModel.deleteSeasonStatus is NetworkingOperationStatusInProgress,
+            seasonDeleteInProgress: viewModel.deleteSeasonStatus is OperationStatusInProgress,
             onNavigateToEpisodeDetails: { episode in
                 if let series = arrSeries {
                     navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
@@ -260,7 +260,7 @@ extension UnifiedMediaDetailsScreen {
                 onEditAlbum: { editAlbum = $0 },
                 onAlbumAutomaticSearch: { viewModel.performAlbumAutomaticLookup(albumId: $0) },
                 deleteAlbumFiles: { confirmDeleteAlbumId = $0.id },
-                albumDeleteInProgress: viewModel.deleteAlbumStatus is NetworkingOperationStatusInProgress
+                albumDeleteInProgress: viewModel.deleteAlbumStatus is OperationStatusInProgress
             )
         } else if let author = success.arrMedia as? Author {
             BooksArea(
@@ -641,7 +641,7 @@ extension UnifiedMediaDetailsScreen {
                     qualityProfiles: viewModel.qualityProfiles,
                     rootFolders: viewModel.rootFolders,
                     tags: viewModel.tags,
-                    editInProgress: viewModel.editStatus is NetworkingOperationStatusInProgress,
+                    editInProgress: viewModel.editStatus is OperationStatusInProgress,
                     onEditItem: { newMovie, moveFiles in
                         viewModel.editItem(item: newMovie, moveFiles: moveFiles)
                     }
@@ -653,7 +653,7 @@ extension UnifiedMediaDetailsScreen {
                     qualityProfiles: viewModel.qualityProfiles,
                     rootFolders: viewModel.rootFolders,
                     tags: viewModel.tags,
-                    editInProgress: viewModel.editStatus is NetworkingOperationStatusInProgress,
+                    editInProgress: viewModel.editStatus is OperationStatusInProgress,
                     onEditItem: { newSeries, moveFiles in
                         viewModel.editItem(item: newSeries, moveFiles: moveFiles)
                     }
@@ -665,7 +665,7 @@ extension UnifiedMediaDetailsScreen {
                     qualityProfiles: viewModel.qualityProfiles,
                     rootFolders: viewModel.rootFolders,
                     tags: viewModel.tags,
-                    editInProgress: viewModel.editStatus is NetworkingOperationStatusInProgress,
+                    editInProgress: viewModel.editStatus is OperationStatusInProgress,
                     onEditItem: { newArtist, moveFiles in
                         viewModel.editItem(item: newArtist, moveFiles: moveFiles)
                     }
@@ -677,7 +677,7 @@ extension UnifiedMediaDetailsScreen {
                     qualityProfiles: viewModel.qualityProfiles,
                     rootFolders: viewModel.rootFolders,
                     tags: viewModel.tags,
-                    editInProgress: viewModel.editStatus is NetworkingOperationStatusInProgress,
+                    editInProgress: viewModel.editStatus is OperationStatusInProgress,
                     onEditItem: { newAuthor, moveFiles in
                         viewModel.editItem(item: newAuthor, moveFiles: moveFiles)
                     }
@@ -688,7 +688,7 @@ extension UnifiedMediaDetailsScreen {
                     item: audiobook,
                     qualityProfiles: viewModel.qualityProfiles,
                     rootFolders: viewModel.rootFolders,
-                    editInProgress: viewModel.editStatus is NetworkingOperationStatusInProgress,
+                    editInProgress: viewModel.editStatus is OperationStatusInProgress,
                     onEditItem: { newAudiobook in
                         viewModel.editItem(item: newAudiobook, moveFiles: false)
                     }
@@ -704,7 +704,7 @@ extension UnifiedMediaDetailsScreen {
     @ViewBuilder
     fileprivate var confirmSheetContent: some View {
         DeleteMediaSheet(
-            isLoading: viewModel.deleteStatus is NetworkingOperationStatusInProgress,
+            isLoading: viewModel.deleteStatus is OperationStatusInProgress,
             initialAddExclusion: viewModel.preferences.deleteAddExclusion,
             initialDeleteFiles: viewModel.preferences.deleteDeleteFiles,
             onConfirm: { addExclusion, deleteFiles in
@@ -717,7 +717,7 @@ extension UnifiedMediaDetailsScreen {
     fileprivate func queueItemSheetContent(_ wrapper: IdentifiableQueueItem) -> some View {
         QueueItemInfoSheet(
             item: wrapper.item,
-            deleteInProgress: viewModel.removeQueueItemStatus is NetworkingOperationStatusInProgress,
+            deleteInProgress: viewModel.removeQueueItemStatus is OperationStatusInProgress,
             onDelete: { remove, block, skip in
                 viewModel.removeQueueItem(item: wrapper.item, removeFromClient: remove, addToBlocklist: block, skipRedownload: skip)
                 selectedQueueItem = nil
@@ -728,7 +728,7 @@ extension UnifiedMediaDetailsScreen {
     
     @ViewBuilder
     fileprivate func editAlbumSheetContent(_ album: ArrAlbum) -> some View {
-        EditAlbumSheet(album: album, editInProgress: viewModel.editStatus is NetworkingOperationStatusInProgress, onEditAlbum: { updatedAlbum in
+        EditAlbumSheet(album: album, editInProgress: viewModel.editStatus is OperationStatusInProgress, onEditAlbum: { updatedAlbum in
             viewModel.updateAlbum(album: updatedAlbum)
         })
     }

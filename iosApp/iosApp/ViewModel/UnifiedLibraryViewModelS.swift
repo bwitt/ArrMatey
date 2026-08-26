@@ -19,8 +19,8 @@ class UnifiedLibraryViewModelS: ObservableObject {
     @Published private(set) var instanceData: InstanceData?
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
     @Published private(set) var hasBazarr: Bool = false
-    @Published private(set) var deleteStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
-    @Published private(set) var editItemStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var editItemStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var errorMessage: String? = nil
     @Published private(set) var lastSearchResult: Bool? = nil
     

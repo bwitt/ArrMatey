@@ -15,7 +15,7 @@ class RequestsViewModelS: ObservableObject {
     @Published private(set) var operationsState: RequestOperationsState = RequestOperationsState()
     @Published private(set) var userState: SeerrUser? = nil
     @Published private(set) var selectedTab: SeerrTab = .requests
-    @Published private(set) var requestActionStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var requestActionStatus: OperationStatus = OperationStatusIdle()
     
     init() {
         self.viewModel = KoinBridge.shared.getRequestsViewModel()

@@ -32,12 +32,12 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
     @Published private(set) var tags: [Tag] = []
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
     
-    @Published private(set) var editStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
-    @Published private(set) var deleteStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
-    @Published private(set) var deleteSeasonStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
-    @Published private(set) var deleteAlbumStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
-    @Published private(set) var deleteMovieFileStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
-    @Published private(set) var removeQueueItemStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var editStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var deleteStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var deleteSeasonStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var deleteAlbumStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var deleteMovieFileStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var removeQueueItemStatus: OperationStatus = OperationStatusIdle()
     
     @Published var editSuccessTrigger = false
     @Published var editErrorTrigger = false
@@ -113,17 +113,17 @@ class UnifiedMediaDetailsViewModelS: ObservableObject {
         
         viewModel.editStatus.observeAsync(on: self) { owner, status in
             owner.editStatus = status
-            if status is NetworkingOperationStatusSuccess {
+            if status is OperationStatusSuccess {
                 owner.editSuccessTrigger.toggle()
-            } else if status is NetworkingOperationStatusError {
+            } else if status is OperationStatusError {
                 owner.editErrorTrigger.toggle()
             }
         }
         viewModel.deleteStatus.observeAsync(on: self) { owner, status in
             owner.deleteStatus = status
-            if status is NetworkingOperationStatusSuccess {
+            if status is OperationStatusSuccess {
                 owner.deleteSuccessTrigger.toggle()
-            } else if status is NetworkingOperationStatusError {
+            } else if status is OperationStatusError {
                 owner.deleteErrorTrigger.toggle()
             }
         }

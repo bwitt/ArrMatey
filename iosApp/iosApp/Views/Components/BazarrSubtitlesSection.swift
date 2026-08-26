@@ -112,7 +112,7 @@ struct BazarrSubtitlesSection: View {
                 MissingSubtitleRow(language: language, onAutoSearch: { viewModel.autoSearch(language) })
             }
 
-            if viewModel.operationState is NetworkingOperationStatusInProgress {
+            if viewModel.operationState is OperationStatusInProgress {
                 HStack(spacing: 8) {
                     ProgressView()
                     Text(MR.strings().bazarr_auto_search.localized())

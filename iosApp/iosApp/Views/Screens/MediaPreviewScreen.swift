@@ -30,7 +30,7 @@ struct MediaPreviewScreen: View {
         viewModel.uiState.lastAddedItemId?.int64Value
     }
     
-    private var addItemStatus: NetworkingOperationStatus {
+    private var addItemStatus: OperationStatus {
         viewModel.uiState.addItemStatus
     }
     

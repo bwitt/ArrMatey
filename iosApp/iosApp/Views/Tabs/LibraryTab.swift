@@ -491,7 +491,7 @@ struct LibraryTabContent: View {
         let profiles = libraryViewModel.instanceData?.qualityProfiles ?? []
         let folders = libraryViewModel.instanceData?.rootFolders ?? []
         let tags = libraryViewModel.instanceData?.tags ?? []
-        let isInProgress = libraryViewModel.editItemStatus is NetworkingOperationStatusInProgress
+        let isInProgress = libraryViewModel.editItemStatus is OperationStatusInProgress
 
         if let series = item as? ArrSeries {
             EditSeriesSheet(item: series, qualityProfiles: profiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in

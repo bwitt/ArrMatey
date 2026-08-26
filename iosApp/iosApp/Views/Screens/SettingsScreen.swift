@@ -316,7 +316,7 @@ struct SettingsScreen: View {
 struct InstanceCard: View {
     let instance: Instance
     let route: SettingsRoute
-    let connectionStatuses: [KotlinLong:NetworkingOperationStatus]
+    let connectionStatuses: [KotlinLong:OperationStatus]
     
     var body: some View {
         NavigationLink(value: route) {
@@ -329,13 +329,13 @@ struct InstanceCard: View {
                             .font(.system(size: 18, weight: .medium))
                         Group {
                             switch connectionStatuses[instance.id.asKotlinLong] {
-                            case is NetworkingOperationStatusInProgress:
+                            case is OperationStatusInProgress:
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle())
-                            case is NetworkingOperationStatusError:
+                            case is OperationStatusError:
                                 Image(systemName: "wifi.slash")
                                     .tint(.red)
-                            case is NetworkingOperationStatusSuccess:
+                            case is OperationStatusSuccess:
                                 Image(systemName: "wifi")
                             default: ZStack{}
                             }
@@ -352,7 +352,7 @@ struct InstanceCard: View {
 
 struct DownloadClientCard: View {
     let client: DownloadClient
-    let connectionStatuses: [KotlinLong:NetworkingOperationStatus]
+    let connectionStatuses: [KotlinLong:OperationStatus]
     
     var body: some View {
         NavigationLink(value: SettingsRoute.editDownloadClient(client.id)) {
@@ -365,13 +365,13 @@ struct DownloadClientCard: View {
                             .font(.system(size: 18, weight: .medium))
                         Group {
                             switch connectionStatuses[client.id.asKotlinLong] {
-                            case is NetworkingOperationStatusInProgress:
+                            case is OperationStatusInProgress:
                                 ProgressView()
                                     .progressViewStyle(CircularProgressViewStyle())
-                            case is NetworkingOperationStatusError:
+                            case is OperationStatusError:
                                 Image(systemName: "wifi.slash")
                                     .tint(.red)
-                            case is NetworkingOperationStatusSuccess:
+                            case is OperationStatusSuccess:
                                 Image(systemName: "wifi")
                             default: ZStack{}
                             }

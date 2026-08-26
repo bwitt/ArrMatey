@@ -10,7 +10,7 @@ import Shared
 
 struct AddAuthorForm: View {
     let author: Author
-    let addItemStatus: NetworkingOperationStatus
+    let addItemStatus: OperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -31,7 +31,7 @@ struct AddAuthorForm: View {
     
     init(
         author: Author,
-        addItemStatus: NetworkingOperationStatus,
+        addItemStatus: OperationStatus,
         qualityProfiles: [QualityProfile],
         rootFolders: [RootFolder],
         tags: [Tag],
@@ -74,7 +74,7 @@ struct AddAuthorForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is NetworkingOperationStatusInProgress
+        addItemStatus is OperationStatusInProgress
     }
     
     var body: some View {

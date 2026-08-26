@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AddSeriesForm: View {
     let series: ArrSeries
-    let addItemStatus: NetworkingOperationStatus
+    let addItemStatus: OperationStatus
     let qualityProfiles: [QualityProfile]
     let rootFolders: [RootFolder]
     let tags: [Tag]
@@ -33,7 +33,7 @@ struct AddSeriesForm: View {
     
     init(
         series: ArrSeries,
-        addItemStatus: NetworkingOperationStatus,
+        addItemStatus: OperationStatus,
         qualityProfiles: [QualityProfile],
         rootFolders: [RootFolder],
         tags: [Tag],
@@ -79,7 +79,7 @@ struct AddSeriesForm: View {
     }
     
     private var isLoading: Bool {
-        addItemStatus is NetworkingOperationStatusInProgress
+        addItemStatus is OperationStatusInProgress
     }
     
     var body: some View {

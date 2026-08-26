@@ -15,8 +15,8 @@ class ArrMediaViewModelS: ObservableObject {
     
     @Published private(set) var uiState: ArrLibrary = ArrLibraryInitial()
     @Published private(set) var instanceData: InstanceData?
-    @Published private(set) var addItemStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
-    @Published private(set) var editItemStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
+    @Published private(set) var addItemStatus: OperationStatus = OperationStatusIdle()
+    @Published private(set) var editItemStatus: OperationStatus = OperationStatusIdle()
     @Published private(set) var preferences: InstancePreferences = InstancePreferences()
     @Published private(set) var hasServerConnectivityError: Bool = false
     @Published private(set) var errorMessage: String? = nil
@@ -68,7 +68,7 @@ class ArrMediaViewModelS: ObservableObject {
         viewModel.selectedItem.observeAsync(on: self, to: \.selectedItem)
         viewModel.selectedInstance.observeAsync(on: self, to: \.selectedInstance)
         viewModel.activeMediaIds.observeAsync(on: self) { owner, activeMediaIds in
-            owner.activeMediaIds = Set(activeMediaIds.compactMap { ($0 as? NSNumber)?.int64Value })
+            owner.activeMediaIds = Set(activeMediaIds.compactMap { $0.int64Value })
         }
     }
     

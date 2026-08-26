@@ -83,7 +83,7 @@ struct ArrLibraryView: View {
         let profiles = viewModel.instanceData?.qualityProfiles ?? []
         let folders = viewModel.instanceData?.rootFolders ?? []
         let tags = viewModel.instanceData?.tags ?? []
-        let isInProgress = viewModel.editItemStatus is NetworkingOperationStatusInProgress
+        let isInProgress = viewModel.editItemStatus is OperationStatusInProgress
 
         if let series = item as? ArrSeries {
             EditSeriesSheet(item: series, qualityProfiles: profiles, rootFolders: folders, tags: tags, editInProgress: isInProgress) { newItem, moveFiles in
