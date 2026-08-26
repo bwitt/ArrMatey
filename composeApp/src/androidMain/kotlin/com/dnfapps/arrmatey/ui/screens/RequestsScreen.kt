@@ -1,5 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,9 +20,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
@@ -36,6 +39,7 @@ import com.dnfapps.arrmatey.ui.screens.requests.IssuesContent
 import com.dnfapps.arrmatey.ui.screens.requests.RequestsContent
 import com.dnfapps.arrmatey.utils.koinInjectParams
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.networking.OperationStatus
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -46,12 +50,39 @@ fun RequestsScreen(
     onNavigateToDetails: (Long, RequestType) -> Unit,
     instancesViewModel: InstancesViewModel = koinInjectParams(InstanceType.Seerr)
 ) {
+    val context = LocalContext.current
+
     val instancesState by instancesViewModel.instancesState.collectAsStateWithLifecycle()
     val userState by viewModel.userState.collectAsStateWithLifecycle()
     val pagedData by viewModel.requestsState.collectAsStateWithLifecycle()
     val issuesData by viewModel.issuesState.collectAsStateWithLifecycle()
     val requestOperationsState by viewModel.operationsState.collectAsStateWithLifecycle()
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
+    val requestActionStatus by viewModel.requestActionStatus.collectAsStateWithLifecycle()
+
+    val requestApprovedMsg = mokoString(MR.strings.request_approved)
+    val requestDeclinedMsg = mokoString(MR.strings.request_declined)
+
+    LaunchedEffect(requestActionStatus) {
+        when (val status = requestActionStatus) {
+            is OperationStatus.Success -> {
+                val msg = when (status.message) {
+                    "Request approved" -> requestApprovedMsg
+                    "Request declined" -> requestDeclinedMsg
+                    else -> status.message
+                }
+                msg?.let {
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                }
+                viewModel.resetRequestActionStatus()
+            }
+            is OperationStatus.Error -> {
+                Toast.makeText(context, status.message, Toast.LENGTH_SHORT).show()
+                viewModel.resetRequestActionStatus()
+            }
+            else -> {}
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -129,7 +160,8 @@ fun RequestsScreen(
                                 pagedData = issuesData,
                                 onLoadMore = { viewModel.loadNextIssuesPage() },
                                 onRetry = { viewModel.retryIssues() },
-                                onClearError = { viewModel.clearIssuesError() }
+                                onClearError = { viewModel.clearIssuesError() },
+                                onRefresh = { viewModel.refresh() }
                             )
                         }
                     } else {
@@ -169,7 +201,8 @@ fun RequestsScreen(
                                         pagedData = issuesData,
                                         onLoadMore = { viewModel.loadNextIssuesPage() },
                                         onRetry = { viewModel.retryIssues() },
-                                        onClearError = { viewModel.clearIssuesError() }
+                                        onClearError = { viewModel.clearIssuesError() },
+                                        onRefresh = { viewModel.refresh() }
                                     )
                                 }
                             }

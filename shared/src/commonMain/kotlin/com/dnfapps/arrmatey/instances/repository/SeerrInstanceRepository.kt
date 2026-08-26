@@ -33,6 +33,7 @@ import com.dnfapps.networking.OperationStatus
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -228,27 +229,43 @@ class SeerrInstanceRepository(
         return client.setRequestStatus(requestId, status, profileId, rootFolder, languageProfileId, seasons)
             .onSuccess {
                 updateOperationsState(requestId, status, OperationStatus.Success())
+                delay(500)
+                updateOperationsState(requestId, status, OperationStatus.Idle)
             }
             .onError { code, message, cause ->
                 updateOperationsState(requestId, status, OperationStatus.Error(code, message, cause))
+                delay(2000)
+                updateOperationsState(requestId, status, OperationStatus.Idle)
             }
     }
 
     suspend fun deleteRequest(requestId: Long): NetworkResult<Unit> {
         updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.InProgress)
         return client.deleteRequest(requestId)
-            .onSuccess { updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Success()) }
+            .onSuccess {
+                updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Success())
+                delay(500)
+                updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
+            }
             .onError { code, message, cause ->
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Error(code, message, cause))
+                delay(2000)
+                updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
             }
     }
 
     suspend fun deleteMediaFile(requestId: Long, mediaId: Long, is4k: Boolean): NetworkResult<Unit> {
         updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.InProgress)
         return client.deleteMediaFile(mediaId, is4k)
-            .onSuccess { updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Success()) }
+            .onSuccess {
+                updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Success())
+                delay(500)
+                updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
+            }
             .onError { code, message, cause ->
                 updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Error(code, message, cause))
+                delay(2000)
+                updateOperationsState(requestId, ApprovalStatus.Decline, OperationStatus.Idle)
             }
     }
 
@@ -270,7 +287,11 @@ class SeerrInstanceRepository(
                 ApprovalStatus.Approve -> it.approvalStates
                 ApprovalStatus.Decline -> it.cancelStates
             }.toMutableMap()
-            currentStates[requestId] = state
+            if (state == OperationStatus.Idle) {
+                currentStates.remove(requestId)
+            } else {
+                currentStates[requestId] = state
+            }
             it.copy(
                 approvalStates = if (status == ApprovalStatus.Approve) currentStates else it.approvalStates,
                 cancelStates = if (status == ApprovalStatus.Decline) currentStates else it.cancelStates

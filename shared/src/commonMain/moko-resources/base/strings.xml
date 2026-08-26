@@ -567,6 +567,9 @@
     <string name="declined">Declined</string>
     <string name="decline_request">Decline Request</string>
     <string name="approve_request">Approve Request</string>
+    <string name="request_approved">Request approved</string>
+    <string name="request_declined">Request declined</string>
+    <string name="issue_closed">Issue closed</string>
     <string name="cancel_request">Cancel Request</string>
     <string name="delete_request">Delete Request</string>
     <string name="remove_from_service">Remove from %1$s</string>

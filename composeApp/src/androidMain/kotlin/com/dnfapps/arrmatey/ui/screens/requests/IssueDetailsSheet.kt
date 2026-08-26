@@ -53,6 +53,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun IssueDetailsSheet(
     ip: MediaIssuePackage,
     onDismiss: () -> Unit,
+    onIssueClosed: () -> Unit = onDismiss,
     viewModel: IssueDetailsViewModel = koinInjectParams(ip)
 ) {
     val context = LocalContext.current
@@ -61,6 +62,7 @@ fun IssueDetailsSheet(
 
     var confirmCloseIssue by remember { mutableStateOf(false) }
     var newComment by remember { mutableStateOf("") }
+    val issueClosedMsg = mokoString(MR.strings.issue_closed)
 
     LaunchedEffect(uiState.commentSubmissionStatus) {
         when (val commentState = uiState.commentSubmissionStatus) {
@@ -69,6 +71,22 @@ fun IssueDetailsSheet(
             }
             is OperationStatus.Error -> {
                 Toast.makeText(context, commentState.message, Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(uiState.issueCloseStatus) {
+        when (val closeState = uiState.issueCloseStatus) {
+            is OperationStatus.Success -> {
+                confirmCloseIssue = false
+                val msg = closeState.message ?: issueClosedMsg
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                onIssueClosed()
+            }
+            is OperationStatus.Error -> {
+                confirmCloseIssue = false
+                Toast.makeText(context, closeState.message, Toast.LENGTH_SHORT).show()
             }
             else -> {}
         }

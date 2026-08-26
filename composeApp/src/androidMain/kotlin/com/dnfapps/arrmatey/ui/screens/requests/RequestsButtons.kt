@@ -20,6 +20,7 @@ import com.dnfapps.arrmatey.ui.components.ConfirmableButton
 import com.dnfapps.arrmatey.ui.theme.onPrimaryDark
 import com.dnfapps.arrmatey.ui.theme.primaryDark
 import com.dnfapps.arrmatey.utils.mokoString
+import com.dnfapps.networking.OperationStatus
 import kotlinx.coroutines.delay
 
 @Composable
@@ -144,9 +145,9 @@ private fun PendingApprovalButtons(
                 onClick = onApprove,
                 modifier = Modifier.weight(1f),
                 colors = approveColors,
-                enabled = operationsState.approvalStates.none { it.key == request.id }
+                enabled = operationsState.approvalStates[request.id] != OperationStatus.InProgress
             ) {
-                if (operationsState.approvalStates.any { it.key == request.id }) {
+                if (operationsState.approvalStates[request.id] is OperationStatus.InProgress) {
                     CircularProgressIndicator(Modifier.size(24.dp))
                 } else {
                     Icon(Icons.Default.Check, null)
@@ -161,9 +162,9 @@ private fun PendingApprovalButtons(
             onClick = onDecline,
             modifier = Modifier.weight(1f),
             colors = declineColors,
-            enabled = operationsState.cancelStates.none { it.key == request.id },
+            enabled = operationsState.cancelStates[request.id] != OperationStatus.InProgress,
             content = {
-                if (operationsState.cancelStates.any { it.key == request.id }) {
+                if (operationsState.cancelStates[request.id] is OperationStatus.InProgress) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.onError

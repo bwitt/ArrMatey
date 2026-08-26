@@ -11,51 +11,57 @@ struct SeerrTabContent: View {
     @StateObject private var instancesViewModel = InstancesViewModelS(type: .seerr)
     @EnvironmentObject private var navigationManager: NavigationManager
     
+    @State private var toastMessage: String? = nil
+    
     var body: some View {
-        Group {
-            if instancesViewModel.instancesState.selectedInstance == nil {
-                NoInstanceView(type: .seerr)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                VStack(spacing: 0) {
-                    Picker("", selection: Binding(
-                        get: { viewModel.selectedTab == .requests ? 0 : 1 },
-                        set: { viewModel.setSelectedTab($0 == 0 ? .requests : .issues) }
-                    )) {
-                        requestsTabLabel.tag(0)
-                        issuesTabLabel.tag(1)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    
-                    if viewModel.selectedTab == .requests {
-                        RequestsContentView(
-                            pagedData: viewModel.requestsState,
-                            userState: viewModel.userState,
-                            operationsState: viewModel.operationsState,
-                            onApprove: { viewModel.approveRequest($0) },
-                            onDecline: { viewModel.declineRequest($0) },
-                            onEdit: { _ in },
-                            onDelete: { viewModel.cancelRequest($0) },
-                            onRemoveFromService: { viewModel.deleteMediaFile($0) },
-                            onNavigateToDetails: { tmdbId, type in
-                                navigationManager.goToSeerrDetails(tmdbId: tmdbId, requestType: type)
-                            },
-                            onLoadMore: { viewModel.loadNextRequestsPage() },
-                            onRetry: { viewModel.retryRequests() },
-                            onClearError: { viewModel.clearRequestsError() }
-                        )
-                    } else {
-                        IssuesContentView(
-                            pagedData: viewModel.issuesState,
-                            onLoadMore: { viewModel.loadNextIssuesPage() },
-                            onRetry: { viewModel.retryIssues() },
-                            onClearError: { viewModel.clearIssuesError() }
-                        )
+        ZStack {
+            Group {
+                if instancesViewModel.instancesState.selectedInstance == nil {
+                    NoInstanceView(type: .seerr)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    VStack(spacing: 0) {
+                        Picker("", selection: Binding(
+                            get: { viewModel.selectedTab == .requests ? 0 : 1 },
+                            set: { viewModel.setSelectedTab($0 == 0 ? .requests : .issues) }
+                        )) {
+                            requestsTabLabel.tag(0)
+                            issuesTabLabel.tag(1)
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        
+                        if viewModel.selectedTab == .requests {
+                            RequestsContentView(
+                                pagedData: viewModel.requestsState,
+                                userState: viewModel.userState,
+                                operationsState: viewModel.operationsState,
+                                onApprove: { viewModel.approveRequest($0) },
+                                onDecline: { viewModel.declineRequest($0) },
+                                onEdit: { _ in },
+                                onDelete: { viewModel.cancelRequest($0) },
+                                onRemoveFromService: { viewModel.deleteMediaFile($0) },
+                                onNavigateToDetails: { tmdbId, type in
+                                    navigationManager.goToSeerrDetails(tmdbId: tmdbId, requestType: type)
+                                },
+                                onLoadMore: { viewModel.loadNextRequestsPage() },
+                                onRetry: { viewModel.retryRequests() },
+                                onClearError: { viewModel.clearRequestsError() }
+                            )
+                        } else {
+                            IssuesContentView(
+                                pagedData: viewModel.issuesState,
+                                onLoadMore: { viewModel.loadNextIssuesPage() },
+                                onRetry: { viewModel.retryIssues() },
+                                onClearError: { viewModel.clearIssuesError() },
+                                onRefresh: { viewModel.refresh() }
+                            )
+                        }
                     }
                 }
             }
+            toastOverlay
         }
         .navigationTitle(MR.strings().seerr.localized())
         .navigationBarTitleDisplayMode(.inline)
@@ -70,6 +76,54 @@ struct SeerrTabContent: View {
         }
         .refreshable {
             viewModel.refresh()
+        }
+        .onChange(of: viewModel.requestActionStatus) { _, status in
+            if let success = status as? NetworkingOperationStatusSuccess {
+                let msg: String
+                if success.message == "Request approved" {
+                    msg = MR.strings().request_approved.localized()
+                } else if success.message == "Request declined" {
+                    msg = MR.strings().request_declined.localized()
+                } else if let message = success.message, !message.isEmpty {
+                    msg = message
+                } else {
+                    msg = MR.strings().success.localized()
+                }
+                withAnimation {
+                    toastMessage = msg
+                }
+                viewModel.resetRequestActionStatus()
+            } else if let error = status as? NetworkingOperationStatusError {
+                withAnimation {
+                    toastMessage = error.message
+                }
+                viewModel.resetRequestActionStatus()
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var toastOverlay: some View {
+        if let message = toastMessage {
+            VStack {
+                Spacer()
+                Text(message)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.black.opacity(0.75))
+                    .cornerRadius(20)
+                    .padding(.bottom, 24)
+            }
+            .transition(.opacity)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    withAnimation {
+                        toastMessage = nil
+                    }
+                }
+            }
         }
     }
     
@@ -159,6 +213,7 @@ private struct IssuesContentView: View {
     let onLoadMore: () -> Void
     let onRetry: () -> Void
     let onClearError: () -> Void
+    let onRefresh: () -> Void
     
     @State private var selectedIssue: MediaIssuePackage? = nil
     
@@ -204,7 +259,11 @@ private struct IssuesContentView: View {
         )) { wrapper in
             SeerrIssueDetailsSheet(
                 issuePackage: wrapper.package,
-                onDismiss: { selectedIssue = nil }
+                onDismiss: { selectedIssue = nil },
+                onIssueClosed: {
+                    selectedIssue = nil
+                    onRefresh()
+                }
             )
         }
     }

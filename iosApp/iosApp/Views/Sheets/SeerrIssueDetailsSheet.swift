@@ -9,14 +9,16 @@ import Shared
 struct SeerrIssueDetailsSheet: View {
     let issuePackage: MediaIssuePackage
     let onDismiss: () -> Void
+    let onIssueClosed: (() -> Void)?
     
     @ObservedObject private var viewModel: IssueDetailsViewModelS
     @State private var newComment = ""
     @State private var showCloseConfirmation = false
     
-    init(issuePackage: MediaIssuePackage, onDismiss: @escaping () -> Void) {
+    init(issuePackage: MediaIssuePackage, onDismiss: @escaping () -> Void, onIssueClosed: (() -> Void)? = nil) {
         self.issuePackage = issuePackage
         self.onDismiss = onDismiss
+        self.onIssueClosed = onIssueClosed
         self.viewModel = IssueDetailsViewModelS(issuePackage: issuePackage)
     }
     
@@ -75,6 +77,16 @@ struct SeerrIssueDetailsSheet: View {
             .onChange(of: isSubmitting) { _, submitting in
                 if !submitting && viewModel.uiState.commentSubmissionStatus is NetworkingOperationStatusSuccess {
                     newComment = ""
+                }
+            }
+            .onChange(of: viewModel.uiState.issueCloseStatus) { _, status in
+                if status is NetworkingOperationStatusSuccess {
+                    showCloseConfirmation = false
+                    if let onIssueClosed = onIssueClosed {
+                        onIssueClosed()
+                    } else {
+                        onDismiss()
+                    }
                 }
             }
         }

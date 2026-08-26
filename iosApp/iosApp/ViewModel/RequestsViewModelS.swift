@@ -15,6 +15,7 @@ class RequestsViewModelS: ObservableObject {
     @Published private(set) var operationsState: RequestOperationsState = RequestOperationsState()
     @Published private(set) var userState: SeerrUser? = nil
     @Published private(set) var selectedTab: SeerrTab = .requests
+    @Published private(set) var requestActionStatus: NetworkingOperationStatus = NetworkingOperationStatusIdle()
     
     init() {
         self.viewModel = KoinBridge.shared.getRequestsViewModel()
@@ -27,6 +28,11 @@ class RequestsViewModelS: ObservableObject {
         viewModel.operationsState.observeAsync(on: self, to: \.operationsState)
         viewModel.userState.observeAsync(on: self, to: \.userState)
         viewModel.selectedTab.observeAsync(on: self, to: \.selectedTab)
+        viewModel.requestActionStatus.observeAsync(on: self, to: \.requestActionStatus)
+    }
+    
+    func resetRequestActionStatus() {
+        viewModel.resetRequestActionStatus()
     }
     
     func setSelectedTab(_ tab: SeerrTab) {

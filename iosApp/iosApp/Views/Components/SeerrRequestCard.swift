@@ -317,7 +317,7 @@ struct RequestActionButtons: View {
                 if isAdmin {
                     Button(action: onApprove) {
                         HStack(spacing: 4) {
-                            if operationsState.approvalStates[request.id.asKotlinLong] != nil {
+                            if operationsState.approvalStates[request.id.asKotlinLong] is NetworkingOperationStatusInProgress {
                                 ProgressView().tint(.white)
                             } else {
                                 Image(systemName: "checkmark")
@@ -331,7 +331,7 @@ struct RequestActionButtons: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .font(.subheadline.bold())
                     }
-                    .disabled(operationsState.approvalStates[request.id.asKotlinLong] != nil)
+                    .disabled(operationsState.approvalStates[request.id.asKotlinLong] is NetworkingOperationStatusInProgress)
                 }
                 
                 Button(action: {
@@ -344,7 +344,7 @@ struct RequestActionButtons: View {
                     }
                 }) {
                     HStack(spacing: 4) {
-                        if operationsState.cancelStates[request.id.asKotlinLong] != nil {
+                        if operationsState.cancelStates[request.id.asKotlinLong] is NetworkingOperationStatusInProgress {
                             ProgressView().tint(.white)
                         } else {
                             Image(systemName: "xmark")
@@ -360,7 +360,7 @@ struct RequestActionButtons: View {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .font(.subheadline.bold())
                 }
-                .disabled(operationsState.cancelStates[request.id.asKotlinLong] != nil)
+                .disabled(operationsState.cancelStates[request.id.asKotlinLong] is NetworkingOperationStatusInProgress)
             }
             
             if isDebug() {

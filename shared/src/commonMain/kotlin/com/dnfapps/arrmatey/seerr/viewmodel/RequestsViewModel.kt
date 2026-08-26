@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.seerr.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.networking.OperationStatus
+import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
@@ -60,6 +61,9 @@ class RequestsViewModel(
 
     private val _selectedTab = MutableStateFlow(SeerrTab.Requests)
     val selectedTab: StateFlow<SeerrTab> = _selectedTab.asStateFlow()
+
+    private val _requestActionStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
+    val requestActionStatus: StateFlow<OperationStatus> = _requestActionStatus.asStateFlow()
 
     private val selectedRepository = getSeerrInstanceRepositoryUseCase
         .observeSelected()
@@ -153,40 +157,72 @@ class RequestsViewModel(
         issuesPagingController?.refresh()
     }
 
+    fun resetRequestActionStatus() {
+        _requestActionStatus.value = OperationStatus.Idle
+    }
+
     fun approveRequest(requestId: Long) {
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
+            _requestActionStatus.value = OperationStatus.InProgress
             setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Approve, repository)
-                .onSuccess { refresh() }
+                .onSuccess {
+                    _requestActionStatus.value = OperationStatus.Success("Request approved")
+                    refresh()
+                }
+                .onError { code, message, cause ->
+                    _requestActionStatus.value = OperationStatus.Error(code, message, cause)
+                }
         }
     }
 
     fun declineRequest(requestId: Long) {
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
+            _requestActionStatus.value = OperationStatus.InProgress
             setRequestApprovalStatusUseCase(requestId, ApprovalStatus.Decline, repository)
-                .onSuccess { refresh() }
+                .onSuccess {
+                    _requestActionStatus.value = OperationStatus.Success("Request declined")
+                    refresh()
+                }
+                .onError { code, message, cause ->
+                    _requestActionStatus.value = OperationStatus.Error(code, message, cause)
+                }
         }
     }
 
     fun cancelRequest(requestId: Long) {
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
+            _requestActionStatus.value = OperationStatus.InProgress
             cancelRequestUseCase(requestId, repository)
-                .onSuccess { refresh() }
+                .onSuccess {
+                    _requestActionStatus.value = OperationStatus.Success("Request cancelled")
+                    refresh()
+                }
+                .onError { code, message, cause ->
+                    _requestActionStatus.value = OperationStatus.Error(code, message, cause)
+                }
         }
     }
 
     fun deleteMediaFile(request: MediaRequest) {
         val repository = selectedRepository.value ?: return
         viewModelScope.launch {
+            _requestActionStatus.value = OperationStatus.InProgress
             removeSeerrMediaFileUseCase(
                 request.id,
                 request.media.id,
                 request.is4k,
                 repository
             )
-                .onSuccess { refresh() }
+                .onSuccess {
+                    _requestActionStatus.value = OperationStatus.Success("Media removed")
+                    refresh()
+                }
+                .onError { code, message, cause ->
+                    _requestActionStatus.value = OperationStatus.Error(code, message, cause)
+                }
         }
     }
 

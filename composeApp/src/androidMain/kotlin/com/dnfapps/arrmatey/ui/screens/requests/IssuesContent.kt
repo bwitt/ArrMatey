@@ -26,7 +26,8 @@ fun IssuesContent(
     pagedData: PagedData<MediaIssuePackage>,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
-    onClearError: () -> Unit
+    onClearError: () -> Unit,
+    onRefresh: () -> Unit = {}
 ) {
     var selectedIssue by remember { mutableStateOf<MediaIssuePackage?>(null) }
 
@@ -71,7 +72,11 @@ fun IssuesContent(
     selectedIssue?.let { issuePackage ->
         IssueDetailsSheet(
             ip = issuePackage,
-            onDismiss = { selectedIssue = null }
+            onDismiss = { selectedIssue = null },
+            onIssueClosed = {
+                selectedIssue = null
+                onRefresh()
+            }
         )
     }
 }
