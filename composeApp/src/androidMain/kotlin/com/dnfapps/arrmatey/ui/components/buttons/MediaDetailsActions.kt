@@ -164,7 +164,7 @@ private fun WatchButton(
     onWatchTrailerClicked: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (buttonColor, iconRes) = when (buttonState.mediaProvider) {
+    val (serviceButtonColor, serviceIconRes) = when (buttonState.mediaProvider) {
         MediaProvider.Plex -> Color(0xFFE5A00D) to MR.images.plex
         MediaProvider.Jellyfin -> Color(0xff4747ed) to MR.images.jellyfin
         MediaProvider.None -> MaterialTheme.colorScheme.primary to Icons.Default.PlayArrow
@@ -182,17 +182,17 @@ private fun WatchButton(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = buttonColor
+                        containerColor = serviceButtonColor
                     )
                 ) {
-                    if (iconRes is ImageResource) {
+                    if (serviceIconRes is ImageResource) {
                         Image(
-                            painter = painterResource(iconRes),
+                            painter = painterResource(serviceIconRes),
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
                         )
-                    } else if (iconRes is ImageVector) {
-                        Icon(iconRes, null)
+                    } else if (serviceIconRes is ImageVector) {
+                        Icon(serviceIconRes, null)
                     }
                     Spacer(Modifier.width(8.dp))
                     Text(mokoString(buttonState.watchButtonLabel))
@@ -203,7 +203,7 @@ private fun WatchButton(
                     SplitButtonDefaults.TrailingButton(
                         onClick = { showWatchMenu = true },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = buttonColor
+                            containerColor = serviceButtonColor
                         )
                     ) {
                         Icon(Icons.Default.ArrowDropDown, null)
@@ -231,6 +231,9 @@ private fun WatchButton(
             }
         )
     } else {
+        val containerColor = if (buttonState.showWatchButton) serviceButtonColor else MaterialTheme.colorScheme.primary
+        val iconRes = if (buttonState.showWatchButton) serviceIconRes else Icons.Default.PlayArrow
+
         Button(
             onClick = {
                 if (buttonState.showWatchButton) {
@@ -240,13 +243,18 @@ private fun WatchButton(
                 } else {
                     buttonState.trailerUrl?.let(onWatchTrailerClicked)
                 }
-            }
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = containerColor
+            ),
+            modifier = modifier
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (iconRes is ImageResource) {
-                    Icon(
+                    Image(
                         painter = painterResource(iconRes),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
                     )
                 } else if (iconRes is ImageVector) {
                     Icon(iconRes, null)
