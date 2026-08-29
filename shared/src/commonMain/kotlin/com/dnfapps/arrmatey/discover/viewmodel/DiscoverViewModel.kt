@@ -1,10 +1,15 @@
-package com.dnfapps.arrmatey.seerr.viewmodel
+package com.dnfapps.arrmatey.discover.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.client.paging.PagedData
 import com.dnfapps.arrmatey.client.paging.PagingController
 import com.dnfapps.arrmatey.database.InstanceRepository
+import com.dnfapps.arrmatey.datastore.PreferencesStore
+import com.dnfapps.arrmatey.discover.model.SearchResult
+import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
+import com.dnfapps.arrmatey.extensions.mergeWithLibrary
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -24,6 +29,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -32,7 +38,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-class TrendingViewModel(
+class DiscoverViewModel(
     private val instanceManager: InstanceManager,
     private val instanceRepository: InstanceRepository,
     private val getTrendingUseCase: GetTrendingUseCase,
@@ -40,7 +46,9 @@ class TrendingViewModel(
     private val getDiscoverTvUseCase: GetDiscoverTvUseCase,
     private val getUpcomingMoviesUseCase: GetUpcomingMoviesUseCase,
     private val getUpcomingTvUseCase: GetUpcomingTvUseCase,
-    private val searchSeerrUseCase: SearchSeerrUseCase
+    private val searchSeerrUseCase: SearchSeerrUseCase,
+    private val globalSearchUseCase: GlobalSearchUseCase,
+    private val preferencesStore: PreferencesStore
 ) : ViewModel() {
 
     private val seerrRepository: StateFlow<SeerrInstanceRepository?> = instanceManager.getSelectedSeerrRepository()
@@ -83,8 +91,30 @@ class TrendingViewModel(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _searchState = MutableStateFlow(PagedData<DiscoverResult>())
-    val searchState: StateFlow<PagedData<DiscoverResult>> = _searchState.asStateFlow()
+    private val _searchState = MutableStateFlow<List<SearchResult>>(emptyList())
+    
+    private val allLibraries: StateFlow<List<ArrMedia>> = instanceManager.observeAllArrLibraries()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val searchState: StateFlow<List<SearchResult>> = combine(_searchState, allLibraries) { results, libraries ->
+        results.map { result ->
+            if (result is SearchResult.ArrMediaResult) {
+                val merged = listOf(result.media).mergeWithLibrary(libraries).first()
+                result.copy(media = merged)
+            } else {
+                result
+            }
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
+
+    val searchShowBanners: StateFlow<Boolean> = preferencesStore.searchShowBanners
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val searchShowInstanceIndicatorShadow: StateFlow<Boolean> = preferencesStore.searchShowInstanceIndicatorShadow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     init {
         observeRepository()
@@ -160,8 +190,7 @@ class TrendingViewModel(
                     if (query.isNotEmpty()) {
                         performSearch(query)
                     } else {
-                        searchPagingController = null
-                        _searchState.value = PagedData()
+                        _searchState.value = emptyList()
                     }
                 }
         }
@@ -170,14 +199,9 @@ class TrendingViewModel(
     private fun performSearch(query: String) {
         searchJob?.cancel()
         searchJob = viewModelScope.launch {
-            seerrRepository.value?.let { repo ->
-                val controller = searchSeerrUseCase.createPagingController(query, repo, viewModelScope)
-                searchPagingController = controller
-                controller.loadInitialPage()
-                controller.state.collect {
-                    _searchState.value = it
-                }
-            }
+            _isSearching.value = true
+            _searchState.value = globalSearchUseCase(query)
+            _isSearching.value = false
         }
     }
 
@@ -203,10 +227,6 @@ class TrendingViewModel(
 
     fun loadNextUpcomingTvPage() {
         upcomingTvPagingController?.loadNextPage()
-    }
-
-    fun loadNextSearchPage() {
-        searchPagingController?.loadNextPage()
     }
 
     fun refresh() {

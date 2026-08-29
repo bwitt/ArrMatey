@@ -25,16 +25,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.AddCircleOutline
+import androidx.compose.material.icons.filled.BrightnessLow
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Contrast
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MiscellaneousServices
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
@@ -170,6 +173,8 @@ fun SettingsScreen(
 
     val useServiceNavLogos by viewModel.useServiceNavLogos.collectAsStateWithLifecycle()
     val hideInstanceSwitcher by viewModel.hideInstanceSwitcher.collectAsStateWithLifecycle()
+    val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
+    val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
 
     val appTheme by viewModel.appTheme.collectAsStateWithLifecycle()
     val appColor by viewModel.appColor.collectAsStateWithLifecycle()
@@ -467,6 +472,34 @@ fun SettingsScreen(
                             )
                         },
                         onClick = { viewModel.toggleInstanceSwitcher() }
+                    )
+                )
+            )
+
+            SettingsGroup(
+                title = mokoString(MR.strings.search_results),
+                items = listOf(
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.Image),
+                        title = mokoString(MR.strings.search_show_banners),
+                        trailingContent = {
+                            Switch(
+                                checked = searchShowBanners,
+                                onCheckedChange = { viewModel.toggleSearchShowBanners() }
+                            )
+                        },
+                        onClick = { viewModel.toggleSearchShowBanners() }
+                    ),
+                    SettingItem(
+                        icon = IconSource.Vector(Icons.Default.BrightnessLow),
+                        title = mokoString(MR.strings.search_show_instance_indicator_shadow),
+                        trailingContent = {
+                            Switch(
+                                checked = searchShowInstanceIndicatorShadow,
+                                onCheckedChange = { viewModel.toggleSearchShowInstanceIndicatorShadow() }
+                            )
+                        },
+                        onClick = { viewModel.toggleSearchShowInstanceIndicatorShadow() }
                     )
                 )
             )

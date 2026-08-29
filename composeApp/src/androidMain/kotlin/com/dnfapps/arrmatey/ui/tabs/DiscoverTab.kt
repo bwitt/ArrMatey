@@ -3,61 +3,51 @@ package com.dnfapps.arrmatey.ui.tabs
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Movie
-import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberSearchBarState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.dnfapps.arrmatey.client.paging.PagedData
+import com.dnfapps.arrmatey.discover.model.SearchResult
+import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.isExpanded
 import com.dnfapps.arrmatey.navigation.DiscoverScreen
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.Navigator
+import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toDetails
-import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
-import com.dnfapps.arrmatey.seerr.viewmodel.TrendingViewModel
+import com.dnfapps.arrmatey.navigation.toPersonDetails
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
-import com.dnfapps.arrmatey.ui.components.PosterItem
+import com.dnfapps.arrmatey.ui.components.SearchResultList
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
@@ -71,7 +61,7 @@ import org.koin.compose.koinInject
 fun DiscoverTab(
     windowSizeClass: WindowSizeClass,
     wideRailIsVisible: Boolean,
-    viewModel: TrendingViewModel = koinInject(),
+    viewModel: DiscoverViewModel = koinInject(),
     navigationManager: NavigationManager = koinInject(),
     navigation: Navigator<NavKey> = navigationManager.discover
 ) {
@@ -88,7 +78,17 @@ fun DiscoverTab(
                     viewModel = viewModel,
                     wideRailIsVisible = wideRailIsVisible,
                     onItemClick = { result ->
-                        navigation.toDetails(tmdbId = result.id, requestType = result.mediaType)
+                        when (result) {
+                            is SearchResult.ArrMediaResult -> {
+                                navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                            }
+                            is SearchResult.SeerrMediaResult -> {
+                                navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
+                            }
+                            is SearchResult.SeerrPersonResult -> {
+                                navigation.toPersonDetails(result.result.id)
+                            }
+                        }
                     }
                 )
             }
@@ -100,9 +100,9 @@ fun DiscoverTab(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DiscoverHomeScreen(
-    viewModel: TrendingViewModel,
+    viewModel: DiscoverViewModel,
     wideRailIsVisible: Boolean,
-    onItemClick: (DiscoverResult) -> Unit
+    onItemClick: (SearchResult) -> Unit
 ) {
     val trendingState by viewModel.trendingState.collectAsStateWithLifecycle()
     val moviesState by viewModel.moviesState.collectAsStateWithLifecycle()
@@ -112,6 +112,9 @@ private fun DiscoverHomeScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
+    val isSearching by viewModel.isSearching.collectAsStateWithLifecycle()
+    val searchShowBanners by viewModel.searchShowBanners.collectAsStateWithLifecycle()
+    val searchShowInstanceIndicatorShadow by viewModel.searchShowInstanceIndicatorShadow.collectAsStateWithLifecycle()
 
     val textFieldState = rememberTextFieldState(searchQuery)
     val searchBarState = rememberSearchBarState()
@@ -140,9 +143,11 @@ private fun DiscoverHomeScreen(
             .fillMaxSize()) {
             if (searchBarState.isExpanded()) {
                 DiscoverSearchOverlay(
-                    data = searchState,
+                    items = searchState,
+                    isLoading = isSearching,
                     onItemClick = onItemClick,
-                    onLoadMore = { viewModel.loadNextSearchPage() }
+                    showBanners = searchShowBanners,
+                    showInstanceIndicatorShadow = searchShowInstanceIndicatorShadow
                 )
             } else {
                 PullToRefreshBox(
@@ -159,9 +164,9 @@ private fun DiscoverHomeScreen(
                     ) {
                         DiscoverSection(
                             title = MR.strings.trending,
-                            icon = Icons.Default.TrendingUp,
+                            icon = Icons.AutoMirrored.Filled.TrendingUp,
                             data = trendingState,
-                            onItemClick = onItemClick,
+                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
                             onLoadMore = { viewModel.loadNextTrendingPage() }
                         )
 
@@ -169,7 +174,7 @@ private fun DiscoverHomeScreen(
                             title = MR.strings.popular_movies,
                             icon = Icons.Default.Movie,
                             data = moviesState,
-                            onItemClick = onItemClick,
+                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
                             onLoadMore = { viewModel.loadNextMoviesPage() }
                         )
 
@@ -177,7 +182,7 @@ private fun DiscoverHomeScreen(
                             title = MR.strings.upcoming_movies,
                             icon = Icons.Default.Event,
                             data = upcomingMoviesState,
-                            onItemClick = onItemClick,
+                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
                             onLoadMore = { viewModel.loadNextUpcomingMoviesPage() }
                         )
 
@@ -185,7 +190,7 @@ private fun DiscoverHomeScreen(
                             title = MR.strings.popular_series,
                             icon = Icons.Default.Tv,
                             data = tvState,
-                            onItemClick = onItemClick,
+                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
                             onLoadMore = { viewModel.loadNextTvPage() }
                         )
 
@@ -193,7 +198,7 @@ private fun DiscoverHomeScreen(
                             title = MR.strings.upcoming_series,
                             icon = Icons.Default.Event,
                             data = upcomingTvState,
-                            onItemClick = onItemClick,
+                            onItemClick = { onItemClick(SearchResult.SeerrMediaResult(it)) },
                             onLoadMore = { viewModel.loadNextUpcomingTvPage() }
                         )
 
@@ -207,64 +212,23 @@ private fun DiscoverHomeScreen(
 
 @Composable
 private fun DiscoverSearchOverlay(
-    data: PagedData<DiscoverResult>,
-    onItemClick: (DiscoverResult) -> Unit,
-    onLoadMore: () -> Unit
+    items: List<SearchResult>,
+    isLoading: Boolean,
+    onItemClick: (SearchResult) -> Unit,
+    showBanners: Boolean,
+    showInstanceIndicatorShadow: Boolean
 ) {
-    val lazyGridState = rememberLazyGridState()
-
-    val shouldLoadMore by remember {
-        derivedStateOf {
-            val totalItemsCount = lazyGridState.layoutInfo.totalItemsCount
-            val lastVisibleItemIndex = lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItemIndex >= totalItemsCount - 5 && totalItemsCount > 0
-        }
-    }
-
-    LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) {
-            onLoadMore()
-        }
-    }
-
-    if (data.isLoading && data.items.isEmpty()) {
+    if (isLoading && items.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
-    } else if (data.items.isNotEmpty()) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 120.dp),
-            state = lazyGridState,
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(
-                items = data.items,
-                key = { "${it.mediaType.name}_${it.id}" }
-            ) { item ->
-                PosterItem(
-                    item = item,
-                    onItemClick = { onItemClick(item) }
-                )
-            }
-
-            if (data.isLoadingMore) {
-                item {
-                    Box(Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                }
-            }
-        }
-    } else if (data.error != null) {
-        Box(Modifier
-            .fillMaxSize()
-            .padding(16.dp), contentAlignment = Alignment.Center) {
-            Text(text = data.error ?: "", color = MaterialTheme.colorScheme.error)
-        }
+    } else if (items.isNotEmpty()) {
+        SearchResultList(
+            items = items,
+            onItemClick = onItemClick,
+            includeOverview = true,
+            showBanners = showBanners,
+            showInstanceIndicatorShadow = showInstanceIndicatorShadow
+        )
     }
 }
