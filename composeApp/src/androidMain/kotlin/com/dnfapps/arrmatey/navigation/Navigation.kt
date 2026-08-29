@@ -81,6 +81,7 @@ class AudiobooksTabNavigator : BaseNavigator<NavKey>(ArrScreen.Library)
 class SettingsTabNavigator : BaseNavigator<SettingsScreen>(SettingsScreen.Landing)
 class DashboardTabNavigator : BaseNavigator<DashboardScreen>(DashboardScreen.Main)
 class BazarrTabNavigator : BaseNavigator<BazarrScreen>(BazarrScreen.Library)
+class TracearrTabNavigator : BaseNavigator<TracearrScreen>(TracearrScreen.Home)
 
 /**
  * Shared media navigation extensions.
@@ -159,6 +160,7 @@ fun Navigator<SettingsScreen>.onInstanceTap(id: Long, type: InstanceType) =
         InstanceType.Listenarr -> toArrDashboard(id)
         InstanceType.Seerr,
         InstanceType.Bazarr,
+        InstanceType.Tracearr,
         InstanceType.Prowlarr -> toEditInstance(id)
     }
 

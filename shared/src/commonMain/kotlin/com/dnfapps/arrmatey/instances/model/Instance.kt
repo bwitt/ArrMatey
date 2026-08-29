@@ -16,6 +16,7 @@ import com.dnfapps.arrmatey.ui.theme.ArrLightPurple
 import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.ui.theme.ArrPurple
 import com.dnfapps.arrmatey.ui.theme.ArrRed
+import com.dnfapps.arrmatey.ui.theme.ArrTracearr
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.getNetworkUtils
 import dev.icerock.moko.resources.ImageResource
@@ -239,6 +240,23 @@ enum class InstanceType(
         aspectRatio = AspectRatio.Poster,
         supportsNotifications = false,
         associatedColor = ArrBazarr
+    ),
+    Tracearr(
+        resource = MR.strings.tracearr_description,
+        github = "https://github.com/connorgallopo/tracearr",
+        website = "https://tracearr.com/",
+        icon = MR.images.tracearr,
+        tabIcon = MR.images.tracearr_tab,
+        // Tracearr does not publish a canonical default port; users typically front it with a reverse proxy.
+        defaultPort = 443,
+        supportsActivityQueue = false,
+        apiBase = "api/v2/public",
+        testEndpoint = "docs",
+        getApiKeyEndpoint = "settings/general",
+        includeTopLevelAutomaticSearchOption = false,
+        aspectRatio = AspectRatio.Poster,
+        supportsNotifications = false,
+        associatedColor = ArrTracearr
     );
 
     companion object {

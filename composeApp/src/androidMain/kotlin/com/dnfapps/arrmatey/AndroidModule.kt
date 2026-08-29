@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.RequestsTabNavigator
 import com.dnfapps.arrmatey.navigation.SeriesTabNavigator
 import com.dnfapps.arrmatey.navigation.SettingsTabNavigator
+import com.dnfapps.arrmatey.navigation.TracearrTabNavigator
 import com.dnfapps.arrmatey.ui.helpers.ArrImageLoader
 import com.dnfapps.arrmatey.utils.AndroidCrashManager
 import com.dnfapps.arrmatey.utils.CrashManager
@@ -45,6 +46,7 @@ val androidModule = module {
     single { AudiobooksTabNavigator() }
     single { DashboardTabNavigator() }
     single { BazarrTabNavigator() }
+    single { TracearrTabNavigator() }
 
     // Navigation Manager
     single {
@@ -59,7 +61,7 @@ val androidModule = module {
             TabItem.Standard.BOOKS to get<BooksTabNavigator>(),
             TabItem.Standard.AUDIOBOOKS to get<AudiobooksTabNavigator>(),
         )
-        NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get())
+        NavigationManager(registry, get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
 
     // Others

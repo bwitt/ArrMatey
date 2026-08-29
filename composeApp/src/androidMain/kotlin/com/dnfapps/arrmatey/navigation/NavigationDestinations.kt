@@ -75,3 +75,7 @@ sealed interface BazarrScreen: NavKey {
     data object Library: BazarrScreen
     data class Details(val id: Long, val type: BazarrMediaType): BazarrScreen
 }
+
+sealed interface TracearrScreen: NavKey {
+    data object Home: TracearrScreen
+}

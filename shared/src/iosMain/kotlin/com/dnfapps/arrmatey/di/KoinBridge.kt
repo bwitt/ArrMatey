@@ -31,6 +31,7 @@ import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
 import com.dnfapps.arrmatey.database.InstanceRepository
@@ -127,6 +128,9 @@ object KoinBridge: KoinComponent {
         getKoin().get()
 
     fun getBazarrViewModel(): BazarrViewModel =
+        getKoin().get()
+
+    fun getTracearrViewModel(): TracearrViewModel =
         getKoin().get()
 
     fun getBazarrDetailsViewModel(id: Long, type: BazarrMediaType): BazarrDetailsViewModel =

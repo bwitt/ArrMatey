@@ -94,6 +94,7 @@ import com.dnfapps.arrmatey.ui.tabs.DownloadsTab
 import com.dnfapps.arrmatey.ui.tabs.ProwlarrTab
 import com.dnfapps.arrmatey.ui.tabs.SeerrTab
 import com.dnfapps.arrmatey.ui.tabs.SettingsTabNavHost
+import com.dnfapps.arrmatey.ui.tabs.TracearrTab
 import com.dnfapps.arrmatey.ui.tabs.UnifiedLibraryTab
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
@@ -592,6 +593,7 @@ private fun StandardTabContent(tab: TabItem.Standard, windowSizeClass: WindowSiz
         TabItem.Standard.PROWLARR -> ProwlarrTab(wideRailIsVisible)
         TabItem.Standard.DASHBOARD -> DashboardTab(windowSizeClass)
         TabItem.Standard.BAZARR -> BazarrTab(windowSizeClass, wideRailIsVisible)
+        TabItem.Standard.TRACEARR -> TracearrTab(wideRailIsVisible)
         TabItem.Standard.DISCOVER -> DiscoverTab(windowSizeClass, wideRailIsVisible)
     }
 }

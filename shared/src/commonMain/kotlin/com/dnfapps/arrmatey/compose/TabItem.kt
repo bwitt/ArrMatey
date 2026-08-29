@@ -44,6 +44,7 @@ sealed interface TabItem {
         DISCOVER("sparkles", MR.strings.discover),
         PROWLARR("magnifyingglass.circle", MR.strings.prowlarr, associatedType = InstanceType.Prowlarr),
         BAZARR("captions.bubble", MR.strings.bazarr, associatedType = InstanceType.Bazarr),
+        TRACEARR("chart.line.uptrend.xyaxis", MR.strings.tracearr, associatedType = InstanceType.Tracearr),
         DASHBOARD("rectangle.grid.3x1", MR.strings.dashboard);
 
         override val key: String get() = "standard_${name}"

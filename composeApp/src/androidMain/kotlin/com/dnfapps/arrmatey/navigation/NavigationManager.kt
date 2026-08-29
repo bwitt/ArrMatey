@@ -20,6 +20,7 @@ class NavigationManager(
     val calendar: CalendarTabNavigator,
     val dashboard: DashboardTabNavigator,
     val bazarr: BazarrTabNavigator,
+    val tracearr: TracearrTabNavigator,
     private val appState: AppState,
     private val tabManager: TabManager,
     private val instanceRepository: com.dnfapps.arrmatey.database.InstanceRepository
@@ -108,6 +109,7 @@ class NavigationManager(
             InstanceType.Seerr -> openRequestsTab()
             InstanceType.Prowlarr -> openProwlarrTab()
             InstanceType.Bazarr -> openBazarrTab()
+            InstanceType.Tracearr -> openTracearrTab()
             else -> navigateToTab(tabFor(type))
         }
     }
@@ -122,6 +124,10 @@ class NavigationManager(
 
     fun openBazarrTab() {
         navigateToTab(TabItem.Standard.BAZARR)
+    }
+
+    fun openTracearrTab() {
+        navigateToTab(TabItem.Standard.TRACEARR)
     }
 
     fun openDownloadClientsTab() {

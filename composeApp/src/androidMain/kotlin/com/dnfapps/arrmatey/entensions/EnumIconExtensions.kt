@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Headphones
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inbox
+import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.ManageSearch
 import androidx.compose.material.icons.filled.Movie
@@ -68,6 +69,7 @@ val TabItem.androidIcon: ImageVector
             TabItem.Standard.DISCOVER -> Stars2
             TabItem.Standard.PROWLARR -> Icons.AutoMirrored.Filled.ManageSearch
             TabItem.Standard.BAZARR -> Icons.Default.Subtitles
+            TabItem.Standard.TRACEARR -> Icons.Default.Insights
             TabItem.Standard.DASHBOARD -> Icons.Default.Dashboard
         }
         is TabItem.CustomWebpage -> Icons.Default.Language

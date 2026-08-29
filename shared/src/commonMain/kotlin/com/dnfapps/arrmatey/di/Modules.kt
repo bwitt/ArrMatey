@@ -84,6 +84,7 @@ import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrDetailsViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrMediaSubtitlesViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrSubtitleSearchViewModel
 import com.dnfapps.arrmatey.bazarr.viewmodel.BazarrViewModel
+import com.dnfapps.arrmatey.tracearr.viewmodel.TracearrViewModel
 import com.dnfapps.arrmatey.compose.DashboardManager
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.compose.utils.ReleaseFilterBy
@@ -124,6 +125,7 @@ import com.dnfapps.arrmatey.instances.usecase.GetBazarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetInstanceByIdUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetProwlarrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
+import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveAllInstancesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveDownloadClientPreferencesUseCase
@@ -345,6 +347,7 @@ val useCaseModule = module {
     factory { SetDownloadClientActiveUseCase(get()) }
     factory { GetProwlarrIndexersStatusUseCase(get()) }
     factory { GetProwlarrInstanceRepositoryUseCase(get()) }
+    factory { GetTracearrInstanceRepositoryUseCase(get()) }
     factory { AddCustomWebpageUseCase(get()) }
     factory { UpdateCustomWebpageUseCase(get()) }
     factory { DeleteCustomWebpageUseCase(get()) }
@@ -468,6 +471,7 @@ val viewModelModule = module {
         SeerrMediaDetailsViewModel(tmdbId, mediaType, get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
     factory { BazarrViewModel(get(), get(), get(), get()) }
+    factory { TracearrViewModel(get()) }
     factory { (target: BazarrMediaTarget) ->
         BazarrSubtitleSearchViewModel(target, get())
     }

@@ -82,6 +82,8 @@ class InstanceManager(
 
             InstanceType.Bazarr -> BazarrInstanceRepository(instance, httpClient)
 
+            InstanceType.Tracearr -> TracearrInstanceRepository(instance, httpClient)
+
             InstanceType.Sonarr,
             InstanceType.Radarr,
             InstanceType.Lidarr,
@@ -101,6 +103,9 @@ class InstanceManager(
 
     fun getBazarrRepository(instanceId: Long): BazarrInstanceRepository? =
         _instanceRepositories.value[instanceId] as? BazarrInstanceRepository
+
+    fun getTracearrRepository(instanceId: Long): TracearrInstanceRepository? =
+        _instanceRepositories.value[instanceId] as? TracearrInstanceRepository
 
     fun getRepository(instanceId: Long): InstanceScopedRepository? =
         _instanceRepositories.value[instanceId]
@@ -132,6 +137,13 @@ class InstanceManager(
                 else _instanceRepositories.map { repos -> repos[instance.id] as? BazarrInstanceRepository }
             }
 
+    fun getSelectedTracearrRepository(): Flow<TracearrInstanceRepository?> =
+        instanceRepository.observeSelectedInstance(InstanceType.Tracearr)
+            .flatMapLatest { instance ->
+                if (instance == null) flowOf(null)
+                else _instanceRepositories.map { repos -> repos[instance.id] as? TracearrInstanceRepository }
+            }
+
     fun getAllRepositories(): List<InstanceScopedRepository> {
         return _instanceRepositories.value.values.toList()
     }
@@ -146,6 +158,10 @@ class InstanceManager(
 
     fun getAllBazarrRepositories(): List<BazarrInstanceRepository> {
         return _instanceRepositories.value.values.filterIsInstance<BazarrInstanceRepository>()
+    }
+
+    fun getAllTracearrRepositories(): List<TracearrInstanceRepository> {
+        return _instanceRepositories.value.values.filterIsInstance<TracearrInstanceRepository>()
     }
 
     fun repositoriesByType(type: InstanceType): Flow<List<InstanceScopedRepository>> =
