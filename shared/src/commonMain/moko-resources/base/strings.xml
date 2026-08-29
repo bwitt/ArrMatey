@@ -774,6 +774,7 @@
     <string name="v7_title">Subtitles, Settings, and Security</string>
     <string name="v8_title">Quick Actions, Theming, and Bug Fixes</string>
     <string name="v9_title">Unified Details, Discover, and More</string>
+    <string name="v10_title">A Unified Experience</string>
 
     <!-- Backup & Restore -->
     <string name="backup_restore">Backup &amp; Restore</string>
