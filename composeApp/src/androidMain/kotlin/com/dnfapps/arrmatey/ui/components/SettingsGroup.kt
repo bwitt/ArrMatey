@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,8 @@ import dev.icerock.moko.resources.compose.painterResource
 fun SettingsGroup(
     title: String? = null,
     items: List<SettingItem>,
+    header: String? = null,
+    footer: String? = null,
 ) {
     Column(
         modifier =
@@ -46,6 +49,14 @@ fun SettingsGroup(
                 modifier = Modifier.padding(bottom = 8.dp),
             )
         }
+        header?.let { footer ->
+            Text(
+                text = footer,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 4.dp, start = 16.dp, end = 16.dp),
+            )
+        }
         items.forEachIndexed { index, item ->
             val total = items.size
             val baseShape = MaterialTheme.shapes.extraLarge
@@ -60,6 +71,14 @@ fun SettingsGroup(
             SettingsRow(
                 item = item,
                 shape = shape,
+            )
+        }
+        footer?.let { footer ->
+            Text(
+                text = footer,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp, start = 16.dp, end = 16.dp),
             )
         }
     }
@@ -93,7 +112,8 @@ fun SettingsRow(
                             Icon(
                                 imageVector = source.imageVector,
                                 contentDescription = null,
-                                modifier = Modifier.size(36.dp),
+                                modifier = Modifier.size(36.dp).rotate(source.rotation),
+                                tint = MaterialTheme.colorScheme.primary,
                             )
                         is IconSource.Resource ->
                             Image(

@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.ui.NavDisplay
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.viewmodel.DiscoverViewModel
 import com.dnfapps.arrmatey.entensions.isExpanded
@@ -50,10 +49,8 @@ import com.dnfapps.arrmatey.ui.components.ArrAppBarWithSearch
 import com.dnfapps.arrmatey.ui.components.DiscoverSection
 import com.dnfapps.arrmatey.ui.components.SearchResultList
 import com.dnfapps.arrmatey.ui.components.navigation.NavigationDrawerButton
-import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.TwoPaneMasterDetailNavDisplay
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
-import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
-import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
 import com.dnfapps.arrmatey.utils.mokoString
 import org.koin.compose.koinInject
 
@@ -67,12 +64,11 @@ fun DiscoverTab(
     navigation: Navigator<NavKey> = navigationManager.discover,
 ) {
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-    NavDisplay(
-        backStack = navigation.backStack,
-        onBack = { navigation.popBackStack() },
-        transitionSpec = { forwardSlideTransform() },
-        popTransitionSpec = { popSlideTransform() },
-        predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
+    TwoPaneMasterDetailNavDisplay(
+        navigation = navigation,
+        isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
+        isMasterScreen = { it is DiscoverScreen.Home },
         entryProvider =
             entryProvider {
                 entry<DiscoverScreen.Home> {
@@ -94,7 +90,11 @@ fun DiscoverTab(
                         },
                     )
                 }
-                mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
+                mediaNavEntries(
+                    navigation = navigation,
+                    isExpanded = isExpanded,
+                    wideRailIsVisible = wideRailIsVisible,
+                )
             },
     )
 }

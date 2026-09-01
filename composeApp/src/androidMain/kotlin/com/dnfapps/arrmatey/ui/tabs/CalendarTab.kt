@@ -138,7 +138,11 @@ fun CalendarTab(
                         },
                     )
                 }
-                mediaNavEntries(navigation = navigation, isExpanded = isExpanded)
+                mediaNavEntries(
+                    navigation = navigation,
+                    isExpanded = isExpanded,
+                    wideRailIsVisible = wideRailIsVisible,
+                )
             },
     )
 }
@@ -220,7 +224,7 @@ private fun CalendarHomeScreen(
                                 )
                             }
                             VerticalDivider(modifier = Modifier.padding(horizontal = 8.dp))
-                            Box(modifier = Modifier.weight(1f)) {
+                            Box(modifier = Modifier.weight(if (wideRailIsVisible) 1.25f else 1f)) {
                                 CalendarListView(
                                     state = calendarState,
                                     instances = instances,

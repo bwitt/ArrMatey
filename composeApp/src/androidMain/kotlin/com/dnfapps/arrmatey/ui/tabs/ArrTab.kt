@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.tabs
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -29,6 +30,7 @@ fun ArrTab(
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
         entryProvider = arrEntryProvider(type, isExpanded, wideRailIsVisible, navigation),
     )
 }
@@ -48,5 +50,10 @@ private fun arrEntryProvider(
             onNavigateToDetails = { media, instanceId -> navigation.toMediaDetails(media, type, instanceId) },
         )
     }
-    mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = type)
+    mediaNavEntries(
+        navigation = navigation,
+        isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
+        defaultInstanceType = type,
+    )
 }
