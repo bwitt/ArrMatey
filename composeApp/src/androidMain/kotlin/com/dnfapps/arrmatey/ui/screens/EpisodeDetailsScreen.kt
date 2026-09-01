@@ -58,6 +58,7 @@ import com.dnfapps.arrmatey.ui.components.MediaActivitySection
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.ReleaseDownloadButtons
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -67,6 +68,8 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun EpisodeDetailsScreen(
     series: ArrSeries,
     episode: Episode,
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     onBack: () -> Unit = {},
     onNavigateToSeriesRelease: (Long) -> Unit = {},
     viewModel: EpisodeDetailsViewModel = koinInjectParams(series.id, episode),
@@ -168,15 +171,17 @@ fun EpisodeDetailsScreen(
                 modifier = Modifier.verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                val isInTwoPane = LocalIsInTwoPane.current
                 Box(modifier = Modifier.fillMaxWidth().height(200.dp)) {
                     DetailHeaderBanner(
                         bannerUrl = currentEpisode.getBanner()?.remoteUrl,
                         gradientHeight = 100.dp,
+                        startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
                     )
                 }
 
                 Column(
-                    modifier = Modifier.padding(horizontal = 24.dp).padding(top = 12.dp),
+                    modifier = Modifier.padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),
                 ) {
                     Column {

@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.tabs
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import com.dnfapps.arrmatey.compose.TabItem
@@ -29,6 +30,7 @@ fun UnifiedLibraryTab(
     TwoPaneMasterDetailNavDisplay(
         navigation = navigation,
         isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
         entryProvider = unifiedLibraryEntryProvider(isExpanded, wideRailIsVisible, navigation),
     )
 }
@@ -46,5 +48,10 @@ private fun unifiedLibraryEntryProvider(
             onNavigateToDetails = { media, type, instanceId -> navigation.toMediaDetails(media, type, instanceId) },
         )
     }
-    mediaNavEntries(navigation = navigation, isExpanded = isExpanded, defaultInstanceType = InstanceType.Sonarr)
+    mediaNavEntries(
+        navigation = navigation,
+        isExpanded = isExpanded,
+        wideRailIsVisible = wideRailIsVisible,
+        defaultInstanceType = InstanceType.Sonarr,
+    )
 }

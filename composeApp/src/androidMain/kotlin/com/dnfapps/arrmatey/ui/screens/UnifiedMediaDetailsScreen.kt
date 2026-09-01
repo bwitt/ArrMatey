@@ -112,6 +112,7 @@ import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitlesSection
 import com.dnfapps.arrmatey.ui.components.buildArrInfoItems
 import com.dnfapps.arrmatey.ui.components.buildSeerrInfoItems
 import com.dnfapps.arrmatey.ui.components.buttons.MediaDetailsActions
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.sheets.AddArtistSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAudiobookSheet
 import com.dnfapps.arrmatey.ui.sheets.AddAuthorSheet
@@ -143,6 +144,7 @@ fun UnifiedMediaDetailsScreen(
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
     isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
     onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
     onNavigateToSeriesRelease: (Long?, Int) -> Unit,
@@ -169,6 +171,7 @@ fun UnifiedMediaDetailsScreen(
 
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val isDualPanel = LocalIsInTwoPane.current
 
     var confirmDelete by remember { mutableStateOf(false) }
     var showEditSheet by remember { mutableStateOf(false) }
@@ -298,8 +301,8 @@ fun UnifiedMediaDetailsScreen(
                         colors = IconButtonDefaults.headerBarColors(),
                     ) {
                         Icon(
-                            imageVector = if (isExpanded) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
-                            contentDescription = mokoString(if (isExpanded) MR.strings.close else MR.strings.back),
+                            imageVector = if (isDualPanel) Icons.Default.Close else Icons.AutoMirrored.Default.ArrowBack,
+                            contentDescription = mokoString(if (isDualPanel) MR.strings.close else MR.strings.back),
                         )
                     }
                 },
@@ -435,6 +438,8 @@ fun UnifiedMediaDetailsScreen(
                                 releasedBy = state.releasedBy,
                                 seasonCount = state.seasonCount?.let { mokoPlural(MR.plurals.seasons, it) },
                                 genres = state.genres,
+                                isExpanded = isExpanded,
+                                wideRailIsVisible = wideRailIsVisible,
                             )
 
                             Column(
@@ -645,6 +650,7 @@ fun UnifiedMediaDetailsScreen(
                                                 ),
                                             ),
                                         modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth(),
+                                        useDualColumn = isExpanded && !isDualPanel,
                                     )
                                 }
 

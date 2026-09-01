@@ -70,6 +70,8 @@ fun SeerrPersonDetailsScreen(
     personId: Long,
     onBack: () -> Unit,
     onMediaClick: (Long, RequestType) -> Unit = { _, _ -> },
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     viewModel: SeerrMediaDetailsViewModel = koinInjectParams(personId, RequestType.Person),
 ) {
     val navManager = navigationManager
@@ -132,6 +134,8 @@ fun SeerrPersonDetailsScreen(
                                     item = item,
                                     credits = credits,
                                     modifier = Modifier.breakPadding(24.dp),
+                                    isExpanded = isExpanded,
+                                    wideRailIsVisible = wideRailIsVisible,
                                 )
                             }
 

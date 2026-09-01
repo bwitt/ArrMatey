@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:standard:max-line-length")
-
 package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
@@ -85,6 +83,7 @@ import com.dnfapps.arrmatey.ui.components.ItemDescriptionCard
 import com.dnfapps.arrmatey.ui.components.OverlayTopAppBar
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrMediaSubtitlesSheet
 import com.dnfapps.arrmatey.ui.components.bazarr.BazarrSubtitleSearchSheet
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import com.dnfapps.arrmatey.ui.helpers.rememberRemoteImageData
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.koinInjectParams
@@ -94,6 +93,8 @@ import com.dnfapps.arrmatey.utils.mokoString
 fun BazarrDetailsScreen(
     id: Long,
     type: BazarrMediaType,
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
     viewModel: BazarrDetailsViewModel = koinInjectParams(id, type),
     onBack: () -> Unit = {},
 ) {
@@ -197,6 +198,8 @@ fun BazarrDetailsScreen(
                 poster = uiState.details?.poster,
                 fanart = uiState.details?.fanart,
                 topPadding = paddingValues.calculateTopPadding(),
+                isExpanded = isExpanded,
+                wideRailIsVisible = wideRailIsVisible,
             )
 
             Column(
@@ -292,13 +295,17 @@ private fun BazarrDetailsHeader(
     poster: String?,
     fanart: String?,
     topPadding: Dp,
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
 ) {
+    val isInTwoPane = LocalIsInTwoPane.current
     Box(
         modifier = Modifier.fillMaxWidth(),
     ) {
         DetailHeaderBanner(
             bannerUrl = fanart ?: poster,
             gradientHeight = 150.dp,
+            startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
         )
 
         Row(

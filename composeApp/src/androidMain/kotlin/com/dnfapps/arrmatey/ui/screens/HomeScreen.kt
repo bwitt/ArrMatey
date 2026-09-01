@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -201,7 +202,7 @@ fun HomeScreen(
         }
 
         ModalNavigationDrawer(
-            gesturesEnabled = overlayTab !is TabItem.CustomWebpage && windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact,
+            gesturesEnabled = overlayTab !is TabItem.CustomWebpage,
             drawerState = drawerState,
             drawerContent = {
                 ModalDrawerSheet(drawerState = drawerState) {
@@ -260,11 +261,13 @@ fun HomeScreen(
                                         }
                                     val navigator = navigationManager.getNavigator(currentTab)
 
-                                    if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
-                                        FloatingActionButton(
-                                            onClick = { navigator.toSearch(type = currentTab?.associatedType) },
-                                        ) {
-                                            Icon(Icons.Default.Add, contentDescription = null)
+                                    Box(modifier = Modifier.size(56.dp)) {
+                                        if (hasInstances && navigator?.backStack?.lastOrNull() is ArrScreen.Library) {
+                                            FloatingActionButton(
+                                                onClick = { navigator.toSearch(type = currentTab?.associatedType) },
+                                            ) {
+                                                Icon(Icons.Default.Add, contentDescription = null)
+                                            }
                                         }
                                     }
                                 }
@@ -308,6 +311,7 @@ fun HomeScreen(
                                         },
                                     )
                                 }
+                                Spacer(modifier = Modifier.height(56.dp))
                             }
                         }
                     }

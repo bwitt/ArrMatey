@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.seerr.api.model.PersonCredits
 import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
+import com.dnfapps.arrmatey.ui.helpers.LocalIsInTwoPane
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -25,9 +26,12 @@ fun PersonDetailsHeader(
     item: PersonDetails,
     credits: PersonCredits?,
     modifier: Modifier = Modifier,
+    isExpanded: Boolean = false,
+    wideRailIsVisible: Boolean = false,
 ) {
     val backdrops = credits?.backdrops ?: emptyList()
     var currentIndex by remember { mutableIntStateOf(0) }
+    val isInTwoPane = LocalIsInTwoPane.current
 
     if (backdrops.isNotEmpty()) {
         LaunchedEffect(backdrops) {
@@ -49,6 +53,7 @@ fun PersonDetailsHeader(
                 DetailHeaderBanner(
                     bannerUrl = url,
                     gradientHeight = 150.dp,
+                    startGradient = isExpanded && (wideRailIsVisible || isInTwoPane),
                 )
             }
         }
