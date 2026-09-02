@@ -536,6 +536,7 @@ fun UnifiedMediaDetailsScreen(
                                         },
                                         deleteEpisodeFile = { confirmDeleteEpisodeId = it },
                                         onNavigateToSeriesRelease = onNavigateToSeriesRelease,
+                                        bazarrDetailsIntegration = state.bazarrDetailsIntegration,
                                     )
                                 }
 
@@ -558,10 +559,12 @@ fun UnifiedMediaDetailsScreen(
                                                     onNavigateToMovieReleases = onNavigateToMovieReleases,
                                                 )
                                                 item.id?.let { movieId ->
-                                                    BazarrSubtitlesSection(
-                                                        target = BazarrMediaTarget.Movie(movieId),
-                                                        modifier = Modifier.padding(horizontal = 24.dp),
-                                                    )
+                                                    if (state.bazarrDetailsIntegration) {
+                                                        BazarrSubtitlesSection(
+                                                            target = BazarrMediaTarget.Movie(movieId),
+                                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                                        )
+                                                    }
                                                 }
                                             }
                                         }

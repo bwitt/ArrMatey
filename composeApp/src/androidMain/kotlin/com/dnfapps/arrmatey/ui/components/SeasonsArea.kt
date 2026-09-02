@@ -64,6 +64,7 @@ fun SeasonsArea(
     seasonDeleteInProgress: Boolean = false,
     onNavigateToEpisodeDetails: (ArrEpisode) -> Unit = {},
     onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> },
+    bazarrDetailsIntegration: Boolean = true,
 ) {
     if (seasons.isEmpty()) return
 
@@ -205,6 +206,7 @@ fun SeasonsArea(
                                 onToggleMonitor = onToggleEpisodeMonitor,
                                 onNavigateToSeriesRelease = { onNavigateToSeriesRelease(seriesId, episode.episodeNumber) },
                                 searchInProgress = { searchIds.contains(it) },
+                                bazarrDetailsIntegration = bazarrDetailsIntegration,
                             )
 
                             if (index < season.episodes.size - 1) {
@@ -233,6 +235,7 @@ fun SeasonsArea(
     onNavigateToEpisodeDetails: (ArrSeries, ArrEpisode) -> Unit,
     onNavigateToSeriesRelease: (Long?, Int) -> Unit,
     modifier: Modifier = Modifier,
+    bazarrDetailsIntegration: Boolean = true,
 ) {
     val arrEpMap = episodes.groupBy { it.seasonNumber }
     val wrappedSeasons =
@@ -262,5 +265,6 @@ fun SeasonsArea(
         onNavigateToEpisodeDetails = { onNavigateToEpisodeDetails(series, it) },
         onNavigateToSeriesRelease = onNavigateToSeriesRelease,
         modifier = modifier,
+        bazarrDetailsIntegration = bazarrDetailsIntegration,
     )
 }

@@ -22,6 +22,7 @@ struct SeasonsArea: View {
     var seasonDeleteInProgress: Bool = false
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
     var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
+    var bazarrDetailsIntegration: Bool = true
 
     @ViewBuilder
     var body: some View {
@@ -45,7 +46,8 @@ struct SeasonsArea: View {
                         onDeleteEpisodeFile: onDeleteEpisodeFile,
                         seasonDeleteInProgress: seasonDeleteInProgress,
                         onNavigateToEpisodeDetails: onNavigateToEpisodeDetails,
-                        onNavigateToSeriesRelease: onNavigateToSeriesRelease
+                        onNavigateToSeriesRelease: onNavigateToSeriesRelease,
+                        bazarrDetailsIntegration: bazarrDetailsIntegration
                     )
                 }
             }
@@ -68,6 +70,7 @@ struct SeasonAreaRow: View {
     let seasonDeleteInProgress: Bool
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
     var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
+    var bazarrDetailsIntegration: Bool
 
     @State private var expanded: Bool = false
     @EnvironmentObject private var navigation: NavigationManager
@@ -189,7 +192,8 @@ struct SeasonAreaRow: View {
                                 if let arrEp = wrapper.arrEpisode {
                                     onNavigateToEpisodeDetails?(arrEp)
                                 }
-                            }
+                            },
+                            bazarrDetailsIntegration: bazarrDetailsIntegration
                         )
                         .padding(.horizontal, 4)
 

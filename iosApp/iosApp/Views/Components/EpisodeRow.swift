@@ -16,6 +16,7 @@ struct EpisodeRow: View {
     var onNavigateToSeriesRelease: ((Int64) -> Void)? = nil
     var onDeleteFile: ((Int64) -> Void)? = nil
     var onClick: (() -> Void)? = nil
+    var bazarrDetailsIntegration: Bool = true
 
     @EnvironmentObject private var navigation: NavigationManager
 
@@ -26,7 +27,8 @@ struct EpisodeRow: View {
         onToggleMonitor: @escaping (Episode) -> Void = { _ in },
         onNavigateToSeriesRelease: ((Int64) -> Void)? = nil,
         onDeleteFile: ((Int64) -> Void)? = nil,
-        onClick: (() -> Void)? = nil
+        onClick: (() -> Void)? = nil,
+        bazarrDetailsIntegration: Bool = true
     ) {
         self.episode = episode
         self.searchInProgress = searchInProgress
@@ -35,6 +37,7 @@ struct EpisodeRow: View {
         self.onNavigateToSeriesRelease = onNavigateToSeriesRelease
         self.onDeleteFile = onDeleteFile
         self.onClick = onClick
+        self.bazarrDetailsIntegration = bazarrDetailsIntegration
     }
 
     init(
@@ -42,6 +45,7 @@ struct EpisodeRow: View {
         onToggleEpisodeMonitor: @escaping (Episode) -> Void,
         onAutomaticSearch: @escaping () -> Void,
         automaticSearchDisabled: Bool = false,
+        bazarrDetailsIntegration: Bool = true,
         onClicked: @escaping () -> Void
     ) {
         self.episode = EpisodeWrapper(
@@ -55,6 +59,7 @@ struct EpisodeRow: View {
         self.onAutomaticSearch = { _ in onAutomaticSearch() }
         self.onToggleMonitor = onToggleEpisodeMonitor
         self.onNavigateToSeriesRelease = nil
+        self.bazarrDetailsIntegration = bazarrDetailsIntegration
         self.onClick = onClicked
     }
 
@@ -235,7 +240,7 @@ struct EpisodeRow: View {
                                 .truncationMode(.tail)
                         }
 
-                        if let bazarrEp = episode.bazarrEpisode {
+                        if bazarrDetailsIntegration, let bazarrEp = episode.bazarrEpisode {
                             EpisodeSubtitlesRow(bazarrEpisode: bazarrEp)
                                 .padding(.top, 2)
                         }
