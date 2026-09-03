@@ -38,7 +38,11 @@ data class SeasonWrapper(
             val rawName = seerrSeason?.name?.trim() ?: return null
             if (rawName.isBlank()) return null
             if (rawName.equals("Season $seasonNumber", ignoreCase = true)) return null
-            if (seasonNumber == 0 && (rawName.equals("Specials", ignoreCase = true) || rawName.equals("Season 0", ignoreCase = true))) return null
+            if (seasonNumber == 0 &&
+                (rawName.equals("Specials", ignoreCase = true) || rawName.equals("Season 0", ignoreCase = true))
+            ) {
+                return null
+            }
             return rawName
         }
 
