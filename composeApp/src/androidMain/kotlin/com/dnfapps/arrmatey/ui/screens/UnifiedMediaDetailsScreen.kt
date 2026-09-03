@@ -160,7 +160,7 @@ fun UnifiedMediaDetailsScreen(
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
     onNavigateToEpisodeDetails: (ArrSeries, Episode) -> Unit,
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
+    onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit,
     onNavigateToMovieFiles: (ArrMovie) -> Unit,
     onNavigateToMovieReleases: (Long) -> Unit,
     onNavigateToAuthorFiles: (Author) -> Unit,

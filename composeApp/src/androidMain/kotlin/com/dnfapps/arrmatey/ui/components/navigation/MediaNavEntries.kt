@@ -56,10 +56,11 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
             onNavigateToEpisodeDetails = { series, episode -> navigation.toEpisodeDetails(series, episode) },
-            onNavigateToSeriesRelease = { seriesId, seasonNumber ->
+            onNavigateToSeriesRelease = { seriesId, seasonNumber, episodeId ->
                 navigation.toSeriesRelease(
                     seriesId,
                     seasonNumber,
+                    episodeId,
                 )
             },
             onNavigateToMovieFiles = { navigation.toMovieFiles(it) },

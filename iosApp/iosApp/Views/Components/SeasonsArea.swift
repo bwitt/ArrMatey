@@ -21,7 +21,7 @@ struct SeasonsArea: View {
     var onDeleteEpisodeFile: (Int64) -> Void = { _ in }
     var seasonDeleteInProgress: Bool = false
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
-    var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
+    var onNavigateToSeriesRelease: ((Int64?, Int32?, Int64?) -> Void)? = nil
     var bazarrDetailsIntegration: Bool = true
 
     @ViewBuilder
@@ -69,7 +69,7 @@ struct SeasonAreaRow: View {
     let onDeleteEpisodeFile: (Int64) -> Void
     let seasonDeleteInProgress: Bool
     var onNavigateToEpisodeDetails: ((Episode) -> Void)? = nil
-    var onNavigateToSeriesRelease: ((Int64?, Int32) -> Void)? = nil
+    var onNavigateToSeriesRelease: ((Int64?, Int32?, Int64?) -> Void)? = nil
     var bazarrDetailsIntegration: Bool
 
     @State private var expanded: Bool = false
@@ -154,7 +154,7 @@ struct SeasonAreaRow: View {
                         ReleaseDownloadButtons(
                             onInteractiveClicked: {
                                 if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
-                                    onNavigateToSeriesRelease(sId, season.seasonNumber)
+                                    onNavigateToSeriesRelease(sId, season.seasonNumber, nil)
                                 } else {
                                     navigation.go(to: .seriesReleases(seriesId: sId, seasonNumber: season.seasonNumber, episodeId: nil), of: .sonarr)
                                 }
@@ -182,9 +182,9 @@ struct SeasonAreaRow: View {
                             onToggleMonitor: { onToggleEpisodeMonitor($0) },
                             onNavigateToSeriesRelease: { epId in
                                 if let onNavigateToSeriesRelease = onNavigateToSeriesRelease {
-                                    onNavigateToSeriesRelease(seriesId, season.seasonNumber)
+                                    onNavigateToSeriesRelease(seriesId, season.seasonNumber, epId)
                                 } else {
-                                    navigation.go(to: .seriesReleases(seriesId: seriesId, seasonNumber: nil, episodeId: epId), of: .sonarr)
+                                    navigation.go(to: .seriesReleases(seriesId: seriesId, seasonNumber: season.seasonNumber, episodeId: epId), of: .sonarr)
                                 }
                             },
                             onDeleteFile: { onDeleteEpisodeFile($0) },

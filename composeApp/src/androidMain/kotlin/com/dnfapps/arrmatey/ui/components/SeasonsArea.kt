@@ -40,8 +40,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
-import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.model.EpisodeWrapper
 import com.dnfapps.arrmatey.model.SeasonWrapper
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -63,7 +61,7 @@ fun SeasonsArea(
     deleteEpisodeFile: (Long) -> Unit = {},
     seasonDeleteInProgress: Boolean = false,
     onNavigateToEpisodeDetails: (ArrEpisode) -> Unit = {},
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit = { _, _ -> },
+    onNavigateToSeriesRelease: (seriesId: Long?, seasonNumber: Int?, episodeId: Long?) -> Unit = { _, _, _ -> },
     bazarrDetailsIntegration: Boolean = true,
 ) {
     if (seasons.isEmpty()) return
@@ -204,7 +202,9 @@ fun SeasonsArea(
                                 onLongClick = arrEp?.episodeFileId?.let { { deleteEpisodeFile(it) } },
                                 onAutomaticSearch = onEpisodeAutomaticSearch,
                                 onToggleMonitor = onToggleEpisodeMonitor,
-                                onNavigateToSeriesRelease = { onNavigateToSeriesRelease(seriesId, episode.episodeNumber) },
+                                onNavigateToSeriesRelease = { episodeId ->
+                                    onNavigateToSeriesRelease(seriesId, season.seasonNumber, episodeId)
+                                },
                                 searchInProgress = { searchIds.contains(it) },
                                 bazarrDetailsIntegration = bazarrDetailsIntegration,
                             )
@@ -218,53 +218,4 @@ fun SeasonsArea(
             }
         }
     }
-}
-
-@Composable
-fun SeasonsArea(
-    series: ArrSeries,
-    episodes: List<ArrEpisode>,
-    searchIds: Set<Long>,
-    onToggleSeasonMonitor: (Int) -> Unit,
-    onToggleEpisodeMonitor: (ArrEpisode) -> Unit,
-    onEpisodeAutomaticSearch: (Long) -> Unit,
-    onSeasonAutomaticSearch: (Int) -> Unit,
-    deleteSeasonFiles: (Int) -> Unit,
-    deleteEpisodeFile: (Long) -> Unit,
-    seasonDeleteInProgress: Boolean,
-    onNavigateToEpisodeDetails: (ArrSeries, ArrEpisode) -> Unit,
-    onNavigateToSeriesRelease: (Long?, Int) -> Unit,
-    modifier: Modifier = Modifier,
-    bazarrDetailsIntegration: Boolean = true,
-) {
-    val arrEpMap = episodes.groupBy { it.seasonNumber }
-    val wrappedSeasons =
-        series.seasons.sortedByDescending { it.seasonNumber }.map { season ->
-            val seasonEpisodes =
-                (arrEpMap[season.seasonNumber] ?: emptyList())
-                    .sortedByDescending { it.episodeNumber }
-                    .map { EpisodeWrapper(arrEpisode = it) }
-            SeasonWrapper(
-                seasonNumber = season.seasonNumber,
-                arrSeason = season,
-                episodes = seasonEpisodes,
-            )
-        }
-
-    SeasonsArea(
-        seasons = wrappedSeasons,
-        seriesId = series.id,
-        searchIds = searchIds,
-        onToggleSeasonMonitor = onToggleSeasonMonitor,
-        onToggleEpisodeMonitor = onToggleEpisodeMonitor,
-        onEpisodeAutomaticSearch = onEpisodeAutomaticSearch,
-        onSeasonAutomaticSearch = onSeasonAutomaticSearch,
-        deleteSeasonFiles = deleteSeasonFiles,
-        deleteEpisodeFile = deleteEpisodeFile,
-        seasonDeleteInProgress = seasonDeleteInProgress,
-        onNavigateToEpisodeDetails = { onNavigateToEpisodeDetails(series, it) },
-        onNavigateToSeriesRelease = onNavigateToSeriesRelease,
-        modifier = modifier,
-        bazarrDetailsIntegration = bazarrDetailsIntegration,
-    )
 }

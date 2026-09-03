@@ -213,9 +213,9 @@ extension UnifiedMediaDetailsScreen {
                     navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
                 }
             },
-            onNavigateToSeriesRelease: { sId, seasonNum in
+            onNavigateToSeriesRelease: { sId, seasonNum, epId in
                 if let sId = sId {
-                    let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: nil)
+                    let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: epId)
                     navigationManager.go(to: route, of: .sonarr)
                 }
             },
