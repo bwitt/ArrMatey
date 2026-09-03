@@ -345,6 +345,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
                 let tmdbId = (userInfo[NotificationConstants.shared.EXTRA_TMDB_ID] as? String).flatMap { Int64($0) }
                 let instanceId = (userInfo[NotificationConstants.shared.EXTRA_INSTANCE_ID] as? String).flatMap { Int64($0) }
+                let episodeId = (userInfo[NotificationConstants.shared.EXTRA_EPISODE_ID] as? String).flatMap { Int64($0) }
 
                 calendarPath = NavigationPath()
                 calendarPath.append(MediaRoute.details(
@@ -353,7 +354,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                     tvdbId: nil,
                     instanceType: type,
                     requestType: nil,
-                    instanceId: instanceId
+                    instanceId: instanceId,
+                    episodeId: episodeId
                 ))
             }
         case NotificationConstants.shared.ACTION_OPEN_DOWNLOADS:
@@ -402,7 +404,8 @@ enum MediaRoute: Hashable {
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
-        instanceId: Int64? = nil
+        instanceId: Int64? = nil,
+        episodeId: Int64? = nil
     )
     case search(query: String, type: InstanceType, instanceId: Int64? = nil)
     case preview(_ json : String, type: InstanceType)

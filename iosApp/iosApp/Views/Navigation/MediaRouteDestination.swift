@@ -13,14 +13,15 @@ struct MediaRouteDestination: View {
 
     var body: some View {
         switch route {
-        case .details(let arrId, let tmdbId, let tvdbId, let instanceType, let requestType, let instanceId):
+        case .details(let arrId, let tmdbId, let tvdbId, let instanceType, let requestType, let instanceId, let episodeId):
             UnifiedMediaDetailsScreen(
                 arrId: arrId,
                 tmdbId: tmdbId,
                 tvdbId: tvdbId,
                 instanceType: instanceType,
                 requestType: requestType,
-                instanceId: instanceId
+                instanceId: instanceId,
+                initialEpisodeId: episodeId
             )
 
         case .search(let query, let type, let instanceId):

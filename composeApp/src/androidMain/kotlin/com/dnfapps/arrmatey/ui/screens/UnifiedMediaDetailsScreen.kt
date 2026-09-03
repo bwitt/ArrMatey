@@ -156,6 +156,7 @@ fun UnifiedMediaDetailsScreen(
     tvdbId: Long? = null,
     instanceType: InstanceType? = null,
     requestType: RequestType? = null,
+    initialEpisodeId: Long? = null,
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onBack: () -> Unit,
@@ -176,9 +177,27 @@ fun UnifiedMediaDetailsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var lastSuccessState by remember { mutableStateOf<UnifiedMediaDetailsUiState.Success?>(null) }
+    var hasNavigatedToInitialEpisode by remember(initialEpisodeId) { mutableStateOf(false) }
+
+    val successState = (uiState as? UnifiedMediaDetailsUiState.Success) ?: lastSuccessState
+
     LaunchedEffect(uiState) {
         if (uiState is UnifiedMediaDetailsUiState.Success) {
             lastSuccessState = uiState as UnifiedMediaDetailsUiState.Success
+        }
+    }
+
+    LaunchedEffect(successState, initialEpisodeId, hasNavigatedToInitialEpisode) {
+        if (initialEpisodeId != null && !hasNavigatedToInitialEpisode && successState != null) {
+            val series =
+                (successState.arrMedia as? ArrSeries)
+                    ?: successState.episodes.firstNotNullOfOrNull { it.arrEpisode?.series }
+            val episode = successState.episodes.mapNotNull { it.arrEpisode }.find { it.id == initialEpisodeId }
+
+            if (series != null && episode != null) {
+                hasNavigatedToInitialEpisode = true
+                onNavigateToEpisodeDetails(series, episode)
+            }
         }
     }
 

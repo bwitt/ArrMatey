@@ -26,6 +26,9 @@ struct UnifiedMediaDetailsScreen: View {
     @State private var confirmClearData = false
     @State private var selectedQueueItem: QueueItem? = nil
 
+    private let initialEpisodeId: Int64?
+    @State private var hasNavigatedToInitialEpisode = false
+
     @State private var toastMessage: String? = nil
 
     private var removeServiceName: String {
@@ -38,8 +41,10 @@ struct UnifiedMediaDetailsScreen: View {
         tvdbId: Int64? = nil,
         instanceType: InstanceType? = nil,
         requestType: RequestType? = nil,
-        instanceId: Int64? = nil
+        instanceId: Int64? = nil,
+        initialEpisodeId: Int64? = nil
     ) {
+        self.initialEpisodeId = initialEpisodeId
         _viewModel = StateObject(wrappedValue: UnifiedMediaDetailsViewModelS(
             arrId: arrId,
             tmdbId: tmdbId,
@@ -58,7 +63,13 @@ struct UnifiedMediaDetailsScreen: View {
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
-        .task { viewModel.refresh() }
+        .task {
+            viewModel.refresh()
+            checkInitialEpisode()
+        }
+        .onChange(of: viewModel.uiState) { _ in
+            checkInitialEpisode()
+        }
         .modifier(UnifiedMediaDetailsSheetsModifier(
             viewModel: viewModel,
             showEditSheet: $showEditSheet,
@@ -97,6 +108,18 @@ struct UnifiedMediaDetailsScreen: View {
 
 // MARK: - State Rendering
 extension UnifiedMediaDetailsScreen {
+    private func checkInitialEpisode() {
+        guard let episodeId = initialEpisodeId, !hasNavigatedToInitialEpisode else { return }
+        if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess,
+           let series = (success.arrMedia as? ArrSeries) ?? success.episodes.compactMap({ $0.arrEpisode?.series }).first {
+            let episodes = success.episodes.compactMap { $0.arrEpisode }
+            if let episode = episodes.first(where: { $0.id?.int64Value == episodeId }) {
+                hasNavigatedToInitialEpisode = true
+                navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
+            }
+        }
+    }
+
     @ViewBuilder
     private func contentForState() -> some View {
         switch viewModel.uiState {

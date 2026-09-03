@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
 
                     if (itemId != -1L && type != null) {
                         val tmdbId = intent.getStringExtra(NotificationConstants.EXTRA_TMDB_ID)?.toLongOrNull()
+                        val episodeId = intent.getStringExtra(NotificationConstants.EXTRA_EPISODE_ID)?.toLongOrNull()
 
                         navigationManager.calendar.popToRoot()
                         navigationManager.calendar.toDetails(
@@ -81,6 +82,7 @@ class MainActivity : ComponentActivity() {
                             tmdbId = tmdbId,
                             type = type,
                             instanceId = instanceId.takeIf { it != -1L },
+                            episodeId = episodeId,
                         )
                     }
                 }

@@ -52,6 +52,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             requestType = details.requestType,
             instanceType = resolvedInstanceType,
             instanceId = details.instanceId,
+            initialEpisodeId = details.episodeId,
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
