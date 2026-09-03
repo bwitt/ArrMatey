@@ -154,6 +154,9 @@ fun RequestsScreen(
                                 userState = userState,
                                 operationsState = requestOperationsState,
                                 onApprove = { viewModel.approveRequest(it) },
+                                onApproveWithDetails = { id, profileId, rootFolder, lang, seasons ->
+                                    viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)
+                                },
                                 onDecline = { viewModel.declineRequest(it) },
                                 onEdit = { },
                                 onDelete = { viewModel.cancelRequest(it) },
@@ -193,6 +196,9 @@ fun RequestsScreen(
                                         userState = userState,
                                         operationsState = requestOperationsState,
                                         onApprove = { viewModel.approveRequest(it) },
+                                        onApproveWithDetails = { id, profileId, rootFolder, lang, seasons ->
+                                            viewModel.approveRequest(id, profileId, rootFolder, lang, seasons)
+                                        },
                                         onDecline = { viewModel.declineRequest(it) },
                                         onEdit = { },
                                         onDelete = { viewModel.cancelRequest(it) },

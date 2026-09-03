@@ -67,7 +67,7 @@ struct UnifiedMediaDetailsScreen: View {
             viewModel.refresh()
             checkInitialEpisode()
         }
-        .onChange(of: viewModel.uiState) { _ in
+        .onReceive(viewModel.$uiState) { _ in
             checkInitialEpisode()
         }
         .modifier(UnifiedMediaDetailsSheetsModifier(
@@ -113,7 +113,7 @@ extension UnifiedMediaDetailsScreen {
         if let success = viewModel.uiState as? UnifiedMediaDetailsUiStateSuccess,
            let series = (success.arrMedia as? ArrSeries) ?? success.episodes.compactMap({ $0.arrEpisode?.series }).first {
             let episodes = success.episodes.compactMap { $0.arrEpisode }
-            if let episode = episodes.first(where: { $0.id?.int64Value == episodeId }) {
+            if let episode = episodes.first(where: { $0.id == episodeId }) {
                 hasNavigatedToInitialEpisode = true
                 navigationManager.go(to: .episodeDetails(series.toJson(), episode.toJson()), of: .sonarr)
             }
@@ -1542,19 +1542,19 @@ fileprivate struct UnifiedMediaDetailsEventsModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .onChange(of: viewModel.lastSearchResult) { _, newVal in
+            .onReceive(viewModel.$lastSearchResult) { newVal in
                 screen.onLastSearchResultChanged(newVal)
             }
-            .onChange(of: viewModel.editSuccessTrigger) { _, _ in
+            .onReceive(viewModel.$editSuccessTrigger) { _ in
                 screen.onEditSuccess()
             }
-            .onChange(of: viewModel.editErrorTrigger) { _, _ in
+            .onReceive(viewModel.$editErrorTrigger) { _ in
                 screen.onEditError()
             }
-            .onChange(of: viewModel.deleteSuccessTrigger) { _, _ in
+            .onReceive(viewModel.$deleteSuccessTrigger) { _ in
                 screen.onDeleteSuccess()
             }
-            .onChange(of: viewModel.deleteErrorTrigger) { _, _ in
+            .onReceive(viewModel.$deleteErrorTrigger) { _ in
                 screen.onDeleteError()
             }
     }
