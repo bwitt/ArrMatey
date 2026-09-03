@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
+import com.dnfapps.arrmatey.arr.api.model.groupByTask
 import com.dnfapps.arrmatey.arr.service.CalendarService
 import com.dnfapps.arrmatey.arr.state.ArrInstanceDashboardState
 import com.dnfapps.arrmatey.arr.state.BazarrDashboardState
@@ -271,7 +272,7 @@ class CombinedDashboardViewModel(
             .map { instances -> instances.flatMap { it.activityTasks } }
             .distinctUntilChanged()
             .flowOn(Dispatchers.Default)
-            .map { tasks -> tasks.sortedByDescending { it.added } }
+            .map { tasks -> tasks.groupByTask().sortedByDescending { it.added } }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
