@@ -33,6 +33,15 @@ data class SeasonWrapper(
     val name: String?
         get() = seerrSeason?.name
 
+    val customTitle: String?
+        get() {
+            val rawName = seerrSeason?.name?.trim() ?: return null
+            if (rawName.isBlank()) return null
+            if (rawName.equals("Season $seasonNumber", ignoreCase = true)) return null
+            if (seasonNumber == 0 && (rawName.equals("Specials", ignoreCase = true) || rawName.equals("Season 0", ignoreCase = true))) return null
+            return rawName
+        }
+
     val year: String
         get() {
             val minUtcYear =
@@ -44,7 +53,8 @@ data class SeasonWrapper(
                     ?.year
                     ?.toString()
             val minDateYear = episodes.mapNotNull { it.airDate?.year }.minOrNull()?.toString()
-            return minUtcYear ?: minDateYear ?: MokoStrings().getString(MR.strings.tba)
+            val seerrYear = seerrSeason?.airDate?.year?.toString()
+            return minUtcYear ?: minDateYear ?: seerrYear ?: MokoStrings().getString(MR.strings.tba)
         }
 
     val runtime: String?
@@ -62,7 +72,7 @@ data class SeasonWrapper(
 
     val infoString: String
         get() {
-            val seasonInfo = listOfNotNull(year, runtime, sizeOnDisk)
+            val seasonInfo = listOfNotNull(customTitle, year, runtime, sizeOnDisk)
             return seasonInfo.joinToString(" • ")
         }
 }

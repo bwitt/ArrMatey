@@ -267,7 +267,7 @@ class GetUnifiedMediaDetailsUseCase(
                         )
                     }
 
-                if (seasonEpisodes.isEmpty()) {
+                if (arrSeason == null && seerrSeason == null && seasonEpisodes.isEmpty()) {
                     null
                 } else {
                     SeasonWrapper(
