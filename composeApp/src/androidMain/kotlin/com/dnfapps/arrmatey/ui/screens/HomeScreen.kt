@@ -97,6 +97,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -106,7 +107,7 @@ fun HomeScreen(
     windowSizeClass: WindowSizeClass,
     navigationManager: NavigationManager = koinInject(),
     preferencesStore: PreferencesStore = koinInject(),
-    activityQueue: ActivityQueueViewModel = koinInject(),
+    activityQueue: ActivityQueueViewModel = koinViewModel(),
     tabManager: TabManager = koinInject(),
     instanceRepository: InstanceRepository = koinInject(),
 ) {
@@ -515,7 +516,11 @@ private fun DrawerContent(
                             }
                         },
                         onClick = {
-                            tabManager.restoreTab(item)
+                            if (isEditMode) {
+                                tabManager.restoreTab(item)
+                            } else {
+                                onDrawerTabClick(item)
+                            }
                             showHiddenSection = false
                         },
                     )
@@ -523,7 +528,7 @@ private fun DrawerContent(
             }
         }
 
-        HorizontalDivider()
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
