@@ -16,6 +16,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.aboutLibraries)
+    alias(libs.plugins.kover)
     kotlin("plugin.serialization") version libs.versions.kotlin
 }
 
@@ -137,6 +138,8 @@ kotlin {
 
         getByName("androidHostTest").dependencies {
             implementation(libs.mockk)
+            // Android actuals (android.icu, android.util.Base64) need a real framework impl
+            implementation(libs.robolectric)
         }
     }
 }

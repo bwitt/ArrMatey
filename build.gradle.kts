@@ -22,6 +22,45 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.aboutLibraries) apply false
     alias(libs.plugins.spotless)
+    alias(libs.plugins.kover)
+}
+
+// Kover covers JVM/Android host tests only; the iOS workflow reports Swift coverage via xccov.
+dependencies {
+    kover(project(":shared"))
+    kover(project(":networking"))
+    kover(project(":composeApp"))
+}
+
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "*_Impl",
+                    "*_Impl\$*",
+                    "*.ComposableSingletons\$*",
+                    "*.MR",
+                    "*.MR\$*",
+                    "*.BuildConfig",
+                    "*.R",
+                    "*.R\$*",
+                )
+                // Declarative-only layers with no branching logic to assert on
+                packages(
+                    "com.dnfapps.arrmatey.di",
+                    "com.dnfapps.arrmatey.ui",
+                    "com.dnfapps.arrmatey.database.migrations",
+                )
+                annotatedBy("androidx.compose.runtime.Composable")
+            }
+        }
+
+        total {
+            html { onCheck = false }
+            xml { onCheck = false }
+        }
+    }
 }
 
 val ktlintVersion = libs.versions.ktlint.get()
