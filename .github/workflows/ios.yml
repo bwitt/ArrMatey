@@ -77,4 +77,38 @@ jobs:
             -sdk iphonesimulator \
             -destination 'platform=iOS Simulator,name=iPhone 17,OS=latest' \
             -derivedDataPath derived_data \
+            -enableCodeCoverage YES \
+            -resultBundlePath TestResults.xcresult \
             -quiet
+
+      - name: Report Swift Coverage
+        if: always()
+        run: |
+          xcrun xccov view --report --json TestResults.xcresult > swift-coverage.json
+          {
+            echo "## Swift Coverage (line)"
+            echo ""
+            echo "| Target | Coverage |"
+            echo "| --- | --- |"
+            python3 - <<'PY'
+          import json, os
+          with open("swift-coverage.json") as f:
+              report = json.load(f)
+          rows = []
+          for target in report.get("targets", []):
+              rows.append(f"| {target['name']} | {target['lineCoverage'] * 100:.2f}% |")
+          print("\n".join(rows))
+          total = report.get("lineCoverage")
+          if total is not None:
+              print(f"| **Overall** | **{total * 100:.2f}%** |")
+          PY
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Swift Coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-coverage
+          path: |
+            swift-coverage.json
+            TestResults.xcresult
