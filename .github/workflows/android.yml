@@ -89,12 +89,40 @@ jobs:
           :composeApp:testDebugUnitTest
           :composeApp:assembleDebug --continue
 
+      - name: Generate Coverage Report
+        if: ${{ always() && (needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request') }}
+        run: ./gradlew koverXmlReport koverHtmlReport
+
+      - name: Coverage Summary
+        if: ${{ always() && (needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request') }}
+        run: |
+          coverage() { ./gradlew -q "$1" 2>/dev/null | grep -oE '[0-9.]+%' | head -1; }
+          {
+            echo "## Coverage (line)"
+            echo ""
+            echo "| Module | Coverage |"
+            echo "| --- | --- |"
+            echo "| shared | $(coverage :shared:koverLog) |"
+            echo "| networking | $(coverage :networking:koverLog) |"
+            echo "| composeApp | $(coverage :composeApp:koverLog) |"
+            echo "| **Aggregate** | **$(coverage :koverLog)** |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results
           path: "**/build/test-results/**/*.xml"
+
+      - name: Upload Coverage Report
+        if: ${{ always() && (needs.changes.outputs.shared == 'true' || github.event_name != 'pull_request') }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-report
+          path: |
+            build/reports/kover/report.xml
+            build/reports/kover/html/
 
       - name: Upload APK
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
