@@ -139,47 +139,41 @@ package com.dnfapps.arrmatey.utils
 //    }
 // }
 
-import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
-import platform.CoreFoundation.CFStringRef
+import kotlinx.cinterop.reinterpret
+import platform.CoreFoundation.CFArrayGetCount
+import platform.CoreFoundation.CFArrayGetValueAtIndex
+import platform.CoreFoundation.CFDictionaryGetValue
+import platform.CoreFoundation.CFRelease
+import platform.CoreFoundation.CFRetain
+import platform.CoreFoundation.__CFString
 import platform.Foundation.CFBridgingRelease
-import platform.Foundation.NSArray
-import platform.Foundation.NSDictionary
-import platform.Foundation.NSString
 import platform.SystemConfiguration.CNCopyCurrentNetworkInfo
 import platform.SystemConfiguration.CNCopySupportedInterfaces
 import platform.SystemConfiguration.kCNNetworkInfoKeySSID
 
-@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
+@OptIn(ExperimentalForeignApi::class)
 class IOSNetworkUtils : NetworkUtils {
+    // Stays in CoreFoundation throughout; the ObjC-bridged types don't map cleanly to NSArray/NSDictionary.
     override fun getCurrentWifiSsid(): String? {
-        // Get supported interfaces
-        val interfacesPtr = CNCopySupportedInterfaces() ?: return null
-
-        // Convert to NSArray
-        val interfaces = CFBridgingRelease(interfacesPtr) as? NSArray ?: return null
-
-        val count = interfaces.count
-
-        for (i in 0UL until count) {
-            val interfaceName = interfaces.objectAtIndex(i) as? NSString ?: continue
-
-            // Get network info for this interface
-            val networkInfoPtr = CNCopyCurrentNetworkInfo(interfaceName as CFStringRef) ?: continue
-
-            // Convert to NSDictionary
-            val networkInfo = CFBridgingRelease(networkInfoPtr) as? NSDictionary ?: continue
-
-            // Get SSID
-            val ssidKey = kCNNetworkInfoKeySSID as NSString
-            val ssid = networkInfo.objectForKey(ssidKey) as? NSString
-
-            if (ssid != null) {
-                return ssid.toString()
+        val interfacesRef = CNCopySupportedInterfaces() ?: return null
+        try {
+            for (i in 0 until CFArrayGetCount(interfacesRef)) {
+                val interfaceRef = CFArrayGetValueAtIndex(interfacesRef, i)?.reinterpret<__CFString>() ?: continue
+                val networkInfoRef = CNCopyCurrentNetworkInfo(interfaceRef) ?: continue
+                try {
+                    val ssidRef = CFDictionaryGetValue(networkInfoRef, kCNNetworkInfoKeySSID) ?: continue
+                    // Retain-then-bridge hands a +1 to ARC rather than consuming the dictionary's reference.
+                    val ssid = CFBridgingRelease(CFRetain(ssidRef)) as? String
+                    if (ssid != null) return ssid
+                } finally {
+                    CFRelease(networkInfoRef)
+                }
             }
+            return null
+        } finally {
+            CFRelease(interfacesRef)
         }
-
-        return null
     }
 
     override fun isConnectedToWifi(): Boolean = getCurrentWifiSsid() != null

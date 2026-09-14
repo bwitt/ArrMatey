@@ -29,7 +29,9 @@ class AESEncryptionManager : EncryptionManager {
                 )
 
             val result = alloc<CFTypeRefVar>()
-            val status = SecItemCopyMatching(query as Any? as CFDictionaryRef?, result.ptr)
+            val queryRef = CFBridgingRetain(query)?.reinterpret<__CFDictionary>()
+            val status = SecItemCopyMatching(queryRef, result.ptr)
+            CFRelease(queryRef)
 
             if (status == errSecSuccess) {
                 return CFBridgingRelease(result.value) as? NSData
@@ -53,7 +55,9 @@ class AESEncryptionManager : EncryptionManager {
                     null,
                 )
 
-            SecItemAdd(addQuery as Any? as CFDictionaryRef?, null)
+            val addQueryRef = CFBridgingRetain(addQuery)?.reinterpret<__CFDictionary>()
+            SecItemAdd(addQueryRef, null)
+            CFRelease(addQueryRef)
             return newKey
         }
 

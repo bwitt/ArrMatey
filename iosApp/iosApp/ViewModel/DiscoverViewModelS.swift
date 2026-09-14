@@ -33,7 +33,7 @@ class DiscoverViewModelS: ObservableObject {
         viewModel.upcomingMoviesState.observeAsync(on: self, to: \.upcomingMoviesState)
         viewModel.upcomingTvState.observeAsync(on: self, to: \.upcomingTvState)
         viewModel.searchState.observeAsync(on: self) { owner, results in
-            owner.searchResults = results as? [SearchResult] ?? []
+            owner.searchResults = results
         }
         viewModel.isSearching.observeAsync(on: self) { owner, searching in
             owner.isSearching = searching.boolValue

@@ -140,7 +140,7 @@ dependencies {
 
     implementation(libs.aboutlibraries)
 
-    debugImplementation(compose.uiTooling)
+    debugImplementation(libs.compose.ui.tooling)
 
     testImplementation(libs.kotlin.testJunit)
     testImplementation(libs.kotlinx.coroutines.test)

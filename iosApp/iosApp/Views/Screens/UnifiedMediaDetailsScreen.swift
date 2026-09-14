@@ -1132,7 +1132,7 @@ struct UnifiedMediaDetailsHeader: View {
             items.append(runtime)
         }
         if let seasonCount = success.seasonCount {
-            items.append(MR.plurals().seasons.localized(Int32(seasonCount)))
+            items.append(MR.plurals().seasons.localized(Int32(truncating: seasonCount)))
         }
         if let certification = success.getCertification(countryCode: Locale.current.region?.identifier ?? "") {
             items.append(certification)

@@ -41,7 +41,7 @@ class UnifiedLibraryViewModelS: ObservableObject {
         self.viewModel = vm
         self.arrInstances = vm.arrInstances.value
         self.selectedInstance = vm.selectedInstance.value
-        self.offlineInstanceIds = Set(vm.offlineInstanceIds.value.compactMap { ($0 as? NSNumber)?.int64Value })
+        self.offlineInstanceIds = Set(vm.offlineInstanceIds.value.map { $0.int64Value })
         self.currentLibraryState = vm.currentLibraryState.value
         self.instanceData = vm.instanceData.value
         self.preferences = vm.preferences.value
@@ -55,7 +55,7 @@ class UnifiedLibraryViewModelS: ObservableObject {
         self.selectedItem = vm.selectedItem.value
         self.activeMediaIdsByInstance = vm.activeMediaIdsByInstance.value.reduce(into: [Int64: Set<Int64>]()) { result, entry in
             let key = entry.key.int64Value
-            let values = Set(entry.value.compactMap { ($0 as? NSNumber)?.int64Value })
+            let values = Set(entry.value.map { $0.int64Value })
             result[key] = values
         }
         startObserving()
@@ -69,7 +69,7 @@ class UnifiedLibraryViewModelS: ObservableObject {
             owner.selectedInstance = selected
         }
         viewModel.offlineInstanceIds.observeAsync(on: self) { owner, offlineInstanceIds in
-            owner.offlineInstanceIds = Set(offlineInstanceIds.compactMap { ($0 as? NSNumber)?.int64Value })
+            owner.offlineInstanceIds = Set(offlineInstanceIds.map { $0.int64Value })
         }
         viewModel.currentLibraryState.observeAsync(on: self) { owner, state in
             owner.currentLibraryState = state
@@ -83,7 +83,7 @@ class UnifiedLibraryViewModelS: ObservableObject {
         viewModel.activeMediaIdsByInstance.observeAsync(on: self) { owner, map in
             owner.activeMediaIdsByInstance = map.reduce(into: [Int64: Set<Int64>]()) { result, entry in
                 let key = entry.key.int64Value
-                let values = Set(entry.value.compactMap { ($0 as? NSNumber)?.int64Value })
+                let values = Set(entry.value.map { $0.int64Value })
                 result[key] = values
             }
         }

@@ -96,6 +96,12 @@ kotlin {
 
         commonMain.dependencies {
             implementation(project(":networking"))
+
+            // Pins Compose to the plugin version; koin/moko otherwise drag in an older runtime.
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.ui)
+
             // Koin DI
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
@@ -142,7 +148,7 @@ kotlin {
 }
 
 dependencies {
-    "androidRuntimeClasspath"(compose.uiTooling)
+    "androidRuntimeClasspath"(libs.compose.ui.tooling)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
