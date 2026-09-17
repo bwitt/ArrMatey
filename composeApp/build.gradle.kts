@@ -78,6 +78,8 @@ android {
     lint {
         // Renovate owns bumps, and NewerVersionAvailable hits the network every run.
         disable += setOf("NewerVersionAvailable", "GradleDependency")
+        warningsAsErrors = true
+        abortOnError = true
     }
     dependenciesInfo {
         // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)

@@ -124,7 +124,7 @@ actual class FileSink actual constructor(
                 if (fileHandle != null) {
                     fileHandle.seekToEndOfFile()
 
-                    val data = (line as NSString).dataUsingEncoding(NSUTF8StringEncoding)
+                    val data = NSString.create(string = line).dataUsingEncoding(NSUTF8StringEncoding)
                     if (data != null) {
                         fileHandle.writeData(data)
                     }
