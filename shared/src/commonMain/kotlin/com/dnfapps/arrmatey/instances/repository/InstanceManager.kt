@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -144,7 +145,9 @@ class InstanceManager(
                 if (instance == null) {
                     _instanceRepositories.map { repos -> repos.values.filterIsInstance<T>().firstOrNull() }
                 } else {
-                    _instanceRepositories.map { repos -> (repos[instance.id] as? T) ?: repos.values.filterIsInstance<T>().firstOrNull() }
+                    _instanceRepositories.map { repos ->
+                        (repos[instance.id] as? T) ?: repos.values.filterIsInstance<T>().firstOrNull()
+                    }
                 }
             }
 
@@ -153,7 +156,9 @@ class InstanceManager(
             .observeSelectedInstance(InstanceType.Seerr)
             .flatMapLatest { instance ->
                 if (instance == null) {
-                    _instanceRepositories.map { repos -> repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull() }
+                    _instanceRepositories.map { repos ->
+                        repos.values.filterIsInstance<SeerrInstanceRepository>().firstOrNull()
+                    }
                 } else {
                     _instanceRepositories.map { repos ->
                         (repos[instance.id] as? SeerrInstanceRepository)
@@ -167,7 +172,9 @@ class InstanceManager(
             .observeSelectedInstance(InstanceType.Prowlarr)
             .flatMapLatest { instance ->
                 if (instance == null) {
-                    _instanceRepositories.map { repos -> repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull() }
+                    _instanceRepositories.map { repos ->
+                        repos.values.filterIsInstance<ProwlarrInstanceRepository>().firstOrNull()
+                    }
                 } else {
                     _instanceRepositories.map { repos ->
                         (repos[instance.id] as? ProwlarrInstanceRepository)
@@ -181,7 +188,9 @@ class InstanceManager(
             .observeSelectedInstance(InstanceType.Bazarr)
             .flatMapLatest { instance ->
                 if (instance == null) {
-                    _instanceRepositories.map { repos -> repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull() }
+                    _instanceRepositories.map { repos ->
+                        repos.values.filterIsInstance<BazarrInstanceRepository>().firstOrNull()
+                    }
                 } else {
                     _instanceRepositories.map { repos ->
                         (repos[instance.id] as? BazarrInstanceRepository)
@@ -207,6 +216,36 @@ class InstanceManager(
     fun getAllRepositories(): List<InstanceScopedRepository> = _instanceRepositories.value.values.toList()
 
     fun getAllArrRepositories(): List<ArrInstanceRepository> = _instanceRepositories.value.values.filterIsInstance<ArrInstanceRepository>()
+
+    suspend fun awaitAllArrRepositories(): List<ArrInstanceRepository> {
+        val configuredInstances = instanceRepository.observeAllInstances().first()
+        val arrInstanceIds =
+            configuredInstances
+                .filter { instance ->
+                    instance.type in
+                        setOf(
+                            InstanceType.Sonarr,
+                            InstanceType.Radarr,
+                            InstanceType.Lidarr,
+                            InstanceType.Bookshelf,
+                            InstanceType.Listenarr,
+                        )
+                }.map { it.id }
+                .toSet()
+
+        if (arrInstanceIds.isEmpty()) return emptyList()
+
+        return _instanceRepositories
+            .first { repos ->
+                val loadedIds =
+                    repos.values
+                        .filterIsInstance<ArrInstanceRepository>()
+                        .map { it.instance.id }
+                        .toSet()
+                loadedIds.containsAll(arrInstanceIds)
+            }.values
+            .filterIsInstance<ArrInstanceRepository>()
+    }
 
     fun getAllSeerrRepositories(): List<SeerrInstanceRepository> =
         _instanceRepositories.value.values.filterIsInstance<SeerrInstanceRepository>()
