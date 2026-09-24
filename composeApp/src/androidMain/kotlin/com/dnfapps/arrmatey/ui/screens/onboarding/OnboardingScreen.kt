@@ -78,7 +78,6 @@ fun OnboardingScreen(
         com.dnfapps.arrmatey.datastore
             .TabPreferences(),
     )
-    val enableActivityPolling by preferences.enableActivityPolling.collectAsStateWithLifecycle(true)
 
     var showAddInstanceSheet by remember { mutableStateOf(false) }
     var showAddDownloadClientSheet by remember { mutableStateOf(false) }
@@ -230,8 +229,6 @@ fun OnboardingScreen(
                         onThemeChange = { moreViewModel.setAppTheme(it) },
                         appColor = appColor,
                         onColorChange = { moreViewModel.setAppColor(it) },
-                        enableActivityPolling = enableActivityPolling,
-                        onToggleActivityPolling = { preferences.toggleActivityPolling() },
                     )
 
                 6 ->
@@ -278,8 +275,10 @@ fun OnboardingScreen(
             onPasswordChanged = { backupViewModel.setImportPassword(it) },
             onToggleInstanceSelection = { backupViewModel.toggleImportInstanceSelection(it) },
             onToggleDownloadClientSelection = { backupViewModel.toggleImportDownloadClientSelection(it) },
+            onToggleCustomWebpageSelection = { backupViewModel.toggleImportCustomWebpageSelection(it) },
             onToggleImportTabPreferences = { backupViewModel.toggleImportTabPreferences() },
             onToggleImportUiPreferences = { backupViewModel.toggleImportUiPreferences() },
+            onToggleImportIntegrationsPreferences = { backupViewModel.toggleImportIntegrationsPreferences() },
             onConfirmDecrypt = {
                 pendingImportData?.let { data ->
                     backupViewModel.prepareImport(data)
