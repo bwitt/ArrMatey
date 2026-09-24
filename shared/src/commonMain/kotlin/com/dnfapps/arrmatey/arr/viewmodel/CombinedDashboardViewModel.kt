@@ -387,12 +387,12 @@ class CombinedDashboardViewModel(
                 initialValue = emptyList(),
             )
 
-    private val _trendingDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
-    private val _popularMoviesDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
-    private val _popularTvDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
-    private val _upcomingMoviesDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
-    private val _upcomingTvDiscover = MutableStateFlow<List<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult>>(emptyList())
-    private val _quickPickItem = MutableStateFlow<com.dnfapps.arrmatey.seerr.api.model.DiscoverResult?>(null)
+    private val _trendingDiscover = MutableStateFlow<List<DiscoverResult>>(emptyList())
+    private val _popularMoviesDiscover = MutableStateFlow<List<DiscoverResult>>(emptyList())
+    private val _popularTvDiscover = MutableStateFlow<List<DiscoverResult>>(emptyList())
+    private val _upcomingMoviesDiscover = MutableStateFlow<List<DiscoverResult>>(emptyList())
+    private val _upcomingTvDiscover = MutableStateFlow<List<DiscoverResult>>(emptyList())
+    private val _quickPickItem = MutableStateFlow<DiscoverResult?>(null)
 
     init {
         observeDashboard()
