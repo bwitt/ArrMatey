@@ -121,7 +121,7 @@ fun HomeScreen(
         }
     }
 
-    DoubleBackToExit()
+    DoubleBackToExit(openDrawerInstead = overlayTab != null)
 
     val isExpanded = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
     val floatingBarIsVisible = !isExpanded && useFloatingNavigationBar && overlayTab == null && visibleTabs.size > 1
