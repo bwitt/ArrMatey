@@ -12,6 +12,7 @@ import com.dnfapps.arrmatey.seerr.api.model.CombinedRatings
 import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.Issue
 import com.dnfapps.arrmatey.seerr.api.model.IssueBody
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
@@ -20,6 +21,7 @@ import com.dnfapps.arrmatey.seerr.api.model.PersonDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaBody
 import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestResponse
+import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.RottenTomatoesRating
 import com.dnfapps.arrmatey.seerr.api.model.Season
@@ -34,6 +36,7 @@ import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +45,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
@@ -77,8 +81,9 @@ class SeerrInstanceRepository(
     private val _openIssuesCount = MutableStateFlow(0)
     val openIssuesCount: StateFlow<Int> = _openIssuesCount.asStateFlow()
 
-    private val _pendingRequests = MutableStateFlow<List<MediaRequestPackage>>(emptyList())
-    val pendingRequests: StateFlow<List<MediaRequestPackage>> = _pendingRequests.asStateFlow()
+    private val _requests = MutableStateFlow<List<MediaRequestPackage>>(emptyList())
+    val requests: StateFlow<List<MediaRequestPackage>> = _requests.asStateFlow()
+    val pendingRequests: StateFlow<List<MediaRequestPackage>> = _requests.asStateFlow()
 
     private val _openIssues = MutableStateFlow<List<MediaIssuePackage>>(emptyList())
     val openIssues: StateFlow<List<MediaIssuePackage>> = _openIssues.asStateFlow()
@@ -100,33 +105,50 @@ class SeerrInstanceRepository(
             .onSuccess { _users.value = it.results }
     }
 
-    suspend fun refreshCounts() {
-        client
-            .getRequests(page = 1, pageSize = 20)
-            .onSuccess { response ->
-                _isOnline.value = true
-                _pendingRequestsCount.value = response.pageInfo.results
-                val enrichedRequests = mediaPackageService.enrichRequests(response.results)
-                _pendingRequests.value = enrichedRequests
-            }.onError { _, _, _ ->
-                _isOnline.value = false
-                _pendingRequests.value = emptyList()
+    suspend fun refreshCounts() =
+        coroutineScope {
+            launch {
+                client
+                    .getRequests(page = 1, pageSize = 50, filter = RequestState.All)
+                    .onSuccess { response ->
+                        _isOnline.value = true
+                        val enrichedRequests = mediaPackageService.enrichRequests(response.results)
+                        _requests.value = enrichedRequests
+                    }.onError { _, _, _ ->
+                        _isOnline.value = false
+                        _requests.value = emptyList()
+                    }
             }
-        client
-            .getIssues(page = 1, pageSize = 20)
-            .onSuccess { response ->
-                _openIssuesCount.value = response.pageInfo.results
-                val enrichedIssues = issuePackageService.enrichIssues(response.results)
-                _openIssues.value = enrichedIssues
-            }.onError { _, _, _ ->
-                _openIssues.value = emptyList()
+            launch {
+                client
+                    .getRequestCount()
+                    .onSuccess { count ->
+                        _pendingRequestsCount.value = count.pending
+                    }
             }
-    }
+            launch {
+                client
+                    .getIssueCount()
+                    .onSuccess { count ->
+                        _openIssuesCount.value = count.open
+                    }
+            }
+            launch {
+                client
+                    .getIssues(page = 1, pageSize = 50, filter = IssueState.All)
+                    .onSuccess { response ->
+                        val enrichedIssues = issuePackageService.enrichIssues(response.results)
+                        _openIssues.value = enrichedIssues
+                    }.onError { _, _, _ ->
+                        _openIssues.value = emptyList()
+                    }
+            }
+        }
 
-    fun getRequestsPaging(): PagingSource<MediaRequestPackage> =
+    fun getRequestsPaging(filter: RequestState = RequestState.All): PagingSource<MediaRequestPackage> =
         BasePagingSource(
             fetcher = { page ->
-                client.getRequests(page = page)
+                client.getRequests(page = page, filter = filter)
             },
             processor = { response ->
                 val enrichedRequests = mediaPackageService.enrichRequests(response.results)
@@ -295,7 +317,8 @@ class SeerrInstanceRepository(
     suspend fun getRequests(
         page: Int = 1,
         pageSize: Int = 10,
-    ): NetworkResult<RequestResponse> = client.getRequests(page = page, pageSize = pageSize)
+        filter: RequestState = RequestState.All,
+    ): NetworkResult<RequestResponse> = client.getRequests(page = page, pageSize = pageSize, filter = filter)
 
     suspend fun createRequest(request: RequestMediaBody): NetworkResult<MediaRequest> = client.createRequest(request)
 
@@ -459,10 +482,10 @@ class SeerrInstanceRepository(
 
     suspend fun submitIssue(issue: IssueBody): NetworkResult<Issue> = client.submitIssue(issue)
 
-    fun getIssuesPaging(): PagingSource<MediaIssuePackage> =
+    fun getIssuesPaging(filter: IssueState = IssueState.All): PagingSource<MediaIssuePackage> =
         BasePagingSource(
             fetcher = { page ->
-                client.getIssues(page = page)
+                client.getIssues(page = page, filter = filter)
             },
             processor = { response ->
                 val enrichedIssues = issuePackageService.enrichIssues(response.results)

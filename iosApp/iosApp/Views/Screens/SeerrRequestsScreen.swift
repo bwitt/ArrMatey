@@ -37,6 +37,8 @@ struct SeerrTabContent: View {
                                 pagedData: viewModel.requestsState,
                                 userState: viewModel.userState,
                                 operationsState: viewModel.operationsState,
+                                selectedFilter: viewModel.selectedFilter,
+                                onFilterSelected: { viewModel.setFilter($0) },
                                 onApprove: { viewModel.approveRequest($0) },
                                 onApproveWithDetails: { id, profileId, rootFolder, lang, seasons in
                                     viewModel.approveRequest(id, profileId: profileId, rootFolder: rootFolder, languageProfileId: lang, seasons: seasons)
@@ -55,6 +57,8 @@ struct SeerrTabContent: View {
                         } else {
                             IssuesContentView(
                                 pagedData: viewModel.issuesState,
+                                selectedFilter: viewModel.selectedIssueFilter,
+                                onFilterSelected: { viewModel.setIssueFilter($0) },
                                 onLoadMore: { viewModel.loadNextIssuesPage() },
                                 onRetry: { viewModel.retryIssues() },
                                 onClearError: { viewModel.clearIssuesError() },
@@ -132,7 +136,7 @@ struct SeerrTabContent: View {
 
     @ViewBuilder
     private var requestsTabLabel: some View {
-        let count = viewModel.requestsState.totalItemCount
+        let count = viewModel.pendingRequestsCount
         if count > 0 {
             Text("\(MR.strings().requests.localized()) (\(count))")
         } else {
@@ -142,7 +146,7 @@ struct SeerrTabContent: View {
 
     @ViewBuilder
     private var issuesTabLabel: some View {
-        let count = viewModel.issuesState.totalItemCount
+        let count = viewModel.openIssuesCount
         if count > 0 {
             Text("\(MR.strings().issues.localized()) (\(count))")
         } else {
@@ -157,6 +161,8 @@ struct RequestsContentView: View {
     let pagedData: PagedData<MediaRequestPackage>
     let userState: SeerrUser?
     let operationsState: RequestOperationsState
+    let selectedFilter: RequestState
+    let onFilterSelected: (RequestState) -> Void
     let onApprove: (Int64) -> Void
     var onApproveWithDetails: ((Int64, Int64?, String?, Int64?, [Int32]?) -> Void)? = nil
     let onDecline: (Int64) -> Void
@@ -171,10 +177,35 @@ struct RequestsContentView: View {
     @State private var selectedPackageForSheet: MediaRequestPackage? = nil
 
     var body: some View {
-        ZStack {
-            if pagedData.isLoading && pagedData.items.isEmpty {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(RequestState.allCases, id: \.self) { state in
+                        let isSelected = selectedFilter == state
+                        Button(action: { onFilterSelected(state) }) {
+                            Text(state.resource.localized())
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            }
+
+            ZStack {
+                if pagedData.isLoading && pagedData.items.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if pagedData.isEmpty {
                 VStack(spacing: 12) {
                     Image(systemName: "tray")
@@ -187,6 +218,7 @@ struct RequestsContentView: View {
             } else {
                 RequestsListView(
                     items: pagedData.items as! [MediaRequestPackage],
+                    selectedFilter: selectedFilter,
                     hasMore: pagedData.hasMore,
                     isLoadingMore: pagedData.isLoadingMore,
                     loadMoreFailed: pagedData.loadMoreFailed,
@@ -214,6 +246,7 @@ struct RequestsContentView: View {
                     .padding(16)
                 }
             }
+        }
         }
         .sheet(item: Binding(
             get: { selectedPackageForSheet.map { IdentifiableRequestPackage(package: $0) } },
@@ -251,6 +284,8 @@ struct RequestsContentView: View {
 
 struct IssuesContentView: View {
     let pagedData: PagedData<MediaIssuePackage>
+    let selectedFilter: IssueState
+    let onFilterSelected: (IssueState) -> Void
     let onLoadMore: () -> Void
     let onRetry: () -> Void
     let onClearError: () -> Void
@@ -259,39 +294,66 @@ struct IssuesContentView: View {
     @State private var selectedIssue: MediaIssuePackage? = nil
 
     var body: some View {
-        ZStack {
-            if pagedData.isLoading && pagedData.items.isEmpty {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if pagedData.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle")
-                        .font(.system(size: 48))
-                        .foregroundColor(.secondary)
-                    Text(MR.strings().no_issues_found.localized())
-                        .foregroundColor(.secondary)
+        VStack(spacing: 0) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(IssueState.allCases, id: \.self) { state in
+                        let isSelected = selectedFilter == state
+                        Button(action: { onFilterSelected(state) }) {
+                            Text(state.resource.localized())
+                                .font(.subheadline)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(isSelected ? Color.accentColor : Color(.secondarySystemBackground))
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                                .overlay(
+                                    Capsule()
+                                        .stroke(Color.primary.opacity(0.1), lineWidth: isSelected ? 0 : 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                IssuesListView(
-                    items: pagedData.items as! [MediaIssuePackage],
-                    hasMore: pagedData.hasMore,
-                    isLoadingMore: pagedData.isLoadingMore,
-                    loadMoreFailed: pagedData.loadMoreFailed,
-                    onLoadMore: onLoadMore,
-                    onSelectIssue: { selectedIssue = $0 }
-                )
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
             }
 
-            if let error = pagedData.error {
-                VStack {
-                    Spacer()
-                    ErrorBannerView(
-                        error: error,
-                        onRetry: onRetry,
-                        onDismiss: onClearError
+            ZStack {
+                if pagedData.isLoading && pagedData.items.isEmpty {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if pagedData.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 48))
+                            .foregroundColor(.secondary)
+                        Text(MR.strings().no_issues_found.localized())
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    IssuesListView(
+                        items: pagedData.items as! [MediaIssuePackage],
+                        selectedFilter: selectedFilter,
+                        hasMore: pagedData.hasMore,
+                        isLoadingMore: pagedData.isLoadingMore,
+                        loadMoreFailed: pagedData.loadMoreFailed,
+                        onLoadMore: onLoadMore,
+                        onSelectIssue: { selectedIssue = $0 }
                     )
-                    .padding(16)
+                }
+
+                if let error = pagedData.error {
+                    VStack {
+                        Spacer()
+                        ErrorBannerView(
+                            error: error,
+                            onRetry: onRetry,
+                            onDismiss: onClearError
+                        )
+                        .padding(16)
+                    }
                 }
             }
         }
@@ -315,6 +377,7 @@ struct IssuesContentView: View {
 
 private struct RequestsListView: View {
     let items: [MediaRequestPackage]
+    let selectedFilter: RequestState
     let hasMore: Bool
     let isLoadingMore: Bool
     var loadMoreFailed: Bool = false
@@ -330,9 +393,14 @@ private struct RequestsListView: View {
     var onViewRequest: ((MediaRequestPackage) -> Void)? = nil
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(items, id: \.request.id) { rPackage in
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    Color.clear
+                        .frame(height: 0)
+                        .id("requestsTop")
+
+                    ForEach(items, id: \.request.id) { rPackage in
                     SeerrRequestCard(
                         mediaPackage: rPackage,
                         user: userState,
@@ -357,21 +425,26 @@ private struct RequestsListView: View {
                     }
                 }
 
-                if isLoadingMore {
-                    ProgressView()
+                    if isLoadingMore {
+                        ProgressView()
+                            .padding(16)
+                    } else if loadMoreFailed {
+                        Button(action: onLoadMore) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.accentColor)
+                                .padding(8)
+                        }
+                        .buttonStyle(.plain)
                         .padding(16)
-                } else if loadMoreFailed {
-                    Button(action: onLoadMore) {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.accentColor)
-                            .padding(8)
                     }
-                    .buttonStyle(.plain)
-                    .padding(16)
                 }
+                .padding(16)
             }
-            .padding(16)
+            .id(selectedFilter)
+            .onChange(of: selectedFilter) { _ in
+                proxy.scrollTo("requestsTop", anchor: .top)
+            }
         }
     }
 }
@@ -380,6 +453,7 @@ private struct RequestsListView: View {
 
 private struct IssuesListView: View {
     let items: [MediaIssuePackage]
+    let selectedFilter: IssueState
     let hasMore: Bool
     let isLoadingMore: Bool
     var loadMoreFailed: Bool = false
@@ -387,35 +461,45 @@ private struct IssuesListView: View {
     let onSelectIssue: (MediaIssuePackage) -> Void
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(items, id: \.issue.id) { issuePackage in
-                    SeerrIssueCard(
-                        issuePackage: issuePackage,
-                        onClick: { onSelectIssue(issuePackage) }
-                    )
-                    .onAppear {
-                        if issuePackage.issue.id == items.last?.issue.id && hasMore && !isLoadingMore {
-                            onLoadMore()
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    Color.clear
+                        .frame(height: 0)
+                        .id("issuesTop")
+
+                    ForEach(items, id: \.issue.id) { issuePackage in
+                        SeerrIssueCard(
+                            issuePackage: issuePackage,
+                            onClick: { onSelectIssue(issuePackage) }
+                        )
+                        .onAppear {
+                            if issuePackage.issue.id == items.last?.issue.id && hasMore && !isLoadingMore {
+                                onLoadMore()
+                            }
                         }
                     }
-                }
 
-                if isLoadingMore {
-                    ProgressView()
+                    if isLoadingMore {
+                        ProgressView()
+                            .padding(16)
+                    } else if loadMoreFailed {
+                        Button(action: onLoadMore) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.accentColor)
+                                .padding(8)
+                        }
+                        .buttonStyle(.plain)
                         .padding(16)
-                } else if loadMoreFailed {
-                    Button(action: onLoadMore) {
-                        Image(systemName: "arrow.clockwise")
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.accentColor)
-                            .padding(8)
                     }
-                    .buttonStyle(.plain)
-                    .padding(16)
                 }
+                .padding(16)
             }
-            .padding(16)
+            .id(selectedFilter)
+            .onChange(of: selectedFilter) { _ in
+                proxy.scrollTo("issuesTop", anchor: .top)
+            }
         }
     }
 }
@@ -486,6 +570,8 @@ struct SeerrSheetView: View {
                         pagedData: viewModel.requestsState,
                         userState: viewModel.userState,
                         operationsState: viewModel.operationsState,
+                        selectedFilter: viewModel.selectedFilter,
+                        onFilterSelected: { viewModel.setFilter($0) },
                         onApprove: { viewModel.approveRequest($0) },
                         onApproveWithDetails: { id, profileId, rootFolder, lang, seasons in
                             viewModel.approveRequest(id, profileId: profileId, rootFolder: rootFolder, languageProfileId: lang, seasons: seasons)
@@ -505,6 +591,8 @@ struct SeerrSheetView: View {
                 } else {
                     IssuesContentView(
                         pagedData: viewModel.issuesState,
+                        selectedFilter: viewModel.selectedIssueFilter,
+                        onFilterSelected: { viewModel.setIssueFilter($0) },
                         onLoadMore: { viewModel.loadNextIssuesPage() },
                         onRetry: { viewModel.retryIssues() },
                         onClearError: { viewModel.clearIssuesError() },

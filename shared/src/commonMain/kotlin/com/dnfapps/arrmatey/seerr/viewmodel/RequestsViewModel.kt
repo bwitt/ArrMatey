@@ -9,9 +9,11 @@ import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
 import com.dnfapps.arrmatey.instances.usecase.GetSeerrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
 import com.dnfapps.arrmatey.seerr.api.model.ApprovalStatus
+import com.dnfapps.arrmatey.seerr.api.model.IssueState
 import com.dnfapps.arrmatey.seerr.api.model.MediaIssuePackage
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequest
 import com.dnfapps.arrmatey.seerr.api.model.MediaRequestPackage
+import com.dnfapps.arrmatey.seerr.api.model.RequestState
 import com.dnfapps.arrmatey.seerr.api.model.SeerrUser
 import com.dnfapps.arrmatey.seerr.state.RequestOperationsState
 import com.dnfapps.arrmatey.seerr.usecase.CancelRequestUseCase
@@ -27,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
@@ -46,11 +49,49 @@ class RequestsViewModel(
     private var requestsPagingController: PagingController<MediaRequestPackage>? = null
     private var issuesPagingController: PagingController<MediaIssuePackage>? = null
 
-    private val _requestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
-    val requestsState: StateFlow<PagedData<MediaRequestPackage>> = _requestsState.asStateFlow()
+    private val _rawRequestsState = MutableStateFlow<PagedData<MediaRequestPackage>>(PagedData())
 
-    private val _issuesState = MutableStateFlow<PagedData<MediaIssuePackage>>(PagedData())
-    val issuesState: StateFlow<PagedData<MediaIssuePackage>> = _issuesState.asStateFlow()
+    private val _selectedFilter = MutableStateFlow(RequestState.Pending)
+    val selectedFilter: StateFlow<RequestState> = _selectedFilter.asStateFlow()
+
+    val requestsState: StateFlow<PagedData<MediaRequestPackage>> =
+        combine(_rawRequestsState, _selectedFilter) { data, filter ->
+            if (filter == RequestState.All) {
+                data
+            } else {
+                val filteredItems = data.items.filter { it.request.matchesFilter(filter) }
+                data.copy(
+                    items = filteredItems,
+                    totalItemCount = filteredItems.size,
+                )
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagedData(),
+        )
+
+    private val _rawIssuesState = MutableStateFlow<PagedData<MediaIssuePackage>>(PagedData())
+
+    private val _selectedIssueFilter = MutableStateFlow(IssueState.Open)
+    val selectedIssueFilter: StateFlow<IssueState> = _selectedIssueFilter.asStateFlow()
+
+    val issuesState: StateFlow<PagedData<MediaIssuePackage>> =
+        combine(_rawIssuesState, _selectedIssueFilter) { data, filter ->
+            if (filter == IssueState.All) {
+                data
+            } else {
+                val filteredItems = data.items.filter { it.issue.matchesFilter(filter) }
+                data.copy(
+                    items = filteredItems,
+                    totalItemCount = filteredItems.size,
+                )
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagedData(),
+        )
 
     private val _operationsState = MutableStateFlow(RequestOperationsState())
     val operationsState: StateFlow<RequestOperationsState> = _operationsState.asStateFlow()
@@ -84,6 +125,28 @@ class RequestsViewModel(
                 initialValue = null,
             )
 
+    val pendingRequestsCount: StateFlow<Int> =
+        selectedRepository
+            .filterNotNull()
+            .flatMapLatest { repo ->
+                repo.pendingRequestsCount
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0,
+            )
+
+    val openIssuesCount: StateFlow<Int> =
+        selectedRepository
+            .filterNotNull()
+            .flatMapLatest { repo ->
+                repo.openIssuesCount
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0,
+            )
+
     init {
         initializePagingController()
     }
@@ -94,26 +157,38 @@ class RequestsViewModel(
                 .filterNotNull()
                 .collect { repo ->
                     viewModelScope.launch {
+                        repo.refreshCounts()
+                    }
+
+                    viewModelScope.launch {
                         requestsPagingController =
-                            getRequestsUseCase.createPagingController(repo, viewModelScope)
+                            getRequestsUseCase.createPagingController(repo, viewModelScope, RequestState.All)
                         requestsPagingController?.loadInitialPage()
                         requestsPagingController?.state?.collect {
-                            _requestsState.value = it
+                            _rawRequestsState.value = it
                         }
                     }
 
                     viewModelScope.launch {
                         issuesPagingController =
-                            getIssuesUseCase.createPagingController(repo, viewModelScope)
+                            getIssuesUseCase.createPagingController(repo, viewModelScope, IssueState.All)
                         issuesPagingController?.loadInitialPage()
                         issuesPagingController?.state?.collect {
-                            _issuesState.value = it
+                            _rawIssuesState.value = it
                         }
                     }
 
                     observeOperationStates(repo)
                 }
         }
+    }
+
+    fun setFilter(filter: RequestState) {
+        _selectedFilter.value = filter
+    }
+
+    fun setIssueFilter(filter: IssueState) {
+        _selectedIssueFilter.value = filter
     }
 
     private fun observeOperationStates(repo: SeerrInstanceRepository) {
@@ -151,6 +226,9 @@ class RequestsViewModel(
     fun refresh() {
         requestsPagingController?.refresh()
         issuesPagingController?.refresh()
+        viewModelScope.launch {
+            selectedRepository.value?.refreshCounts()
+        }
     }
 
     fun resetRequestActionStatus() {

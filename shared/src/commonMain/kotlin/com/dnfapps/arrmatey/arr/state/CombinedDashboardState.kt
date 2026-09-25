@@ -77,8 +77,14 @@ sealed interface CombinedDashboardState {
         val networkStatus: NetworkStatusState? = null,
         val isRefreshing: Boolean = false,
     ) : CombinedDashboardState {
+        val allRequests: List<MediaRequestPackage>
+            get() = seerrInstances.flatMap { it.requests }
+
         val pendingRequests: List<MediaRequestPackage>
             get() = seerrInstances.flatMap { it.pendingRequests }
+
+        val allIssues: List<MediaIssuePackage>
+            get() = seerrInstances.flatMap { it.issues }
 
         val openIssues: List<MediaIssuePackage>
             get() = seerrInstances.flatMap { it.openIssues }
@@ -304,8 +310,8 @@ sealed interface CombinedDashboardState {
                         instance = it,
                         pendingRequestsCount = 5,
                         openIssuesCount = 2,
-                        pendingRequests = listOf(mockRequestPackage),
-                        openIssues = listOf(mockIssuePackage),
+                        requests = listOf(mockRequestPackage),
+                        issues = listOf(mockIssuePackage),
                     )
                 }
 
@@ -606,10 +612,16 @@ data class SeerrDashboardState(
     val instance: Instance,
     val pendingRequestsCount: Int = 0,
     val openIssuesCount: Int = 0,
-    val pendingRequests: List<MediaRequestPackage> = emptyList(),
-    val openIssues: List<MediaIssuePackage> = emptyList(),
+    val requests: List<MediaRequestPackage> = emptyList(),
+    val issues: List<MediaIssuePackage> = emptyList(),
     val isOnline: Boolean = true,
-)
+) {
+    val pendingRequests: List<MediaRequestPackage>
+        get() = requests.filter { it.request.matchesFilter(com.dnfapps.arrmatey.seerr.api.model.RequestState.Pending) }
+
+    val openIssues: List<MediaIssuePackage>
+        get() = issues.filter { it.issue.matchesFilter(com.dnfapps.arrmatey.seerr.api.model.IssueState.Open) }
+}
 
 data class DownloadClientDashboardState(
     val client: DownloadClient,
