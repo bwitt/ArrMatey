@@ -2,27 +2,22 @@ package com.dnfapps.arrmatey.ui.theme
 
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Typography
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.text.font.FontWeight
 import com.dnfapps.arrmatey.R
 
-val provider =
-    GoogleFont.Provider(
-        providerAuthority = "com.google.android.gms.fonts",
-        providerPackage = "com.google.android.gms",
-        certificates = R.array.com_google_android_gms_fonts_certs,
-    )
-
-private val GoogleSansFont = GoogleFont("Google Sans")
-private val GoogleSansFontFamily =
+private val FigtreeFontFamily =
     FontFamily(
-        Font(googleFont = GoogleSansFont, fontProvider = provider),
+        Font(R.font.figtree_regular, FontWeight.Normal),
+        Font(R.font.figtree_medium, FontWeight.Medium),
+        Font(R.font.figtree_semibold, FontWeight.SemiBold),
+        Font(R.font.figtree_bold, FontWeight.Bold),
     )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 fun typography(): Typography {
-    val fontFamily = GoogleSansFontFamily
+    val fontFamily = FigtreeFontFamily
     val typography = Typography()
     return typography.copy(
         displayLarge = typography.displayLarge.copy(fontFamily = fontFamily),
