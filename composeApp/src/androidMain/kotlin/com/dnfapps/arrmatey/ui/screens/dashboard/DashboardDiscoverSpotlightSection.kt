@@ -26,6 +26,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Schedule
@@ -45,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -156,14 +156,9 @@ fun DashboardDiscoverSpotlightSection(
                             val spotlightItem = spotlightItems[page]
                             val title = spotlightItem.title ?: spotlightItem.name ?: mokoString(MR.strings.unknown)
 
-                            val imageModel: Any =
+                            val imageModel: String? =
                                 spotlightItem.fullBackdropPath
                                     ?: spotlightItem.fullPosterPath
-                                    ?: if (spotlightItem.mediaType == RequestType.Tv) {
-                                        painterResource(MR.images.sonarr_mock_poster)
-                                    } else {
-                                        painterResource(MR.images.radarr_mock_poster)
-                                    }
 
                             Box(
                                 modifier =
@@ -173,20 +168,25 @@ fun DashboardDiscoverSpotlightSection(
                                             onMediaClick(spotlightItem.id, spotlightItem.mediaType)
                                         },
                             ) {
-                                if (imageModel is Painter) {
-                                    Image(
-                                        painter = imageModel,
-                                        contentDescription = title,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize(),
-                                    )
-                                } else {
+                                if (imageModel != null) {
                                     AsyncImage(
                                         model = imageModel,
                                         contentDescription = title,
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier.fillMaxSize(),
                                     )
+                                } else {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.BrokenImage,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.error,
+                                            modifier = Modifier.size(64.dp),
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -267,7 +267,8 @@ struct DashboardTabContent: View {
                         },
                         onMediaRequestClick: { item in
                             selectedMediaForRequest = item
-                        }
+                        },
+                        visibleCategories: viewModel.discoverSectionPreferences.visibleCategories
                     ) {
                         viewModel.removeCard(card: card)
                     }
@@ -398,6 +399,7 @@ struct DashboardCardWrapper: View {
     var onSeerrIssuesStatClick: (() -> Void)? = nil
     var onShuffleQuickPick: (() -> Void)? = nil
     var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
+    var visibleCategories: [DiscoverCategory] = []
     let onRemove: () -> Void
 
     var body: some View {
@@ -414,7 +416,8 @@ struct DashboardCardWrapper: View {
                 onSeerrRequestsStatClick: onSeerrRequestsStatClick,
                 onSeerrIssuesStatClick: onSeerrIssuesStatClick,
                 onShuffleQuickPick: onShuffleQuickPick,
-                onMediaRequestClick: onMediaRequestClick
+                onMediaRequestClick: onMediaRequestClick,
+                visibleCategories: visibleCategories
             )
             .padding(12)
             .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
@@ -447,6 +450,7 @@ struct DashboardCardView: View {
     var onSeerrIssuesStatClick: (() -> Void)? = nil
     var onShuffleQuickPick: (() -> Void)? = nil
     var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
+    var visibleCategories: [DiscoverCategory] = []
 
     @EnvironmentObject private var navigationManager: NavigationManager
 
@@ -458,7 +462,7 @@ struct DashboardCardView: View {
             case .pendingRequests: DashboardPendingRequestsSection(state: state, isEditing: isEditing, onRequestClick: onRequestClick)
             case .pendingIssues: DashboardPendingIssuesSection(state: state, isEditing: isEditing, onIssueClick: onIssueClick)
             case .prowlarrOverview: DashboardProwlarrSection(state: state, isEditing: isEditing)
-            case .network: DashboardNetworkSection(state: state)
+            case .network: DashboardNetworkSection(state: state, isEditing: isEditing)
             case .recentlyAdded: DashboardRecentlyAddedSection(state: state)
             case .downloadClients: DashboardDownloadClientsSection(state: state, isEditing: isEditing)
             case .activityQueue: DashboardActivityQueueSection(state: state, isEditing: isEditing, onItemClick: onActivityClick)
@@ -472,6 +476,7 @@ struct DashboardCardView: View {
                 DashboardDiscoverFeedSection(
                     state: state,
                     isEditing: isEditing,
+                    visibleCategories: visibleCategories,
                     onMediaClick: { id, type in
                         if !isEditing {
                             navigationManager.goToSeerrDetailsOnDashboard(tmdbId: id, requestType: type)
@@ -727,6 +732,7 @@ struct DashboardTracearrSection: View {
 
 struct DashboardNetworkSection: View {
     let state: CombinedDashboardStateSuccess
+    var isEditing: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -739,7 +745,7 @@ struct DashboardNetworkSection: View {
 
                 Spacer()
 
-                if let ssid = state.networkStatus?.ssid {
+                if !isEditing, let ssid = state.networkStatus?.ssid {
                     Text(ssid)
                         .font(.system(size: 10, weight: .bold))
                         .padding(.horizontal, 8)
@@ -2317,16 +2323,36 @@ struct DashboardDiscoverQuickPickSection: View {
 struct DashboardDiscoverFeedSection: View {
     let state: CombinedDashboardStateSuccess
     let isEditing: Bool
+    var visibleCategories: [DiscoverCategory] = []
     var onMediaClick: ((Int64, RequestType) -> Void)? = nil
 
-    @State private var selectedCategory: DiscoverCategory = .trending
+    @State private var selectedCategory: DiscoverCategory? = nil
 
-    private let categories: [(DiscoverCategory, String, String)] = [
-        (.trending, MR.strings().trending.localized(), "chart.line.uptrend.xyaxis"),
-        (.popularMovies, MR.strings().popular_movies.localized(), "film"),
-        (.popularSeries, MR.strings().popular_series.localized(), "tv"),
-        (.upcomingMovies, MR.strings().upcoming_movies.localized(), "calendar")
-    ]
+    private var activeCategories: [DiscoverCategory] {
+        visibleCategories.isEmpty ? DiscoverCategory.allCases : visibleCategories
+    }
+
+    private var currentSelectedCategory: DiscoverCategory {
+        if let selected = selectedCategory, activeCategories.contains(selected) {
+            return selected
+        }
+        return activeCategories.first ?? .trending
+    }
+
+    private var categories: [(DiscoverCategory, String, String)] {
+        return activeCategories.map { category in
+            let title = category.title.localized()
+            let icon: String
+            switch category {
+            case .trending: icon = "chart.line.uptrend.xyaxis"
+            case .popularMovies: icon = "film"
+            case .popularSeries: icon = "tv"
+            case .upcomingMovies, .upcomingSeries: icon = "calendar"
+            default: icon = "calendar"
+            }
+            return (category, title, icon)
+        }
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -2351,7 +2377,7 @@ struct DashboardDiscoverFeedSection: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(categories, id: \.0) { category, title, icon in
-                            let isSelected = selectedCategory == category
+                            let isSelected = currentSelectedCategory == category
                             Button(action: {
                                 withAnimation { selectedCategory = category }
                             }) {
@@ -2371,7 +2397,7 @@ struct DashboardDiscoverFeedSection: View {
                     }
                 }
 
-                let items = state.getDiscoverFeedItems(category: selectedCategory)
+                let items = state.getDiscoverFeedItems(category: currentSelectedCategory)
 
                 if items.isEmpty {
                     Text(MR.strings().no_media_found.localized())

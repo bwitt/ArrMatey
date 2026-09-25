@@ -2,11 +2,6 @@ package com.dnfapps.arrmatey.ui.screens
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +18,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -99,7 +93,6 @@ import com.dnfapps.arrmatey.ui.screens.tracearr.TracearrStreamDetailsSheet
 import com.dnfapps.arrmatey.ui.sheets.MediaRequestOrAddSheet
 import com.dnfapps.arrmatey.ui.tabs.ConfirmDeleteItemSheet
 import com.dnfapps.arrmatey.ui.tabs.QueueItemInfoSheet
-import com.dnfapps.arrmatey.ui.theme.ArrOrange
 import com.dnfapps.arrmatey.utils.MokoStrings
 import com.dnfapps.arrmatey.utils.handleWatchClick
 import com.dnfapps.arrmatey.utils.mokoPlural
@@ -143,6 +136,7 @@ fun UnifiedMediaDetailsScreen(
     moko: MokoStrings = koinInject(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val recommendationsState by viewModel.recommendationsState.collectAsStateWithLifecycle()
     val similarState by viewModel.similarState.collectAsStateWithLifecycle()
     val selectedInstanceId by viewModel.selectedInstanceId.collectAsStateWithLifecycle()
@@ -252,10 +246,12 @@ fun UnifiedMediaDetailsScreen(
             is OperationStatus.Success -> {
                 Toast.makeText(context, itemAddedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
                 showAddSheet = false
+                viewModel.resetAddItemStatus()
             }
 
             is OperationStatus.Error -> {
                 Toast.makeText(context, errorAddingItemMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetAddItemStatus()
             }
 
             else -> {}
@@ -268,10 +264,12 @@ fun UnifiedMediaDetailsScreen(
                 Toast.makeText(context, itemEditedSuccessfullyMessage, Toast.LENGTH_SHORT).show()
                 showEditSheet = false
                 editAlbum = null
+                viewModel.resetEditStatus()
             }
 
             is OperationStatus.Error -> {
                 Toast.makeText(context, errorEditingItemMessage, Toast.LENGTH_SHORT).show()
+                viewModel.resetEditStatus()
             }
 
             else -> {}
@@ -350,23 +348,6 @@ fun UnifiedMediaDetailsScreen(
                         val canAddDirectly = !success.hasArrId && success.arrMedia != null && isArrConfigured
                         val resolvedType = viewModel.resolvedInstanceType
 
-                        AnimatedVisibility(
-                            visible = buttonState.showReportIssueButton,
-                            enter = fadeIn() + expandHorizontally(),
-                            exit = fadeOut() + shrinkHorizontally(),
-                        ) {
-                            IconButton(
-                                onClick = { viewModel.showReportIssueSheet() },
-                                colors = IconButtonDefaults.headerBarColors(),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Warning,
-                                    contentDescription = mokoString(MR.strings.report_issue),
-                                    tint = ArrOrange,
-                                )
-                            }
-                        }
-
                         MediaActionsToolbarMenus(
                             buttonState = buttonState,
                             canAddDirectly = canAddDirectly,
@@ -442,6 +423,7 @@ fun UnifiedMediaDetailsScreen(
                             onMarkAsAvailable = { viewModel.markSeerrMediaAsAvailable() },
                             onRemoveFromService = { confirmRemoveFromService = true },
                             onClearData = { confirmClearData = true },
+                            onReportIssue = { viewModel.showReportIssueSheet() },
                         )
                     }
                 },
@@ -457,7 +439,7 @@ fun UnifiedMediaDetailsScreen(
             when {
                 successState != null -> {
                     PullToRefreshBox(
-                        isRefreshing = false,
+                        isRefreshing = isRefreshing,
                         onRefresh = { viewModel.refresh() },
                     ) {
                         Column(

@@ -71,6 +71,7 @@ import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsSeerrServiceHan
 import com.dnfapps.arrmatey.viewmodel.details.UnifiedMediaDetailsTracearrHandler
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -136,6 +137,9 @@ class UnifiedMediaDetailsViewModel(
 
     private val _isMonitored = MutableStateFlow(false)
     val isMonitored: StateFlow<Boolean> = _isMonitored.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     private val _uiState = MutableStateFlow<UnifiedMediaDetailsUiState>(UnifiedMediaDetailsUiState.Initial)
     val uiState: StateFlow<UnifiedMediaDetailsUiState> = _uiState.asStateFlow()
@@ -310,16 +314,31 @@ class UnifiedMediaDetailsViewModel(
 
     fun refresh() {
         viewModelScope.launch {
-            val repository = instanceHandler.getActiveArrRepository()
-            if (repository != null) {
-                launch { repository.refreshQualityProfiles() }
-                launch { repository.refreshRootFolders() }
-                launch { repository.refreshTags() }
+            _isRefreshing.value = true
+            try {
+                val repository = instanceHandler.getActiveArrRepository()
+                val effectiveId = instanceHandler.getEffectiveArrId(_uiState.value)
+                val seerrRepository = instanceHandler.getSeerrRepository()
+                coroutineScope {
+                    if (repository != null) {
+                        launch { repository.refreshQualityProfiles() }
+                        launch { repository.refreshRootFolders() }
+                        launch { repository.refreshTags() }
+                        if (effectiveId != null && effectiveId != 0L) {
+                            launch { repository.getMediaDetails(effectiveId) }
+                        }
+                    }
+                    if (seerrRepository != null && tmdbId != null && resolvedRequestType != null) {
+                        launch { seerrRepository.refreshMediaDetails(tmdbId, resolvedRequestType) }
+                    }
+                    launch { activityQueueService.manualRefresh() }
+                    launch { recommendationsHandler.refresh() }
+                }
+                dataObserver.observeData(_uiState)
+            } finally {
+                _isRefreshing.value = false
             }
-            launch { activityQueueService.manualRefresh() }
         }
-        recommendationsHandler.refresh()
-        dataObserver.observeData(_uiState)
     }
 
     fun performRefresh() {
@@ -588,6 +607,7 @@ class UnifiedMediaDetailsViewModel(
             effectiveIdProvider = { instanceHandler.getEffectiveArrId(_uiState.value) },
             item = item,
             moveFiles = moveFiles,
+            onSuccessRefresh = ::refresh,
         )
     }
 
@@ -598,6 +618,17 @@ class UnifiedMediaDetailsViewModel(
             album = album,
             onSuccessReobserve = { dataObserver.observeData(_uiState) },
         )
+    }
+
+    fun resetEditStatus() {
+        arrActionsHandler.resetEditStatus()
+        viewModelScope.launch {
+            instanceHandler.getActiveArrRepository()?.resetEditItemStatus()
+        }
+    }
+
+    fun resetAddItemStatus() {
+        arrActionsHandler.resetAddItemStatus()
     }
 
     fun deleteMedia(

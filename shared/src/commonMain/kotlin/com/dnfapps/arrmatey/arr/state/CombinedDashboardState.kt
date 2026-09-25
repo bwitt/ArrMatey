@@ -105,9 +105,8 @@ sealed interface CombinedDashboardState {
                 DiscoverCategory.TRENDING -> trendingMedia
                 DiscoverCategory.POPULAR_MOVIES -> popularMovies
                 DiscoverCategory.POPULAR_SERIES -> popularTv
-                DiscoverCategory.UPCOMING_MOVIES,
-                DiscoverCategory.UPCOMING_SERIES,
-                -> upcomingMovies.ifEmpty { upcomingTv }
+                DiscoverCategory.UPCOMING_MOVIES -> upcomingMovies
+                DiscoverCategory.UPCOMING_SERIES -> upcomingTv
             }
 
         fun resolveMediaStatus(item: DiscoverResult): com.dnfapps.arrmatey.seerr.api.model.MediaStatus {
@@ -609,6 +608,7 @@ data class SeerrDashboardState(
     val openIssuesCount: Int = 0,
     val pendingRequests: List<MediaRequestPackage> = emptyList(),
     val openIssues: List<MediaIssuePackage> = emptyList(),
+    val isOnline: Boolean = true,
 )
 
 data class DownloadClientDashboardState(
@@ -630,6 +630,7 @@ data class BazarrDashboardState(
     val instance: Instance,
     val wantedEpisodesCount: Int,
     val wantedMoviesCount: Int,
+    val isOnline: Boolean = true,
 )
 
 data class TracearrDashboardState(

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -217,27 +216,31 @@ fun DownloadQueueItem(
                     },
             ),
     ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-            verticalAlignment = Alignment.CenterVertically,
+        Box(
+            modifier = Modifier.fillMaxWidth(),
         ) {
             if (showClientInfo) {
                 Box(
-                    modifier =
-                        Modifier
-                            .width(6.dp)
-                            .fillMaxHeight()
-                            .background(item.client.type.associatedColor),
-                )
+                    modifier = Modifier.matchParentSize(),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(6.dp)
+                                .fillMaxHeight()
+                                .background(item.client.type.associatedColor)
+                                .align(Alignment.CenterStart),
+                    )
+                }
             }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.weight(1f),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = if (showClientInfo) 6.dp else 0.dp),
             ) {
                 if (isInSelectionMode) {
                     Checkbox(

@@ -1,9 +1,10 @@
 package com.dnfapps.arrmatey.ui.screens.dashboard
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -29,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,7 +49,6 @@ import com.dnfapps.arrmatey.ui.screens.requests.IssueStatusChip
 import com.dnfapps.arrmatey.ui.screens.requests.UserInfoRow
 import com.dnfapps.arrmatey.utils.AspectRatio
 import com.dnfapps.arrmatey.utils.mokoString
-import dev.icerock.moko.resources.compose.painterResource
 
 @Composable
 fun DashboardPendingIssuesSection(
@@ -156,33 +156,14 @@ private fun CompactIssueCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Top,
             ) {
-                val posterModel: Any? =
+                val posterModel =
                     if (details?.fullPosterPath != null) {
                         rememberRemoteImageData(details.fullPosterPath)
                     } else {
-                        painterResource(
-                            if (issue.media?.mediaType ==
-                                RequestType.Tv
-                            ) {
-                                MR.images.sonarr_mock_poster
-                            } else {
-                                MR.images.radarr_mock_poster
-                            },
-                        )
+                        null
                     }
 
-                if (posterModel is Painter) {
-                    Image(
-                        painter = posterModel,
-                        contentDescription = null,
-                        modifier =
-                            Modifier
-                                .width(60.dp)
-                                .aspectRatio(AspectRatio.Poster.ratio)
-                                .clip(MaterialTheme.shapes.medium),
-                        contentScale = ContentScale.Crop,
-                    )
-                } else {
+                if (posterModel != null) {
                     AsyncImage(
                         model = posterModel,
                         contentDescription = null,
@@ -193,6 +174,23 @@ private fun CompactIssueCard(
                                 .clip(MaterialTheme.shapes.medium),
                         contentScale = ContentScale.Crop,
                     )
+                } else {
+                    Box(
+                        modifier =
+                            Modifier
+                                .width(60.dp)
+                                .aspectRatio(AspectRatio.Poster.ratio)
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.BrokenImage,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
                 }
 
                 Column(
