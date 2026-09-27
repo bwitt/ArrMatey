@@ -1,0 +1,13 @@
+### New Features
+* Full Backup & Restore: Export and import all app configuration and instance settings with encrypted backup support.
+* Request & Issue Filters: Added advanced filter options for Seerr requests and issues.
+* Customizable Back Gesture: Added option to customize back button/gesture behavior to open the drawer or navigate directly.
+
+### Improvements
+* Network & Polling Optimizations: Reduced redundant network calls and improved background polling efficiency.
+* Remember Removal Preferences: Persist user selection when removing queue items or deleting media.
+
+### Bug Fixes
+* Schedule Loading: Resolved race conditions when loading calendar and release schedules.
+* Seerr Data Types: Fixed field deserialization issues for Seerr media details.
+* UI Scaling: Fixed layout scaling and alignment issues on varying screen densities.
