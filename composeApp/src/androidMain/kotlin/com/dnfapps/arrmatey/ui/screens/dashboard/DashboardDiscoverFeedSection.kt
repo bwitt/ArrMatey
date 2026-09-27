@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -27,12 +28,16 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +54,6 @@ import com.dnfapps.arrmatey.datastore.DiscoverSectionPreferences
 import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.seerr.api.model.DiscoverResult
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.PosterItem
@@ -57,6 +61,7 @@ import com.dnfapps.arrmatey.utils.mokoString
 import dev.icerock.moko.resources.compose.painterResource
 import org.koin.compose.koinInject
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DashboardDiscoverFeedSection(
     state: CombinedDashboardState.Success,
@@ -64,6 +69,7 @@ fun DashboardDiscoverFeedSection(
     isEditing: Boolean = false,
     enabled: Boolean = true,
     preferencesStore: PreferencesStore = koinInject(),
+    onLoadMore: (DiscoverCategory) -> Unit = {},
 ) {
     val sectionPreferences by preferencesStore.discoverSectionPreferences.collectAsStateWithLifecycle(
         initialValue = DiscoverSectionPreferences(),
@@ -78,8 +84,6 @@ fun DashboardDiscoverFeedSection(
     var selectedCategory by rememberSaveable { mutableStateOf<DiscoverCategory?>(null) }
 
     val activeCategory = (selectedCategory?.takeIf { it in categories }) ?: categories.firstOrNull() ?: DiscoverCategory.TRENDING
-
-    val currentItems: List<DiscoverResult> = state.getDiscoverFeedItems(activeCategory)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -178,12 +182,15 @@ fun DashboardDiscoverFeedSection(
                 }
 
                 AnimatedContent(
-                    targetState = currentItems,
+                    targetState = activeCategory,
                     transitionSpec = {
                         (fadeIn() + slideInHorizontally { it / 4 }) togetherWith (fadeOut() + slideOutHorizontally { -it / 4 })
                     },
                     label = "DiscoverFeedCarouselTransition",
-                ) { itemsList ->
+                ) { category ->
+                    val itemsList = state.getDiscoverFeedItems(category)
+                    val isLoadingMore = state.isLoadingDiscoverFeed(category)
+
                     if (itemsList.isEmpty()) {
                         Text(
                             text = mokoString(MR.strings.no_media_found),
@@ -195,12 +202,36 @@ fun DashboardDiscoverFeedSection(
                             textAlign = TextAlign.Center,
                         )
                     } else {
+                        val lazyListState = rememberSaveable(category, saver = LazyListState.Saver) { LazyListState() }
+
+                        val shouldLoadMore by remember {
+                            derivedStateOf {
+                                val totalItemsCount = lazyListState.layoutInfo.totalItemsCount
+                                val lastVisibleItemIndex =
+                                    lazyListState.layoutInfo.visibleItemsInfo
+                                        .lastOrNull()
+                                        ?.index ?: 0
+                                totalItemsCount > 0 && lastVisibleItemIndex >= (totalItemsCount - 4)
+                            }
+                        }
+
+                        LaunchedEffect(shouldLoadMore) {
+                            if (shouldLoadMore && enabled && !isLoadingMore) {
+                                onLoadMore(category)
+                            }
+                        }
+
                         LazyRow(
+                            state = lazyListState,
                             contentPadding = PaddingValues(horizontal = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                             userScrollEnabled = enabled,
                         ) {
-                            items(itemsList) { item ->
+                            items(
+                                items = itemsList,
+                                key = { item -> "${category.name}_${item.id}_${item.mediaType.name}" },
+                            ) { item ->
                                 PosterItem(
                                     item = item,
                                     modifier = Modifier.width(120.dp),
@@ -210,6 +241,12 @@ fun DashboardDiscoverFeedSection(
                                         }
                                     },
                                 )
+                            }
+
+                            if (isLoadingMore) {
+                                item(key = "${category.name}_loading_indicator") {
+                                    LoadingIndicator(modifier = Modifier.padding(16.dp))
+                                }
                             }
                         }
                     }
