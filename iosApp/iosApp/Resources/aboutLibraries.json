@@ -2186,7 +2186,7 @@
         },
         {
             "uniqueId": "dev.icerock.moko:graphics",
-            "artifactVersion": "0.10.0",
+            "artifactVersion": "0.10.2",
             "name": "MOKO graphics",
             "description": "Graphics primitives for mobile (android & ios) Kotlin Multiplatform development",
             "website": "https://github.com/icerockdev/moko-graphics",
@@ -2209,7 +2209,7 @@
         },
         {
             "uniqueId": "dev.icerock.moko:resources",
-            "artifactVersion": "0.26.4",
+            "artifactVersion": "0.27.1",
             "name": "MOKO resources",
             "description": "Resources access for Kotlin Multiplatform development (mobile first)",
             "website": "https://github.com/icerockdev/moko-resources",
@@ -2241,7 +2241,7 @@
         },
         {
             "uniqueId": "dev.icerock.moko:resources-compose",
-            "artifactVersion": "0.26.4",
+            "artifactVersion": "0.27.1",
             "name": "MOKO resources",
             "description": "Resources access for Kotlin Multiplatform development (mobile first)",
             "website": "https://github.com/icerockdev/moko-resources",
