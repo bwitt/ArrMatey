@@ -1,0 +1,15 @@
+### New Features
+* Activity History & Recently Downloaded: Added dedicated "History" and "Recently Downloaded" tabs to the Activity screen, providing complete insight into past activity and completed media.
+* Activity Queue Sorting: Added the ability to sort items in the Activity Queue by download progress.
+* Self-Signed Certificates: Added per-webpage support for allowing self-signed SSL certificates in Custom Webpages.
+* Interactive Rating Chips: Rating chips on media detail screens now link directly to their source website.
+
+### Improvements
+* Consolidated Dashboard Navigation: Merged navigation destinations into the dashboard tab for a smoother and more unified experience.
+* Polling & Activity Resilience: Improved background polling resilience and fixed stuck loading states in the Activity Queue.
+* Bundled Fonts: Replaced downloadable fonts with bundled open-source Google Sans.
+* Preference Write Isolation: Isolated Datastore preference writes using supervisor jobs to avoid propagation of cancellation exceptions.
+
+### Bug Fixes
+* Seerr Media Loading: Fixed issues handling nullable fields and media details loading in Overseerr/Jellyseerr.
+* iOS Discover Pagination: Fixed category pagination issues when scrolling discover feeds.
