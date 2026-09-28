@@ -17,10 +17,14 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemStandard.dashboard as TabItem)
     @Published var selectedDrawerTab: AnyTabItem? = nil
 
-    @Published var showLauncher: Bool = false
-    @Published var showMoreDrawer: Bool = false
+    @Published var isMoreSelected: Bool = false
 
-    private var pendingSettingsRoute: SettingsRoute? = nil
+    // Set by ContentView; the sidebar lists every tab, the tab bar only the first `compactTabLimit`.
+    var usesSidebar: Bool = false
+
+    // iPhone TabView collapses anything past 5 items into a system More list, and our More tab takes one slot.
+    static let compactTabLimit = 4
+    static let moreKey = "launcher"
 
     // MARK: - Scoped Path Accessors
 
@@ -74,8 +78,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         set { paths[TabItemStandard.requests.key] = newValue }
     }
     var launcherPath: NavigationPath {
-        get { paths["launcher"] ?? NavigationPath() }
-        set { paths["launcher"] = newValue }
+        get { paths[NavigationManager.moreKey] ?? NavigationPath() }
+        set { paths[NavigationManager.moreKey] = newValue }
     }
     var dashboardPath: NavigationPath {
         get { paths[TabItemStandard.dashboard.key] ?? NavigationPath() }
@@ -141,8 +145,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     private func activeContextKey() -> String {
-        if showLauncher {
-            return "launcher"
+        if isMoreSelected {
+            return NavigationManager.moreKey
         }
         return selectedTab.key
     }
@@ -150,7 +154,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     // MARK: - Navigation Intents
 
     func go(to route: MediaRoute, of type: InstanceType) {
-        if showLauncher {
+        if isMoreSelected {
             push(route)
             return
         }
@@ -162,6 +166,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             return
         }
 
+        if openInMoreIfNeeded(tabFor(type), route: route) { return }
+
         navigateToTab(tabFor(type))
 
         let targetKey = tabKey(for: type)
@@ -171,11 +177,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func replaceCurrent(with route: MediaRoute, for type: InstanceType) {
-        if showLauncher {
-            var lPath = paths["launcher"] ?? NavigationPath()
+        if isMoreSelected {
+            var lPath = paths[NavigationManager.moreKey] ?? NavigationPath()
             if !lPath.isEmpty { lPath.removeLast() }
             lPath.append(route)
-            paths["launcher"] = lPath
+            paths[NavigationManager.moreKey] = lPath
             return
         }
 
@@ -187,6 +193,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             return
         }
 
+        if openInMoreIfNeeded(tabFor(type), route: route) { return }
+
         navigateToTab(tabFor(type))
 
         let targetKey = tabKey(for: type)
@@ -196,8 +204,18 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         paths[targetKey] = tabPath
     }
 
+    private func openInMoreIfNeeded(_ tab: TabItem, route: MediaRoute) -> Bool {
+        guard !directlySelectableTabs().contains(where: { $0.key == tab.key }) else { return false }
+        var lPath = NavigationPath()
+        lPath.append(AnyTabItem(item: tab))
+        lPath.append(route)
+        paths[NavigationManager.moreKey] = lPath
+        isMoreSelected = true
+        return true
+    }
+
     func go(to route: SettingsRoute) {
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var sPath = paths[TabItemSettings.shared.key] ?? NavigationPath()
@@ -207,7 +225,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func go(to route: BazarrRoute) {
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var bPath = paths[TabItemStandard.bazarr.key] ?? NavigationPath()
@@ -217,7 +235,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func go(to route: TracearrRoute) {
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else if selectedTab.key == TabItemStandard.dashboard.key {
             var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
@@ -239,35 +257,21 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func goToNewInstance(of type: InstanceType) {
-        clearAllPaths()
-
-        if showLauncher {
-            let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
-            var lPath = paths["launcher"] ?? NavigationPath()
-            lPath.append(settingsTab)
-            lPath.append(SettingsRoute.services)
-            lPath.append(SettingsRoute.newInstance(type))
-            paths["launcher"] = lPath
-        } else {
-            pendingSettingsRoute = .newInstance(type)
-            showLauncher = true
-        }
+        openSettingsRoute(.newInstance(type))
     }
 
     func goToEditInstance(of type: InstanceType, _ id: Int64) {
-        clearAllPaths()
+        openSettingsRoute(.editInstance(id))
+    }
 
-        if showLauncher {
-            let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
-            var lPath = paths["launcher"] ?? NavigationPath()
-            lPath.append(settingsTab)
-            lPath.append(SettingsRoute.services)
-            lPath.append(SettingsRoute.editInstance(id))
-            paths["launcher"] = lPath
-        } else {
-            pendingSettingsRoute = .editInstance(id)
-            showLauncher = true
-        }
+    private func openSettingsRoute(_ route: SettingsRoute) {
+        clearAllPaths()
+        var lPath = NavigationPath()
+        lPath.append(AnyTabItem(item: TabItemSettings.shared as TabItem))
+        lPath.append(SettingsRoute.services)
+        lPath.append(route)
+        paths[NavigationManager.moreKey] = lPath
+        isMoreSelected = true
     }
 
     func clearAllPaths() {
@@ -280,37 +284,27 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         }
     }
 
-    func applyPendingRoute() {
-        if let route = pendingSettingsRoute {
-            var lPath = paths["launcher"] ?? NavigationPath()
-            lPath.append(SettingsRoute.services)
-            lPath.append(route)
-            paths["launcher"] = lPath
-            pendingSettingsRoute = nil
-        }
-    }
-
     func completeSetupAndDismiss() {
-        self.showLauncher = false
+        self.isMoreSelected = false
         self.paths.removeAll()
     }
 
     func goInLauncher(to route: SettingsRoute) {
-        var lPath = paths["launcher"] ?? NavigationPath()
+        var lPath = paths[NavigationManager.moreKey] ?? NavigationPath()
         lPath.append(route)
-        paths["launcher"] = lPath
+        paths[NavigationManager.moreKey] = lPath
     }
 
     func popLauncherPath() {
-        var lPath = paths["launcher"] ?? NavigationPath()
+        var lPath = paths[NavigationManager.moreKey] ?? NavigationPath()
         if !lPath.isEmpty {
             lPath.removeLast()
-            paths["launcher"] = lPath
+            paths[NavigationManager.moreKey] = lPath
         }
     }
 
     func clearLauncherPath() {
-        paths["launcher"] = NavigationPath()
+        paths[NavigationManager.moreKey] = NavigationPath()
     }
 
     func openSettings() {
@@ -318,11 +312,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func popToSettings() {
-        if showLauncher {
+        if isMoreSelected {
             clearLauncherPath()
             var lPath = NavigationPath()
             lPath.append(AnyTabItem(item: TabItemSettings.shared))
-            paths["launcher"] = lPath
+            paths[NavigationManager.moreKey] = lPath
         } else {
             paths[TabItemSettings.shared.key] = NavigationPath()
         }
@@ -330,7 +324,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func goToSeerrDetails(tmdbId: Int64, requestType: RequestType) {
         let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
@@ -341,7 +335,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func goToDiscoverCategory(category: DiscoverCategory) {
         let route = SeerrRoute.category(category: category)
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
@@ -352,7 +346,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func goToPersonDetails(id: Int64) {
         let route = SeerrRoute.personDetails(id: id)
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var sPath = paths[TabItemStandard.requests.key] ?? NavigationPath()
@@ -379,7 +373,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             instanceId: instanceId,
             episodeId: episodeId
         )
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else if let type = instanceType {
             go(to: route, of: type)
@@ -396,7 +390,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func goToPreview(_ json: String, type: InstanceType) {
         let route = MediaRoute.preview(json, type: type)
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             go(to: route, of: type)
@@ -436,7 +430,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             instanceId: instanceId,
             episodeId: episodeId
         )
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
@@ -450,7 +444,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             goToPersonDetailsOnDashboard(id: tmdbId)
         } else {
             let route = SeerrRoute.details(tmdbId: tmdbId, requestType: requestType)
-            if showLauncher {
+            if isMoreSelected {
                 push(route)
             } else {
                 var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
@@ -462,7 +456,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func goToPersonDetailsOnDashboard(id: Int64) {
         let route = SeerrRoute.personDetails(id: id)
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
@@ -480,7 +474,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                 goToDetailsOnDashboard(arrId: nil, tmdbId: tmdbId, tvdbId: tvdbId, instanceType: type, instanceId: instanceId)
             } else if let type = type {
                 let route = MediaRoute.preview(item.toJson(), type: type)
-                if showLauncher {
+                if isMoreSelected {
                     push(route)
                 } else {
                     var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
@@ -494,11 +488,10 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func navigateToTab(_ tab: TabItem) {
-        let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
-        let visibleKeys = visibleTabs.map { $0.key }
+        let selectable = directlySelectableTabs().contains(where: { $0.key == tab.key })
 
         DispatchQueue.main.async {
-            if visibleKeys.contains(tab.key) {
+            if selectable {
                 self.closeOverlay()
                 self.selectedTab = AnyTabItem(item: tab)
             } else {
@@ -507,16 +500,33 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         }
     }
 
+    func directlySelectableTabs() -> [TabItem] {
+        let config = tabManager.tabConfiguration.value
+        if usesSidebar {
+            return config.visibleTabs + config.drawerTabs
+        }
+        return Array(config.visibleTabs.prefix(Self.compactTabLimit))
+    }
+
+    func selectTab(key: String) {
+        if key == NavigationManager.moreKey {
+            isMoreSelected = true
+        } else if let match = directlySelectableTabs().first(where: { $0.key == key }) {
+            isMoreSelected = false
+            selectedTab = AnyTabItem(item: match)
+        }
+    }
+
     func openOverlay(_ tab: TabItem) {
         clearLauncherPath()
         var lPath = NavigationPath()
         lPath.append(AnyTabItem(item: tab))
-        paths["launcher"] = lPath
-        showLauncher = true
+        paths[NavigationManager.moreKey] = lPath
+        isMoreSelected = true
     }
 
     func closeOverlay() {
-        showLauncher = false
+        isMoreSelected = false
         clearLauncherPath()
     }
 
@@ -567,8 +577,6 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     func handleAction(_ action: String, userInfo: [AnyHashable: Any] = [:]) {
         switch action {
         case NotificationConstants.shared.ACTION_OPEN_SCHEDULE:
-            openScheduleTab()
-
             if let itemIdStr = userInfo[NotificationConstants.shared.EXTRA_ITEM_ID] as? String,
                let itemId = Int64(itemIdStr),
                let typeName = userInfo[NotificationConstants.shared.EXTRA_INSTANCE_TYPE] as? String,
@@ -578,8 +586,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                 let instanceId = (userInfo[NotificationConstants.shared.EXTRA_INSTANCE_ID] as? String).flatMap { Int64($0) }
                 let episodeId = (userInfo[NotificationConstants.shared.EXTRA_EPISODE_ID] as? String).flatMap { Int64($0) }
 
-                var calPath = NavigationPath()
-                calPath.append(MediaRoute.details(
+                let route = MediaRoute.details(
                     arrId: itemId,
                     tmdbId: tmdbId,
                     tvdbId: nil,
@@ -587,8 +594,16 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                     requestType: nil,
                     instanceId: instanceId,
                     episodeId: episodeId
-                ))
-                paths[TabItemStandard.calendar.key] = calPath
+                )
+                let calendar = TabItemStandard.calendar as TabItem
+                if !openInMoreIfNeeded(calendar, route: route) {
+                    openScheduleTab()
+                    var calPath = NavigationPath()
+                    calPath.append(route)
+                    paths[calendar.key] = calPath
+                }
+            } else {
+                openScheduleTab()
             }
         case NotificationConstants.shared.ACTION_OPEN_DOWNLOADS:
             openDownloadsTab()
@@ -609,7 +624,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func openArrDashboard(id: Int64) {
         let route = SettingsRoute.arrDashboard(id)
-        if showLauncher {
+        if isMoreSelected {
             push(route)
         } else {
             var dPath = paths[TabItemStandard.dashboard.key] ?? NavigationPath()
@@ -637,16 +652,6 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func tabKey(for type: InstanceType) -> String {
         tabFor(type).key
-    }
-
-    func shouldShowDrawerButton(for tabKey: String) -> Bool {
-        guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
-        guard !showLauncher else { return false }
-        let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
-        guard visibleTabs.contains(where: { $0.key == tabKey }) else { return false }
-        guard selectedTab.key == tabKey else { return false }
-        guard (paths[tabKey]?.isEmpty ?? true) else { return false }
-        return true
     }
 }
 

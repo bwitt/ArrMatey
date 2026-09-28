@@ -144,15 +144,6 @@ private struct DiscoverTabContent: View {
             viewModel.updateSearchQuery(newValue)
         }
         .toolbar {
-            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.discover.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
-            }
             if instancesViewModel.instancesState.selectedInstance != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
