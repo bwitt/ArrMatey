@@ -17,10 +17,15 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     @Published var selectedTab: AnyTabItem = AnyTabItem(item: TabItemStandard.dashboard as TabItem)
     @Published var selectedDrawerTab: AnyTabItem? = nil
 
+    // True while the More tab (iPhone) or More pane (iPad) is active; its stack is stored under "launcher".
     @Published var showLauncher: Bool = false
     @Published var showMoreDrawer: Bool = false
 
-    private var pendingSettingsRoute: SettingsRoute? = nil
+    // Set by ContentView; the sidebar lists every tab, the tab bar only the first `compactTabLimit`.
+    var usesSidebar: Bool = false
+
+    // iPhone TabView collapses anything past 5 items into a system More list, and our More tab takes one slot.
+    static let compactTabLimit = 4
 
     // MARK: - Scoped Path Accessors
 
@@ -154,6 +159,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             return
         }
 
+        if openInMoreIfNeeded(tabFor(type), route: route) { return }
+
         navigateToTab(tabFor(type))
 
         let targetKey = tabKey(for: type)
@@ -179,6 +186,8 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
             return
         }
 
+        if openInMoreIfNeeded(tabFor(type), route: route) { return }
+
         navigateToTab(tabFor(type))
 
         let targetKey = tabKey(for: type)
@@ -186,6 +195,16 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
         if !tabPath.isEmpty { tabPath.removeLast() }
         tabPath.append(route)
         paths[targetKey] = tabPath
+    }
+
+    private func openInMoreIfNeeded(_ tab: TabItem, route: MediaRoute) -> Bool {
+        guard !directlySelectableTabs().contains(where: { $0.key == tab.key }) else { return false }
+        var lPath = NavigationPath()
+        lPath.append(AnyTabItem(item: tab))
+        lPath.append(route)
+        paths["launcher"] = lPath
+        showLauncher = true
+        return true
     }
 
     func go(to route: SettingsRoute) {
@@ -231,35 +250,21 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func goToNewInstance(of type: InstanceType) {
-        clearAllPaths()
-
-        if showLauncher {
-            let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
-            var lPath = paths["launcher"] ?? NavigationPath()
-            lPath.append(settingsTab)
-            lPath.append(SettingsRoute.services)
-            lPath.append(SettingsRoute.newInstance(type))
-            paths["launcher"] = lPath
-        } else {
-            pendingSettingsRoute = .newInstance(type)
-            showLauncher = true
-        }
+        openSettingsRoute(.newInstance(type))
     }
 
     func goToEditInstance(of type: InstanceType, _ id: Int64) {
-        clearAllPaths()
+        openSettingsRoute(.editInstance(id))
+    }
 
-        if showLauncher {
-            let settingsTab = AnyTabItem(item: TabItemSettings.shared as TabItem)
-            var lPath = paths["launcher"] ?? NavigationPath()
-            lPath.append(settingsTab)
-            lPath.append(SettingsRoute.services)
-            lPath.append(SettingsRoute.editInstance(id))
-            paths["launcher"] = lPath
-        } else {
-            pendingSettingsRoute = .editInstance(id)
-            showLauncher = true
-        }
+    private func openSettingsRoute(_ route: SettingsRoute) {
+        clearAllPaths()
+        var lPath = NavigationPath()
+        lPath.append(AnyTabItem(item: TabItemSettings.shared as TabItem))
+        lPath.append(SettingsRoute.services)
+        lPath.append(route)
+        paths["launcher"] = lPath
+        showLauncher = true
     }
 
     func clearAllPaths() {
@@ -269,16 +274,6 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     func maybeEditInstance(of type: InstanceType, _ instance: Instance?) {
         if let i = instance {
             goToEditInstance(of: type, i.id)
-        }
-    }
-
-    func applyPendingRoute() {
-        if let route = pendingSettingsRoute {
-            var lPath = paths["launcher"] ?? NavigationPath()
-            lPath.append(SettingsRoute.services)
-            lPath.append(route)
-            paths["launcher"] = lPath
-            pendingSettingsRoute = nil
         }
     }
 
@@ -484,16 +479,32 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
     }
 
     func navigateToTab(_ tab: TabItem) {
-        let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
-        let visibleKeys = visibleTabs.map { $0.key }
+        let selectable = directlySelectableTabs().contains(where: { $0.key == tab.key })
 
         DispatchQueue.main.async {
-            if visibleKeys.contains(tab.key) {
+            if selectable {
                 self.closeOverlay()
                 self.selectedTab = AnyTabItem(item: tab)
             } else {
                 self.openOverlay(tab)
             }
+        }
+    }
+
+    func directlySelectableTabs() -> [TabItem] {
+        let config = tabManager.tabConfiguration.value
+        if usesSidebar {
+            return config.visibleTabs + config.drawerTabs
+        }
+        return Array(config.visibleTabs.prefix(Self.compactTabLimit))
+    }
+
+    func selectTab(key: String) {
+        if key == "launcher" {
+            showLauncher = true
+        } else if let match = directlySelectableTabs().first(where: { $0.key == key }) {
+            showLauncher = false
+            selectedTab = AnyTabItem(item: match)
         }
     }
 
@@ -564,8 +575,7 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                 let instanceId = (userInfo[NotificationConstants.shared.EXTRA_INSTANCE_ID] as? String).flatMap { Int64($0) }
                 let episodeId = (userInfo[NotificationConstants.shared.EXTRA_EPISODE_ID] as? String).flatMap { Int64($0) }
 
-                var calPath = NavigationPath()
-                calPath.append(MediaRoute.details(
+                let route = MediaRoute.details(
                     arrId: itemId,
                     tmdbId: tmdbId,
                     tvdbId: nil,
@@ -573,8 +583,11 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
                     requestType: nil,
                     instanceId: instanceId,
                     episodeId: episodeId
-                ))
-                paths[TabItemStandard.calendar.key] = calPath
+                )
+                // Queued after navigateToTab's async switch so it lands on the calendar's stack, in the bar or in More.
+                DispatchQueue.main.async {
+                    self.push(route)
+                }
             }
         case NotificationConstants.shared.ACTION_OPEN_DOWNLOADS:
             openDownloadsTab()
@@ -620,16 +633,6 @@ class NavigationManager: NSObject, ObservableObject, UNUserNotificationCenterDel
 
     func tabKey(for type: InstanceType) -> String {
         tabFor(type).key
-    }
-
-    func shouldShowDrawerButton(for tabKey: String) -> Bool {
-        guard UIDevice.current.userInterfaceIdiom == .phone else { return false }
-        guard !showLauncher else { return false }
-        let visibleTabs = tabManager.tabConfiguration.value.visibleTabs
-        guard visibleTabs.contains(where: { $0.key == tabKey }) else { return false }
-        guard selectedTab.key == tabKey else { return false }
-        guard (paths[tabKey]?.isEmpty ?? true) else { return false }
-        return true
     }
 }
 

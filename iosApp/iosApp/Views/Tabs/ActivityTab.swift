@@ -17,7 +17,6 @@ struct ActivityTab: View {
 struct ActivityTabContent: View {
     
     @StateObject private var viewModel = ActivityQueueViewModelS()
-    @EnvironmentObject private var navigationManager: NavigationManager
     
     @State private var selectedItem: IdentifiableQueueItem? = nil
     
@@ -56,16 +55,6 @@ struct ActivityTabContent: View {
         .navigationTitle(titleText)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.activity.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
-            }
-
             ToolbarItem(placement: .primaryAction) {
                 ActivityFilterMenu(
                     selectedTab: viewModel.uiState.selectedTab,

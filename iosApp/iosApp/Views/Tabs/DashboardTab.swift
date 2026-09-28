@@ -103,16 +103,6 @@ struct DashboardTabContent: View {
         }
         .animation(.easeInOut(duration: 0.3), value: toastMessage != nil)
         .toolbar {
-            if !viewModel.isEditing && navigationManager.shouldShowDrawerButton(for: TabItemStandard.dashboard.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
-            }
-
             if viewModel.isEditing {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(MR.strings().close.localized()) {

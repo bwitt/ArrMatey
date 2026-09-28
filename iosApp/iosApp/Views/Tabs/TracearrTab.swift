@@ -152,14 +152,6 @@ struct TracearrTabContent: View {
                     )
                     .menuIndicator(.hidden)
                 }
-            } else if navigationManager.shouldShowDrawerButton(for: TabItemStandard.tracearr.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
             }
         }
     }

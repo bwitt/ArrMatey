@@ -66,7 +66,7 @@ struct NavigationPageView: View {
                                 HStack(spacing: 6) {
                                     Text(MR.strings().navigation_items_selected.localized())
                                         .font(.headline)
-                                    Text("\(preferences.bottomTabItems.count) / 5")
+                                    Text("\(preferences.bottomTabItems.count) / \(NavigationManager.compactTabLimit)")
                                         .font(.caption.bold())
                                         .foregroundColor(.themePrimary)
                                 }
@@ -92,7 +92,7 @@ struct NavigationPageView: View {
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 8)], spacing: 8) {
                                 ForEach(allStandardTabs, id: \.key) { tab in
                                     let isSelected = visibleTabKeys.contains(tab.key)
-                                    let canSelect = isSelected || visibleTabKeys.count < 5
+                                    let canSelect = isSelected || visibleTabKeys.count < NavigationManager.compactTabLimit
 
                                     Button {
                                         withAnimation(.easeInOut(duration: 0.2)) {
@@ -316,7 +316,7 @@ struct NavigationPageView: View {
 
     private func addTab(tab: TabItemStandard) {
         var visible = visibleTabKeys
-        guard visible.count < 5, !visible.contains(tab.key) else { return }
+        guard visible.count < NavigationManager.compactTabLimit, !visible.contains(tab.key) else { return }
         visible.append(tab.key)
         var hidden = preferences.tabPreferences.orderedHiddenKeys as [String]
         hidden.removeAll { $0 == tab.key }

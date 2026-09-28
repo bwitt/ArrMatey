@@ -17,7 +17,6 @@ struct ProwlarrTab: View {
 struct ProwlarrTabContent: View {
     @State private var selectedSegment = 0
     @StateObject private var viewModel = ProwlarrIndexersViewModelS()
-    @EnvironmentObject private var navigationManager: NavigationManager
     
     var body: some View {
         VStack(spacing: 0) {
@@ -37,16 +36,6 @@ struct ProwlarrTabContent: View {
         }
         .navigationTitle(MR.strings().prowlarr.localized())
         .toolbar {
-            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.prowlarr.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
-            }
-
             if selectedSegment == 0 {
                 ToolbarItem(placement: .primaryAction) {
                     IndexerSortMenu(
