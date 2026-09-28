@@ -102,4 +102,8 @@ class DashboardViewModelS: ObservableObject {
     func shuffleQuickPick() {
         viewModel.shuffleQuickPick()
     }
+
+    func loadNextDiscoverPage(category: DiscoverCategory) {
+        viewModel.loadNextDiscoverPage(category: category)
+    }
 }

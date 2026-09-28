@@ -258,7 +258,10 @@ struct DashboardTabContent: View {
                         onMediaRequestClick: { item in
                             selectedMediaForRequest = item
                         },
-                        visibleCategories: viewModel.discoverSectionPreferences.visibleCategories
+                        visibleCategories: viewModel.discoverSectionPreferences.visibleCategories,
+                        onLoadMore: { category in
+                            viewModel.loadNextDiscoverPage(category: category)
+                        }
                     ) {
                         viewModel.removeCard(card: card)
                     }
@@ -375,6 +378,7 @@ struct DashboardCardWrapper: View {
     var onShuffleQuickPick: (() -> Void)? = nil
     var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
     var visibleCategories: [DiscoverCategory] = []
+    var onLoadMore: ((DiscoverCategory) -> Void)? = nil
     let onRemove: () -> Void
 
     var body: some View {
@@ -392,7 +396,8 @@ struct DashboardCardWrapper: View {
                 onSeerrIssuesStatClick: onSeerrIssuesStatClick,
                 onShuffleQuickPick: onShuffleQuickPick,
                 onMediaRequestClick: onMediaRequestClick,
-                visibleCategories: visibleCategories
+                visibleCategories: visibleCategories,
+                onLoadMore: onLoadMore
             )
             .padding(12)
             .background(Color(UIColor.systemBackground).midpoint(with: Color(UIColor.secondarySystemBackground)))
@@ -426,6 +431,7 @@ struct DashboardCardView: View {
     var onShuffleQuickPick: (() -> Void)? = nil
     var onMediaRequestClick: ((DiscoverResult) -> Void)? = nil
     var visibleCategories: [DiscoverCategory] = []
+    var onLoadMore: ((DiscoverCategory) -> Void)? = nil
 
     @EnvironmentObject private var navigationManager: NavigationManager
 
@@ -459,7 +465,7 @@ struct DashboardCardView: View {
                     },
                     onLoadMore: { category in
                         if !isEditing {
-                            viewModel.loadNextDiscoverPage(category: category)
+                            onLoadMore?(category)
                         }
                     }
                 )
