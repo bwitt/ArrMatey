@@ -132,16 +132,6 @@ struct DownloadsTab: View {
                 }
             }
         } else {
-            if navigation.shouldShowDrawerButton(for: TabItemStandard.downloads.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigation.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
-            }
-
             ToolbarItem(placement: .primaryAction) {
                 DownloadQueueFilterMenu(
                     filterState: viewModel.filterState,

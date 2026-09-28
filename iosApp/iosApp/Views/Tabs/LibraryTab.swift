@@ -555,31 +555,12 @@ struct LibraryTabContent: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if libraryViewModel.arrInstances.isEmpty || selectedInstance == nil {
-            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.library.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
-            }
-        } else if !libraryViewModel.isInSelectionMode {
-            if navigationManager.shouldShowDrawerButton(for: TabItemStandard.library.key) {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        navigationManager.showLauncher = true
-                    } label: {
-                        Image(systemName: "line.3.horizontal")
-                    }
-                }
-            }
-
+        let hasInstance = !libraryViewModel.arrInstances.isEmpty && selectedInstance != nil
+        if hasInstance && !libraryViewModel.isInSelectionMode {
             if uiState is ArrLibrarySuccess {
                 toolbarViewOptions
             }
-        } else {
+        } else if hasInstance {
             ToolbarItem(placement: .topBarLeading) {
                 Button(MR.strings().close.localized()) {
                     libraryViewModel.exitSelectionMode()

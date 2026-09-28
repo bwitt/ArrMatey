@@ -101,16 +101,6 @@ struct CalendarTabContent: View {
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if navigationManager.shouldShowDrawerButton(for: TabItemStandard.calendar.key) {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    navigationManager.showLauncher = true
-                } label: {
-                    Image(systemName: "line.3.horizontal")
-                }
-            }
-        }
-
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button(action: {
                 viewModel.toggleViewMode()

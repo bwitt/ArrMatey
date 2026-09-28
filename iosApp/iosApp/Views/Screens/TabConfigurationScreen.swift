@@ -296,7 +296,7 @@ struct TabDropDelegate: DropDelegate {
                 }
             }
 
-            if mutBottomTabs.count > 5 {
+            if mutBottomTabs.count > NavigationManager.compactTabLimit {
                 let extra = mutBottomTabs.removeLast()
                 mutDrawerTabs.insert(extra, at: 0)
             }

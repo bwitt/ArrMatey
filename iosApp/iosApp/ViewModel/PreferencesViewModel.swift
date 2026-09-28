@@ -93,6 +93,21 @@ class PreferencesViewModel: ObservableObject {
         preferenceStore.updateTabPreferences(tabPreferences: preferences)
     }
 
+    // Moves bottom tabs past `limit` to the front of the drawer.
+    func trimBottomTabs(to limit: Int) {
+        let store = preferenceStore
+        Task {
+            guard let prefs = await store.tabPreferences.firstValue() else { return }
+            let visible = prefs.orderedVisibleKeys as [String]
+            guard visible.count > limit else { return }
+            store.updateTabPreferences(tabPreferences: TabPreferences(
+                orderedVisibleKeys: Array(visible.prefix(limit)),
+                orderedHiddenKeys: Array(visible.dropFirst(limit)) + (prefs.orderedHiddenKeys as [String]),
+                orderedRemovedKeys: prefs.orderedRemovedKeys as [String]
+            ))
+        }
+    }
+
     func saveNavigationLayout(visible: [TabItem], hidden: [TabItem], removed: [TabItem]) {
         let newPrefs = TabPreferences(
             orderedVisibleKeys: visible.map { $0.key },
