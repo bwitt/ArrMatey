@@ -7,6 +7,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteEpisodeBody
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
@@ -19,7 +20,6 @@ import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.SonarrHistoryResponse
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.networking.NetworkResult
-import com.dnfapps.networking.onSuccess
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
 
@@ -30,18 +30,9 @@ class SonarrClient(
     ArrClient {
     override suspend fun getLibrary(): NetworkResult<List<ArrSeries>> =
         get<List<ArrSeries>>("series")
-            .onSuccess { shows ->
+            .map { shows ->
                 shows.map { series ->
-                    series.copy(
-                        images =
-                            series.images.map { image ->
-                                if (image.remoteUrl?.startsWith("/") == true) {
-                                    image.copy(remoteUrl = "$baseUrl${image.remoteUrl}")
-                                } else {
-                                    image
-                                }
-                            },
-                    )
+                    series.withLocalImages(instance.url).copy(instanceId = instance.id)
                 }
             }
 
@@ -129,12 +120,56 @@ class SonarrClient(
     ): NetworkResult<List<SonarrHistoryItem>> =
         get<SonarrHistoryResponse>(
             "history",
-            mapOf(
+            mapOf<String, Any>(
                 "page" to page,
                 "pageSize" to pageSize,
                 "episodeId" to id,
+                "includeSeries" to true,
+                "includeEpisode" to true,
             ),
-        ).map { it.records }
+        ).map { response ->
+            response.records.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                    series = it.series?.withLocalImages(instance.url),
+                    episode =
+                        it.episode?.copy(
+                            images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
+                            series = it.series?.withLocalImages(instance.url),
+                        ),
+                )
+            }
+        }
+
+    override suspend fun getHistory(
+        page: Int,
+        pageSize: Int,
+    ): NetworkResult<List<HistoryItem>> =
+        get<SonarrHistoryResponse>(
+            "history",
+            mapOf<String, Any>(
+                "page" to page,
+                "pageSize" to pageSize,
+                "includeSeries" to true,
+                "includeEpisode" to true,
+            ),
+        ).map { response ->
+            response.records.map {
+                it.copy(
+                    instanceId = instance.id,
+                    instanceName = instance.label,
+                    instanceType = instance.type,
+                    series = it.series?.withLocalImages(instance.url),
+                    episode =
+                        it.episode?.copy(
+                            images = it.episode.images.map { img -> img.rebuildWithLocalUrls(instance.url) },
+                            series = it.series?.withLocalImages(instance.url),
+                        ),
+                )
+            }
+        }
 
     override suspend fun performAutomaticSearch(id: Long): NetworkResult<CommandResponse> = post("command", CommandPayload.Series(id))
 
