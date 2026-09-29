@@ -297,22 +297,6 @@ class ActivityQueueViewModel(
                                 instanceType = instType,
                             )
                         }
-
-                        else -> {
-                            DownloadedMediaItem(
-                                id = "history_${instId}_${hist.id}",
-                                title = hist.displayTitle ?: "Unknown Media",
-                                subtitle = hist.sourceTitle,
-                                date = hist.date,
-                                quality = hist.quality?.qualityLabel,
-                                languages = hist.languages.mapNotNull { it.name },
-                                indexer = hist.indexerLabel,
-                                customFormats = hist.customFormats.mapNotNull { it.name },
-                                instanceId = instId,
-                                instanceName = instName,
-                                instanceType = instType,
-                            )
-                        }
                     }
                 }
 
