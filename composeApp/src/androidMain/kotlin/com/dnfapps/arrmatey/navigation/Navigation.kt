@@ -6,7 +6,6 @@ import androidx.navigation3.runtime.NavKey
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
-import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
@@ -182,21 +181,6 @@ fun Navigator<*>.toMovieReleases(
     instanceId: Long? = null,
 ) = nav().navigateTo(MediaScreen.MovieReleases(movieId, instanceId))
 
-fun Navigator<*>.toMovieFiles(
-    movie: ArrMovie,
-    instanceId: Long? = null,
-) = nav().navigateTo(MediaScreen.MovieFiles(movie, instanceId))
-
-fun Navigator<*>.toAuthorFiles(
-    author: Author,
-    instanceId: Long? = null,
-) = nav().navigateTo(MediaScreen.AuthorFiles(author, instanceId))
-
-fun Navigator<*>.toAudiobookFiles(
-    audiobook: Audiobook,
-    instanceId: Long? = null,
-) = nav().navigateTo(MediaScreen.AudiobookFiles(audiobook, instanceId))
-
 fun Navigator<*>.toEpisodeDetails(
     series: ArrSeries,
     episode: Episode,
@@ -236,6 +220,8 @@ fun Navigator<*>.toAudiobookRelease(
 fun Navigator<*>.toPersonDetails(personId: Long) = nav().navigateTo(MediaScreen.PersonDetails(personId))
 
 fun Navigator<*>.toPersonWebView(url: String) = nav().navigateTo(MediaScreen.PersonWebView(url))
+
+fun Navigator<*>.toTracearrUser(userRef: String) = nav().navigateTo(MediaScreen.TracearrUser(userRef))
 
 /**
  * Domain-specific navigation extensions for Settings feature set.

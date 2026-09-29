@@ -43,6 +43,17 @@ struct UnifiedMediaDetailsScreen: View {
         viewModel.buttonState.serviceName ?? (viewModel.resolvedRequestType == RequestType.movie ? "Radarr" : "Sonarr")
     }
 
+    private var seasonsOrFilesTabTitle: String {
+        switch viewModel.resolvedInstanceType {
+        case .sonarr:
+            return MR.strings().seasons_header.localized()
+        case .lidarr:
+            return MR.strings().albums_header.localized()
+        default:
+            return MR.strings().files.localized()
+        }
+    }
+
     init(
         arrId: Int64? = nil,
         tmdbId: Int64? = nil,
@@ -219,19 +230,24 @@ extension UnifiedMediaDetailsScreen {
                         }
                     }
 
-                    if hasSeasonsOrFiles || hasTracearr {
+                    if hasSeasonsOrFiles || success.hasArrId || hasTracearr {
                         Picker("View Mode", selection: $selectedTab) {
                             if hasSeasonsOrFiles {
-                                Text(!success.seasons.isEmpty ? MR.plurals().seasons.localized(2) : MR.strings().media.localized())
+                                Text(seasonsOrFilesTabTitle)
                                     .tag(DetailsTab.seasonsFiles)
                             }
                             Text(MR.strings().overview.localized())
                                 .tag(DetailsTab.overview)
+                            if success.hasArrId {
+                                Text(MR.strings().activity.localized())
+                                    .tag(DetailsTab.activity)
+                                    .badge(success.queueItems.count)
+                            }
                             if hasTracearr {
                                 Text(MR.strings().statistics.localized())
                                     .tag(DetailsTab.analytics)
-                                Text(MR.strings().history.localized())
-                                    .tag(DetailsTab.history)
+                                Text(MR.strings().streams_label.localized())
+                                    .tag(DetailsTab.steams)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -242,12 +258,39 @@ extension UnifiedMediaDetailsScreen {
                         seasonsAndFilesTabContent(success)
                     case .overview:
                         overviewTabContent(success)
+                    case .activity:
+                        VStack(alignment: .leading, spacing: 16) {
+                            if !success.queueItems.isEmpty {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text(MR.strings().activity.localized())
+                                        .font(.title3.bold())
+                                    ForEach(success.queueItems, id: \.id) { item in
+                                        ActivityQueueItem(item: item, onClick: { selectedQueueItem = item })
+                                    }
+                                }
+                            }
+
+                            Text(MR.strings().history.localized())
+                                .font(.title3.bold())
+
+                            if success.history.isEmpty {
+                                Text(MR.strings().no_history.localized())
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .center)
+                                    .padding(.vertical, 12)
+                            } else {
+                                ForEach(success.history, id: \.id) { historyItem in
+                                    HistoryItemView(item: historyItem)
+                                }
+                            }
+                        }
                     case .analytics:
                         TracearrAnalyticsSectionView(
                             uiState: tracearrState,
                             onWindowSelected: { viewModel.selectTracearrStatsWindow(window: $0) }
                         )
-                    case .history:
+                    case .steams:
                         TracearrHistorySectionView(
                             uiState: tracearrState,
                             onLoadMore: { viewModel.loadMoreTracearrHistory() },
@@ -281,7 +324,7 @@ extension UnifiedMediaDetailsScreen {
             previousHasSeasonsOrFiles = newValue
         }
         .onChange(of: hasTracearr) { _, newValue in
-            if !newValue && (selectedTab == .analytics || selectedTab == .history) {
+            if !newValue && (selectedTab == .analytics || selectedTab == .steams) {
                 withAnimation {
                     selectedTab = success.defaultTab
                 }

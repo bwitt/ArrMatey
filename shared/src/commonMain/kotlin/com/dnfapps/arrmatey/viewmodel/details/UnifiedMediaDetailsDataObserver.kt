@@ -11,6 +11,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.BazarrInstanceRepository
 import com.dnfapps.arrmatey.instances.repository.SeerrInstanceRepository
+import com.dnfapps.arrmatey.instances.repository.SonarrRepository
 import com.dnfapps.arrmatey.instances.usecase.GetTracearrInstanceRepositoryUseCase
 import com.dnfapps.arrmatey.model.UnifiedMediaDetailsUiState
 import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
@@ -177,6 +178,25 @@ class UnifiedMediaDetailsDataObserver(
                     bazarrRepository = if (showBazarr) bazarrRepo else null,
                 ).collect { rawState ->
                     if (rawState is UnifiedMediaDetailsUiState.Success) {
+                        val effectiveArrId = rawState.arrMedia?.id
+                        if (effectiveArrId != null && effectiveArrId != 0L && activeRepo != null) {
+                            launch {
+                                if (activeRepo is SonarrRepository) {
+                                    activeRepo.getSeriesHistory(effectiveArrId)
+                                } else {
+                                    activeRepo.getItemHistory(effectiveArrId)
+                                }
+                            }
+                            launch {
+                                activeRepo.observeItemHistory(effectiveArrId).collect { history ->
+                                    val current = uiStateFlow.value as? UnifiedMediaDetailsUiState.Success ?: return@collect
+                                    if (current.history != history) {
+                                        uiStateFlow.value = current.copy(history = history)
+                                    }
+                                }
+                            }
+                        }
+
                         onIsMonitoredUpdated(rawState.arrMedia?.monitored ?: false)
 
                         val resolvedTvdbLookupId =

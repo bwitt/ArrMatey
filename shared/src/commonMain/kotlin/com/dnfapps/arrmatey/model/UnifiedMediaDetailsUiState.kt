@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.arr.api.model.BookFile
 import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.Episode
 import com.dnfapps.arrmatey.arr.api.model.ExtraFile
+import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrackFile
 import com.dnfapps.arrmatey.arr.api.model.QueueItem
@@ -64,6 +65,7 @@ sealed interface UnifiedMediaDetailsUiState {
         val queueItems: List<QueueItem> = emptyList(),
         val combineSeerrArrMedia: Boolean = true,
         val bazarrDetailsIntegration: Boolean = true,
+        val history: List<HistoryItem> = emptyList(),
     ) : UnifiedMediaDetailsUiState {
         val missingInstances: List<Instance>
             get() = instancePresences.filter { !it.isPresent }.map { it.instance }
@@ -112,9 +114,10 @@ sealed interface UnifiedMediaDetailsUiState {
         fun getAvailableTabs(isTracearrConfigured: Boolean): List<UnifiedMediaDetailsTab> = buildList {
             if (hasSeasonsOrFiles) add(UnifiedMediaDetailsTab.SeasonsFiles)
             add(UnifiedMediaDetailsTab.Overview)
+            if (hasArrId) add(UnifiedMediaDetailsTab.Activity)
             if (hasTracearr(isTracearrConfigured)) {
                 add(UnifiedMediaDetailsTab.Analytics)
-                add(UnifiedMediaDetailsTab.History)
+                add(UnifiedMediaDetailsTab.Steams)
             }
         }
 
