@@ -5,6 +5,9 @@ import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.model.SeerrAuthType
 import com.dnfapps.networking.NetworkResult
+import dev.shivathapaa.logger.api.LoggerFactory
+import dev.shivathapaa.logger.core.LoggerConfig
+import dev.shivathapaa.logger.sink.TestSink
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -23,6 +26,13 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class SeerrInstanceRepositoryTest {
+    // The default sink calls android.util.Log, which host tests don't provide.
+    private val logger =
+        LoggerFactory.run {
+            install(LoggerConfig.Builder().addSink(TestSink()).build())
+            get("test")
+        }
+
     private val fakeInstance =
         Instance(
             id = 1,
@@ -56,7 +66,7 @@ class SeerrInstanceRepositoryTest {
                 headers = headersOf("Content-Type", "application/json"),
             )
         }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine))
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine), logger)
 
         repository.getLoggedInUser()
 
@@ -85,7 +95,7 @@ class SeerrInstanceRepositoryTest {
                 else -> error("Unexpected url: ${request.url.encodedPath}")
             }
         }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine))
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine), logger)
 
         val result = repository.loginLocal("user@test.com", "secret")
         assertTrue(result is NetworkResult.Success)
@@ -115,7 +125,7 @@ class SeerrInstanceRepositoryTest {
                 else -> error("Unexpected url: ${request.url.encodedPath}")
             }
         }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine))
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine), logger)
 
         val result = repository.loginPlex("valid-plex-token")
         assertTrue(result is NetworkResult.Success)
@@ -145,7 +155,7 @@ class SeerrInstanceRepositoryTest {
                 else -> error("Unexpected url: ${request.url.encodedPath}")
             }
         }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine))
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine), logger)
 
         val result = repository.loginJellyfin("jf_fan", "jf_pass")
         assertTrue(result is NetworkResult.Success)
@@ -194,7 +204,7 @@ class SeerrInstanceRepositoryTest {
                 else -> error("Unexpected url: ${request.url.encodedPath}")
             }
         }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine))
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine), logger)
 
         val initiate = repository.initiateJellyfinQuickConnect()
         assertTrue(initiate is NetworkResult.Success)
@@ -233,7 +243,7 @@ class SeerrInstanceRepositoryTest {
                 else -> error("Unexpected url: ${request.url.encodedPath}")
             }
         }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine))
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine), logger)
 
         repository.getLoggedInUser()
         assertNotNull(repository.loggedInUser.value)
@@ -273,7 +283,7 @@ class SeerrInstanceRepositoryTest {
                 else -> error("Unexpected url: ${request.url.encodedPath}")
             }
         }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine))
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient(mockEngine), logger)
 
         repository.refreshCounts()
 

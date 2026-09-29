@@ -7,12 +7,14 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestMediaDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 class MediaIssuePackageService(
     private val client: SeerrClient,
+    private val logger: Logger,
 ) {
     suspend fun enrichIssue(issue: Issue): MediaIssuePackage {
         val details =
@@ -39,8 +41,8 @@ class MediaIssuePackageService(
             .getMovieDetails(tmdbId)
             .onSuccess { movieDetails ->
                 details = movieDetails
-            }.onError { _, message, _ ->
-                println("Error fetching movie details: $message")
+            }.onError { code, message, cause ->
+                logger.error(cause) { "Error fetching movie details for $tmdbId: $message (code=$code)" }
             }
 
         return details
@@ -53,8 +55,8 @@ class MediaIssuePackageService(
             .getTvDetails(tmdbId)
             .onSuccess { tvDetails ->
                 details = tvDetails
-            }.onError { _, message, _ ->
-                println("Error fetching tv details: $message")
+            }.onError { code, message, cause ->
+                logger.error(cause) { "Error fetching tv details for $tmdbId: $message (code=$code)" }
             }
 
         return details

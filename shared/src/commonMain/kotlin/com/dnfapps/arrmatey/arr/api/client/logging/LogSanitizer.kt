@@ -12,7 +12,7 @@ private val SENSITIVE_HEADER_REGEX =
 private val SENSITIVE_JSON_REGEX =
     Regex("(?i)(\"(?:apikey|api_key|apiKey|token|password|pass|secret|auth)\"\\s*:\\s*)\"[^\"]*\"")
 
-internal fun sanitizeLogMessage(message: String): String {
+fun sanitizeLogMessage(message: String): String {
     if (message.isEmpty()) return message
 
     return message

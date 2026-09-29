@@ -219,7 +219,7 @@ class GlobalSearchUseCaseTest {
     @Test
     fun testBlankQueryEmitsEmptyList() = runBlocking {
         val fakeDao = FakeInstanceDao()
-        val instanceRepo = InstanceRepository(fakeDao)
+        val instanceRepo = InstanceRepository(fakeDao, logger)
         val mockFactory = MockHttpClientFactory(json) { MockEngine { respond("[]", HttpStatusCode.OK) } }
         val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
 
@@ -231,7 +231,7 @@ class GlobalSearchUseCaseTest {
     @Test
     fun testBothSonarrAndRadarrConfiguredExcludesSeerrMediaResults() = runBlocking {
         val fakeDao = FakeInstanceDao(listOf(sonarrInstance(1), radarrInstance(2), seerrInstance(3)))
-        val instanceRepo = InstanceRepository(fakeDao)
+        val instanceRepo = InstanceRepository(fakeDao, logger)
 
         val sonarrLookupJson =
             json.encodeToString(
@@ -345,7 +345,7 @@ class GlobalSearchUseCaseTest {
     @Test
     fun testOnlySonarrConfiguredIncludesSeerrMediaResults() = runBlocking {
         val fakeDao = FakeInstanceDao(listOf(sonarrInstance(1), seerrInstance(2)))
-        val instanceRepo = InstanceRepository(fakeDao)
+        val instanceRepo = InstanceRepository(fakeDao, logger)
 
         val sonarrLookupJson =
             json.encodeToString(
@@ -431,7 +431,7 @@ class GlobalSearchUseCaseTest {
     @Test
     fun testSearchCancellationAbortsPendingRequests() = runBlocking {
         val fakeDao = FakeInstanceDao(listOf(sonarrInstance(1)))
-        val instanceRepo = InstanceRepository(fakeDao)
+        val instanceRepo = InstanceRepository(fakeDao, logger)
 
         val requestStarted = CompletableDeferred<Unit>()
         val requestCancelled = CompletableDeferred<Unit>()
@@ -474,7 +474,7 @@ class GlobalSearchUseCaseTest {
     @Test
     fun testChaptarrSearchResultsIncludedInUniversalSearch() = runBlocking {
         val fakeDao = FakeInstanceDao(listOf(chaptarrInstance(10)))
-        val instanceRepo = InstanceRepository(fakeDao)
+        val instanceRepo = InstanceRepository(fakeDao, logger)
 
         val chaptarrLookupJson =
             """
