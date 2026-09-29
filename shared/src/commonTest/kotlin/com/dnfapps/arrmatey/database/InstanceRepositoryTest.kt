@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import dev.shivathapaa.logger.api.LoggerFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -12,6 +13,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class InstanceRepositoryTest {
+    private val logger = LoggerFactory.get("test")
+
     private val fakeDao =
         object : InstanceDao {
             private val instances = MutableStateFlow<List<Instance>>(emptyList())
@@ -97,7 +100,7 @@ class InstanceRepositoryTest {
             }
         }
 
-    private val repository = InstanceRepository(fakeDao)
+    private val repository = InstanceRepository(fakeDao, logger)
 
     @Test
     fun testCreateInstanceSuccess() = runTest {

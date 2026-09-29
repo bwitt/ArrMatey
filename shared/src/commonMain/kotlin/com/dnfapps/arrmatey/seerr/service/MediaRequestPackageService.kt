@@ -8,12 +8,14 @@ import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.ServiceDetails
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 
 class MediaRequestPackageService(
     private val client: SeerrClient,
+    private val logger: Logger,
 ) {
     suspend fun enrichMedia(request: MediaRequest): MediaRequestPackage = coroutineScope {
         val detailsDeferred =
@@ -56,8 +58,8 @@ class MediaRequestPackageService(
             .getMovieDetails(tmdbId)
             .onSuccess { movieDetails ->
                 details = movieDetails
-            }.onError { _, message, _ ->
-                println("Error fetching movie details: $message")
+            }.onError { code, message, cause ->
+                logger.error(cause) { "Error fetching movie details for $tmdbId: $message (code=$code)" }
             }
 
         return details
@@ -71,7 +73,7 @@ class MediaRequestPackageService(
             .onSuccess { tvDetails ->
                 details = tvDetails
             }.onError { code, message, cause ->
-                println("Error fetching tv details: $message, $code, $cause")
+                logger.error(cause) { "Error fetching tv details for $tmdbId: $message (code=$code)" }
             }
 
         return details
@@ -85,7 +87,7 @@ class MediaRequestPackageService(
             .onSuccess { radarrDetails ->
                 details = radarrDetails
             }.onError { code, message, cause ->
-                println("Error fetching radarr details: $message, $code, $cause")
+                logger.error(cause) { "Error fetching radarr details for server $serverId: $message (code=$code)" }
             }
 
         return details
@@ -99,7 +101,7 @@ class MediaRequestPackageService(
             .onSuccess { sonarrDetails ->
                 details = sonarrDetails
             }.onError { code, message, cause ->
-                println("Error fetching radarr details: $message, $code, $cause")
+                logger.error(cause) { "Error fetching sonarr details for server $serverId: $message (code=$code)" }
             }
 
         return details

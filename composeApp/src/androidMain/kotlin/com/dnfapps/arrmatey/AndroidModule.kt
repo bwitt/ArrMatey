@@ -68,7 +68,7 @@ val androidModule =
 
         // Others
         single<ImageLoader> {
-            ArrImageLoader(get(), get())
+            ArrImageLoader(get(), get(), get())
                 .imageLoader
         }
 

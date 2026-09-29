@@ -83,7 +83,7 @@ class InstanceManager(
         httpClient: HttpClient,
         logger: Logger,
     ): InstanceScopedRepository = when (instance.type) {
-        InstanceType.Seerr -> SeerrInstanceRepository(instance, httpClient)
+        InstanceType.Seerr -> SeerrInstanceRepository(instance, httpClient, logger)
         InstanceType.Prowlarr -> ProwlarrInstanceRepository(instance, httpClient)
         InstanceType.Bazarr -> BazarrInstanceRepository(instance, httpClient)
         InstanceType.Tracearr -> TracearrRepository(instance, httpClient)

@@ -5,6 +5,7 @@ import com.dnfapps.arrmatey.database.dao.InsertResult
 import com.dnfapps.arrmatey.database.dao.InstanceDao
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -16,6 +17,7 @@ import kotlinx.coroutines.withContext
 
 class InstanceRepository(
     private val instanceDao: InstanceDao,
+    private val logger: Logger,
 ) {
     fun observeAllInstances(): Flow<List<Instance>> = instanceDao.observeAllInstances()
 
@@ -88,7 +90,7 @@ class InstanceRepository(
             }
         }
     } catch (e: Exception) {
-        println("Error during creation: ${e.message}")
+        logger.error(e) { "Error updating instance ${instance.id}" }
         InsertResult.Error(e.message ?: "An error occurred")
     }
 

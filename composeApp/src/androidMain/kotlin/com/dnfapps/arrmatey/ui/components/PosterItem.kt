@@ -88,8 +88,7 @@ fun PosterItem(
         posterModel ?: rememberRemoteImageData(
             url = item.getPoster()?.remoteUrl,
             trim = false,
-            onError = { _, err ->
-                println(err.throwable.message)
+            onError = { _, _ ->
                 imageLoadError = true
             },
             onSuccess = { _, _ ->
@@ -208,8 +207,7 @@ fun PosterItem(
                 ?: rememberRemoteImageData(
                     url = item.fullPosterPath,
                     trim = false,
-                    onError = { _, err ->
-                        println(err.throwable.message)
+                    onError = { _, _ ->
                         imageLoadError = true
                     },
                     onSuccess = { _, _ ->
@@ -317,8 +315,7 @@ fun PosterItem(
             ?: rememberRemoteImageData(
                 url = item.fullPosterPath,
                 trim = false,
-                onError = { _, err ->
-                    println(err.throwable.message)
+                onError = { _, _ ->
                     imageLoadError = true
                 },
                 onSuccess = { _, _ ->

@@ -7,8 +7,11 @@ import com.dnfapps.arrmatey.instances.repository.ArrInstanceRepository
 import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import dev.shivathapaa.logger.api.Logger
 
-class UpdateMediaUseCase {
+class UpdateMediaUseCase(
+    private val logger: Logger,
+) {
     suspend operator fun invoke(
         item: ArrMedia,
         repository: ArrInstanceRepository,
@@ -51,7 +54,7 @@ class UpdateMediaUseCase {
                     }
                 }
             }.onError { code, message, cause ->
-                println("$code - $message - ${cause?.printStackTrace()}")
+                logger.error(cause) { "Error editing media ${item.id}: $message (code=$code)" }
             }
     }
 

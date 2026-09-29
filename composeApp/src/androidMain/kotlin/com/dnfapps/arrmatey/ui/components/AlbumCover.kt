@@ -62,8 +62,7 @@ fun AlbumCover(
             model =
             rememberRemoteImageData(
                 url = url,
-                onError = { _, err ->
-                    println(err.throwable.message)
+                onError = { _, _ ->
                     imageLoadError = true
                 },
                 onSuccess = { _, _ -> imageLoaded = true },

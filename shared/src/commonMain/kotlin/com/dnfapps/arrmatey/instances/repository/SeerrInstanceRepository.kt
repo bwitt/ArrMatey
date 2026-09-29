@@ -35,6 +35,7 @@ import com.dnfapps.networking.NetworkResult
 import com.dnfapps.networking.asSuccess
 import com.dnfapps.networking.onError
 import com.dnfapps.networking.onSuccess
+import dev.shivathapaa.logger.api.Logger
 import io.ktor.client.HttpClient
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -53,10 +54,11 @@ import kotlin.time.Clock
 class SeerrInstanceRepository(
     override val instance: Instance,
     httpClient: HttpClient,
+    logger: Logger,
 ) : InstanceScopedRepository {
     val client: SeerrClient = SeerrClientImpl(instance, httpClient)
-    private val mediaPackageService = MediaRequestPackageService(client)
-    private val issuePackageService = MediaIssuePackageService(client)
+    private val mediaPackageService = MediaRequestPackageService(client, logger)
+    private val issuePackageService = MediaIssuePackageService(client, logger)
 
     private val _loggedInUser = MutableStateFlow<SeerrUser?>(null)
     val loggedInUser: StateFlow<SeerrUser?> = _loggedInUser.asStateFlow()

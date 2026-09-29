@@ -271,7 +271,7 @@ val preferencesModule =
 
 val repositoryModule =
     module {
-        single { InstanceRepository(get()) }
+        single { InstanceRepository(get(), get()) }
         single { InstancePreferenceStoreRepository(get()) }
         single { InstanceManager(get(), get(), get(), get()) }
 
@@ -323,7 +323,7 @@ val useCaseModule =
         factory { DeleteSeasonFilesUseCase() }
         factory { ToggleMonitorUseCase() }
         factory { PerformAutomaticSearchUseCase() }
-        factory { UpdateMediaUseCase() }
+        factory { UpdateMediaUseCase(get()) }
         factory { DeleteMediaUseCase() }
         factory { GetEpisodeHistoryUseCase() }
         factory { DeleteEpisodeFileUseCase() }

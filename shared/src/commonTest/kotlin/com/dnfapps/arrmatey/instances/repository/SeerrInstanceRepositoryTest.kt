@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.instances.repository
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
+import dev.shivathapaa.logger.api.LoggerFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -17,6 +18,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class SeerrInstanceRepositoryTest {
+    private val logger = LoggerFactory.get("test")
+
     private val fakeInstance =
         Instance(
             id = 1,
@@ -47,7 +50,7 @@ class SeerrInstanceRepositoryTest {
                     )
                 }
             }
-        val repository = SeerrInstanceRepository(fakeInstance, httpClient)
+        val repository = SeerrInstanceRepository(fakeInstance, httpClient, logger)
 
         repository.getLoggedInUser()
 
