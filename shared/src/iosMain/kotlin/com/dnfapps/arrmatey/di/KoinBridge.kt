@@ -4,6 +4,7 @@ import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
 import com.dnfapps.arrmatey.arr.api.model.Episode
+import com.dnfapps.arrmatey.arr.api.model.QueueItem
 import com.dnfapps.arrmatey.arr.viewmodel.ActivityQueueViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.AddInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ArrInstanceDashboardViewModel
@@ -16,6 +17,7 @@ import com.dnfapps.arrmatey.arr.viewmodel.EditInstanceViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.EpisodeDetailsViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InteractiveSearchViewModel
+import com.dnfapps.arrmatey.arr.viewmodel.ManualImportViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MediaPreviewViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.ProwlarrIndexersViewModel
@@ -59,6 +61,8 @@ import org.koin.core.parameter.parametersOf
 
 object KoinBridge : KoinComponent {
     fun getActivityQueueViewModel(): ActivityQueueViewModel = getKoin().get()
+
+    fun getManualImportViewModel(item: QueueItem): ManualImportViewModel = getKoin().get { parametersOf(item) }
 
     fun getArrMediaViewModel(type: InstanceType): ArrMediaViewModel = getKoin().get { parametersOf(type) }
 
