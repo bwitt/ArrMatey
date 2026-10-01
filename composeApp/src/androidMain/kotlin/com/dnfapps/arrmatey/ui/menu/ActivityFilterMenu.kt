@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -65,6 +68,7 @@ fun ActivityFilterMenu(
     onHistoryStateFilterChanged: (HistoryStateFilter) -> Unit,
     selectedDownloadedInstanceId: Long? = null,
     onDownloadedInstanceChange: (Long?) -> Unit = {},
+    onOpenViewCustomization: (() -> Unit)? = null,
 ) {
     var showSheet by remember { mutableStateOf(false) }
 
@@ -124,23 +128,47 @@ fun ActivityFilterMenu(
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                         )
-                        if (isFiltered) {
-                            TextButton(
-                                onClick = {
-                                    when (selectedTab) {
-                                        ActivityTabSegment.Activity -> onInstanceChange(null)
-                                        ActivityTabSegment.History -> {
-                                            onHistoryInstanceChange(null)
-                                            onHistoryStateFilterChanged(HistoryStateFilter.All)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            onOpenViewCustomization?.let { openCustomization ->
+                                OutlinedButton(
+                                    onClick = {
+                                        openCustomization()
+                                        showSheet = false
+                                    },
+                                ) {
+                                    Icon(
+                                        Icons.Default.Palette,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                    Spacer(Modifier.size(8.dp))
+                                    Text(
+                                        text = mokoString(MR.strings.view_customization),
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                }
+                            }
+                            if (isFiltered) {
+                                TextButton(
+                                    onClick = {
+                                        when (selectedTab) {
+                                            ActivityTabSegment.Activity -> onInstanceChange(null)
+                                            ActivityTabSegment.History -> {
+                                                onHistoryInstanceChange(null)
+                                                onHistoryStateFilterChanged(HistoryStateFilter.All)
+                                            }
+                                            ActivityTabSegment.Downloaded -> onDownloadedInstanceChange(null)
                                         }
-                                        ActivityTabSegment.Downloaded -> onDownloadedInstanceChange(null)
-                                    }
-                                },
-                            ) {
-                                Text(
-                                    text = mokoString(MR.strings.clear_all),
-                                    style = MaterialTheme.typography.labelMedium,
-                                )
+                                    },
+                                ) {
+                                    Text(
+                                        text = mokoString(MR.strings.clear_all),
+                                        style = MaterialTheme.typography.labelMedium,
+                                    )
+                                }
                             }
                         }
                     }

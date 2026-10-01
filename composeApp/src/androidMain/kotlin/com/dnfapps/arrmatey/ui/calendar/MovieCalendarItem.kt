@@ -49,6 +49,7 @@ fun MovieCalendarItem(
     movie: ArrMovie,
     instances: List<Instance>,
     useFullColorCards: Boolean = false,
+    posterModel: Any? = null,
     onNavigate: (Long?) -> Unit,
 ) {
     val associatedColor = movie.associatedType?.associatedColor ?: ArrOrange
@@ -113,7 +114,11 @@ fun MovieCalendarItem(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    PosterItem(movie, Modifier.width(50.dp))
+                    PosterItem(
+                        item = movie,
+                        modifier = Modifier.width(50.dp),
+                        posterModel = posterModel,
+                    )
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(2.dp),
