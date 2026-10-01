@@ -9,7 +9,6 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
@@ -146,6 +145,5 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         get<InstanceManager>().cleanup()
-        get<ActivityQueueService>().cleanup()
     }
 }
