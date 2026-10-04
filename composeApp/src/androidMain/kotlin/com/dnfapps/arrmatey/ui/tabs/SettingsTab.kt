@@ -25,6 +25,7 @@ import com.dnfapps.arrmatey.navigation.toUserInterface
 import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.rememberNavEntryDecorators
 import com.dnfapps.arrmatey.ui.screens.AddEditCustomWebpageScreen
 import com.dnfapps.arrmatey.ui.screens.AddEditDownloadClientScreen
 import com.dnfapps.arrmatey.ui.screens.AddInstanceScreen
@@ -50,6 +51,7 @@ fun SettingsTabNavHost(
     NavDisplay(
         backStack = navigation.backStack,
         onBack = { navigation.popBackStack() },
+        entryDecorators = rememberNavEntryDecorators(),
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },

@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.rememberNavEntryDecorators
 import com.dnfapps.arrmatey.ui.components.navigation.tracearrNavEntries
 import org.koin.compose.koinInject
 
@@ -30,6 +31,7 @@ fun TracearrTab(
     NavDisplay(
         backStack = navigation.backStack,
         onBack = { navigation.popBackStack() },
+        entryDecorators = rememberNavEntryDecorators(),
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },

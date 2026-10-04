@@ -105,6 +105,20 @@ fun List<ArrMedia>.mergeWithLibrary(library: List<ArrMedia>): List<ArrMedia> = t
     match ?: item
 }
 
+// Arr lookups embed the library record for owned items, so a deleted item keeps its old id until searched again.
+fun ArrMedia.withoutStaleLibraryId(libraryIds: Set<Long>): ArrMedia {
+    val libraryId = id?.takeIf { it != 0L } ?: return this
+    if (libraryId in libraryIds) return this
+    return when (this) {
+        is ArrMovie -> copy(id = null, monitored = false)
+        is ArrSeries -> copy(id = null, monitored = false)
+        is Arrtist -> copy(id = null, monitored = false)
+        is Author -> copy(id = null, monitored = false)
+        is Audiobook -> copy(id = null, monitored = false)
+        is SearchAudiobook, is MockMedia -> this
+    }
+}
+
 internal fun formatAirTime(
     airTime: String?,
     is24Hour: Boolean = is24Hour(),

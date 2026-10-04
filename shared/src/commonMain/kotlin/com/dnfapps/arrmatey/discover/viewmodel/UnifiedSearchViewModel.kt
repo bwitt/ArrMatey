@@ -10,9 +10,11 @@ import com.dnfapps.arrmatey.datastore.PreferencesStore
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
+import com.dnfapps.arrmatey.extensions.withoutStaleLibraryId
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
+import com.dnfapps.networking.asSuccess
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -53,16 +55,23 @@ class UnifiedSearchViewModel(
     val searchState: StateFlow<List<SearchResult>> =
         combine(_searchState, librariesByInstance) { results, libraryMap ->
             val allLibraries = libraryMap.values.flatten()
+            // libraryMap can't tell "not loaded" from "empty", so read loaded ids straight from the repos.
+            val libraryIdsByInstance =
+                instanceManager.getAllArrRepositories().associate { repo ->
+                    repo.instance.id to repo.library.value?.asSuccess()?.data?.mapNotNullTo(HashSet()) { it.id }
+                }
             results.map { result ->
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
                         val instanceLib = result.instanceId?.let { libraryMap[it] } ?: emptyList()
-                        if (instanceLib.isNotEmpty()) {
-                            val merged = listOf(result.media).mergeWithLibrary(instanceLib).first()
-                            result.copy(media = merged)
-                        } else {
-                            result
-                        }
+                        val merged =
+                            if (instanceLib.isNotEmpty()) {
+                                listOf(result.media).mergeWithLibrary(instanceLib).first()
+                            } else {
+                                result.media
+                            }
+                        val libraryIds = result.instanceId?.let { libraryIdsByInstance[it] }
+                        result.copy(media = libraryIds?.let { merged.withoutStaleLibraryId(it) } ?: merged)
                     }
 
                     is SearchResult.SeerrMediaResult -> {

@@ -8,7 +8,10 @@ import com.dnfapps.arrmatey.arr.api.model.MonitorNewItems
 import com.dnfapps.arrmatey.arr.api.model.SeriesType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class MediaExtensionsTest {
     @Test
@@ -37,6 +40,33 @@ class MediaExtensionsTest {
 
         assertEquals(1, merged.size)
         assertEquals(99L, merged[0].id)
+    }
+
+    @Test
+    fun testWithoutStaleLibraryId_KeepsIdStillInLibrary() {
+        val series = createSeries(title = "Kept", tvdbId = 1, tmdbId = 1L, id = 99L)
+
+        val result = series.withoutStaleLibraryId(setOf(99L))
+
+        assertEquals(99L, result.id)
+        assertTrue(result.monitored)
+    }
+
+    @Test
+    fun testWithoutStaleLibraryId_ClearsDeletedId() {
+        val series = createSeries(title = "Deleted", tvdbId = 1, tmdbId = 1L, id = 99L)
+
+        val result = series.withoutStaleLibraryId(emptySet())
+
+        assertNull(result.id)
+        assertFalse(result.monitored)
+    }
+
+    @Test
+    fun testWithoutStaleLibraryId_IgnoresItemsWithoutId() {
+        val series = createSeries(title = "New", tvdbId = 1, tmdbId = 1L, id = null)
+
+        assertSame(series, series.withoutStaleLibraryId(emptySet()))
     }
 
     private fun createSeries(
