@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.discover.model.DiscoverCategory
 import com.dnfapps.arrmatey.discover.model.SearchResult
 import com.dnfapps.arrmatey.discover.usecase.GlobalSearchUseCase
 import com.dnfapps.arrmatey.extensions.mergeWithLibrary
+import com.dnfapps.arrmatey.extensions.withoutStaleLibraryId
 import com.dnfapps.arrmatey.instances.model.Instance
 import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.instances.repository.InstanceManager
@@ -172,11 +173,16 @@ class DiscoverViewModel(
 
     val searchState: StateFlow<List<SearchResult>> =
         combine(_searchState, allLibraries) { results, libraries ->
+            val libraryIdsByInstance =
+                instanceManager.getAllArrRepositories().associate { repo ->
+                    repo.instance.id to repo.library.value?.asSuccess()?.data?.mapNotNullTo(HashSet()) { it.id }
+                }
             results.map { result ->
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
                         val merged = listOf(result.media).mergeWithLibrary(libraries).first()
-                        result.copy(media = merged)
+                        val libraryIds = result.instanceId?.let { libraryIdsByInstance[it] }
+                        result.copy(media = libraryIds?.let { merged.withoutStaleLibraryId(it) } ?: merged)
                     }
 
                     is SearchResult.SeerrMediaResult -> {
