@@ -54,6 +54,8 @@ enum class HistoryEventType(
     TrackFileImported(MR.strings.track_file_imported),
     TrackFileAdded(MR.strings.audiobook_file_added),
     TrackFileDelete(MR.strings.track_file_deleted),
+    TrackFileRenamed(MR.strings.track_file_renamed),
+    TrackFileRetagged(MR.strings.track_file_retagged),
     AlbumFolderImported(MR.strings.series_folder_imported),
     ArtistFolderImported(MR.strings.series_folder_imported),
     AlbumDeleted(MR.strings.deleted),
@@ -101,6 +103,8 @@ object HistoryEventTypeSerializer : KSerializer<HistoryEventType> {
             "trackfileimported" -> HistoryEventType.TrackFileImported
             "trackfileadded" -> HistoryEventType.TrackFileAdded
             "trackfiledeleted" -> HistoryEventType.TrackFileDelete
+            "trackfilerenamed" -> HistoryEventType.TrackFileRenamed
+            "trackfileretagged" -> HistoryEventType.TrackFileRetagged
             "albumfolderimported" -> HistoryEventType.AlbumFolderImported
             "artistfolderimported" -> HistoryEventType.ArtistFolderImported
             "albumdeleted" -> HistoryEventType.AlbumDeleted

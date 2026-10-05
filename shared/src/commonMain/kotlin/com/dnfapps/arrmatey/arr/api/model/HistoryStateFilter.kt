@@ -66,6 +66,7 @@ enum class HistoryStateFilter(
                     HistoryEventType.MovieFileRenamed,
                     HistoryEventType.EpisodeFileRenamed,
                     HistoryEventType.BookFileRenamed,
+                    HistoryEventType.TrackFileRenamed,
                     HistoryEventType.Moved,
                 )
         Ignored -> eventType == HistoryEventType.DownloadIgnored

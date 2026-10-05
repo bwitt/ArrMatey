@@ -442,6 +442,8 @@
     <string name="album_import_incomplete">Album Import Incomplete</string>
     <string name="book_import_incomplete">Book Import Incomplete</string>
     <string name="track_file_deleted">Track File Deleted</string>
+    <string name="track_file_renamed">Track File Renamed</string>
+    <string name="track_file_retagged">Track File Retagged</string>
 
     <!-- Errors -->
     <string name="error">Error</string>
