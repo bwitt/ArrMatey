@@ -1,0 +1,15 @@
+### New Features
+* Alphabetical Fast Scroll: Added an alphabetical index scrollbar in Library views when sorting by title for quick navigation.
+* Media Details Activity History: Added a dedicated "History" tab to media details across all media types (Movies, Series, Artists, Authors, Audiobooks).
+* Manual Queue Import: Added support for manually importing blocked queue items directly from the Activity Queue.
+* Collapsed Season Quick Search: Added quick search actions directly onto collapsed season headers in series details.
+* Floating Navigation Bar Customization: Added a UI preference to hide labels on selected items in the floating navigation bar.
+
+### Improvements
+* Authenticated Media Covers: Arr images across all media types now load through authenticated API-key routes with header auth on Android and iOS.
+* Log Privacy & Security: Redacted API keys and sensitive tokens in debug logs.
+* Backup & Restore Enhancements: Automatically refreshes services when restoring a backup and includes library UI customizations in export preferences.
+* View Customization Polish: Reorganized and refined view customization options in settings.
+
+### Bug Fixes
+* Download Client Polling & Deluge: Fixed download client polling resilience and Deluge response deserialization.
