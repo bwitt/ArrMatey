@@ -1,4 +1,4 @@
-ArrMatey is an all-in-one mobile companion for your home server media stack. Support for Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, Prowlarr, and Seerr is included with many more coming!
+ArrMatey is an all-in-one mobile companion for your home server media stack. Support for Sonarr, Radarr, Lidarr, Bookshelf, Listenarr, Prowlarr, Seerr, Bazarr, and Tracearr is included, along with download clients (qBittorrent, SABnzbd, Deluge, and Transmission) with many more coming!
 
 <b>Combined Dashboard</b>
 <li>
@@ -11,7 +11,7 @@ ArrMatey is an all-in-one mobile companion for your home server media stack. Sup
 <b>Multi-Instance Support</b>
 <li>
 <ul>Manage multiple Sonarr, Radarr, Lidarr, Bookshelf, and Listenarr instances</ul>
-<ul>Seamless integration with Prowlarr for indexer management and Seerr for requests</ul>
+<ul>Seamless integration with Prowlarr for indexer management, Seerr for requests, Bazarr for subtitles, and Tracearr for stream monitoring</ul>
 <ul>Quick instance switching and custom instance labels</ul>
 </li>
 
