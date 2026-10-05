@@ -406,6 +406,13 @@
     <string name="book_file_imported">Book File Imported</string>
     <string name="book_file_deleted">Book File Deleted</string>
     <string name="book_file_renamed">Book File Renamed</string>
+    <string name="artist_folder_imported">Artist Folder Imported</string>
+    <string name="track_file_imported">Track File Imported</string>
+    <string name="track_file_deleted">Track File Deleted</string>
+    <string name="track_file_renamed">Track File Renamed</string>
+    <string name="track_file_retagged">Track File Retagged</string>
+    <string name="album_import_incomplete">Album Import Incomplete</string>
+    <string name="download_imported">Download Imported</string>
     <string name="audiobook_file_deleted">File Delete</string>
     <string name="audiobook_file_added">File Added</string>
     <string name="history_state_imported">Imported</string>

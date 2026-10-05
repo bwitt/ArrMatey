@@ -3,6 +3,8 @@ package com.dnfapps.arrmatey.arr.api.model
 import com.dnfapps.arrmatey.shared.*
 import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.shared.added
+import com.dnfapps.arrmatey.shared.album_import_incomplete
+import com.dnfapps.arrmatey.shared.artist_folder_imported
 import com.dnfapps.arrmatey.shared.audiobook_file_added
 import com.dnfapps.arrmatey.shared.audiobook_file_deleted
 import com.dnfapps.arrmatey.shared.book_file_deleted
@@ -11,6 +13,7 @@ import com.dnfapps.arrmatey.shared.book_file_renamed
 import com.dnfapps.arrmatey.shared.download_failed
 import com.dnfapps.arrmatey.shared.download_folder_imported
 import com.dnfapps.arrmatey.shared.download_ignored
+import com.dnfapps.arrmatey.shared.download_imported
 import com.dnfapps.arrmatey.shared.episode_file_deleted
 import com.dnfapps.arrmatey.shared.episode_file_renamed
 import com.dnfapps.arrmatey.shared.grabbed
@@ -18,6 +21,10 @@ import com.dnfapps.arrmatey.shared.movie_file_deleted
 import com.dnfapps.arrmatey.shared.movie_file_renamed
 import com.dnfapps.arrmatey.shared.movie_folder_imported
 import com.dnfapps.arrmatey.shared.series_folder_imported
+import com.dnfapps.arrmatey.shared.track_file_deleted
+import com.dnfapps.arrmatey.shared.track_file_imported
+import com.dnfapps.arrmatey.shared.track_file_renamed
+import com.dnfapps.arrmatey.shared.track_file_retagged
 import com.dnfapps.arrmatey.shared.unknown
 import dev.icerock.moko.resources.StringResource
 import kotlinx.serialization.SerialName
@@ -65,6 +72,29 @@ enum class HistoryEventType(
 
     @SerialName("bokFileDeleted")
     BookFileDelete(MR.strings.book_file_deleted),
+
+    // Lidarr
+
+    @SerialName("artistFolderImported")
+    ArtistFolderImported(MR.strings.artist_folder_imported),
+
+    @SerialName("trackFileImported")
+    TrackFileImported(MR.strings.track_file_imported),
+
+    @SerialName("trackFileDeleted")
+    TrackFileDeleted(MR.strings.track_file_deleted),
+
+    @SerialName("trackFileRenamed")
+    TrackFileRenamed(MR.strings.track_file_renamed),
+
+    @SerialName("trackFileRetagged")
+    TrackFileRetagged(MR.strings.track_file_retagged),
+
+    @SerialName("albumImportIncomplete")
+    AlbumImportIncomplete(MR.strings.album_import_incomplete),
+
+    @SerialName("downloadImported")
+    DownloadImported(MR.strings.download_imported),
 
     // Listenarr
 

@@ -14,6 +14,7 @@ import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.DeleteTrackBody
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
 import com.dnfapps.arrmatey.arr.api.model.IdWrapper
+import com.dnfapps.arrmatey.arr.api.model.LidarrHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.LidarrHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.LidarrRelease
 import com.dnfapps.arrmatey.arr.api.model.LidarrTrack
@@ -108,15 +109,17 @@ class LidarrClient(
         page: Int,
         pageSize: Int,
         altId: Long?,
-    ): NetworkResult<List<HistoryItem>> = get<LidarrHistoryResponse>(
-        "history",
-        mapOf<String, Any>(
-            "page" to page,
-            "pageSize" to pageSize,
-            "albumId" to id,
-        ),
-    ).map { response ->
-        response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+    ): NetworkResult<List<HistoryItem>> = get<List<LidarrHistoryItem>>(
+        "history/artist",
+        buildMap<String, Any> {
+            put("artistId", id)
+            altId?.let { put("albumId", it) }
+            put("includeArtist", true)
+            put("includeAlbum", true)
+            put("includeTrack", true)
+        },
+    ).map { list ->
+        list.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
     }
 
     override suspend fun getHistory(
