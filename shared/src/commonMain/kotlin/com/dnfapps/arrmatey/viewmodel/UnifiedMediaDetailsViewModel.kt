@@ -281,6 +281,14 @@ class UnifiedMediaDetailsViewModel(
     val addSheetUiState: StateFlow<AddSheetUiState> = instanceHandler.addSheetUiState
     val preferences: StateFlow<InstancePreferences> = instanceHandler.preferences
 
+    private val navigatedInitialEpisodeIds = mutableSetOf<Long>()
+
+    fun hasNavigatedToInitialEpisode(episodeId: Long): Boolean = navigatedInitialEpisodeIds.contains(episodeId)
+
+    fun markInitialEpisodeNavigated(episodeId: Long) {
+        navigatedInitialEpisodeIds.add(episodeId)
+    }
+
     init {
         dataObserver.observeData(_uiState)
         recommendationsHandler.observeRecommendations(
