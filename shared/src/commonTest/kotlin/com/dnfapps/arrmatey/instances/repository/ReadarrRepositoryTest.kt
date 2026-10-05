@@ -1,6 +1,7 @@
 package com.dnfapps.arrmatey.instances.repository
 
 import com.dnfapps.arrmatey.arr.api.client.BookshelfClient
+import com.dnfapps.arrmatey.arr.api.client.ListenarrInstantSerializer
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.database.EncryptedString
 import com.dnfapps.arrmatey.instances.model.Instance
@@ -14,11 +15,14 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.SerializersModule
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.time.Instant
 
 class ReadarrRepositoryTest {
     private val fakeInstance =
@@ -205,4 +209,57 @@ class ReadarrRepositoryTest {
         assertEquals(1, data.size)
         assertEquals("Approved Release", data[0].title)
     }
+
+    @Test
+    fun testBookHistoryDoesNotOverwriteAuthorHistory() = runTest {
+        val mockEngine =
+            MockEngine { request ->
+                val records =
+                    if (request.url.parameters["bookId"] == null) {
+                        listOf(1, 2).joinToString { historyItemJson(id = it, bookId = it.toLong()) }
+                    } else {
+                        historyItemJson(id = 1, bookId = 1)
+                    }
+                respond(
+                    content = "[$records]",
+                    status = HttpStatusCode.OK,
+                    headers = headersOf("Content-Type", "application/json"),
+                )
+            }
+        val httpClient =
+            HttpClient(mockEngine) {
+                install(ContentNegotiation) {
+                    json(
+                        Json {
+                            ignoreUnknownKeys = true
+                            serializersModule =
+                                SerializersModule {
+                                    contextual(Instant::class, ListenarrInstantSerializer)
+                                }
+                        },
+                    )
+                }
+            }
+        val repository = ReadarrRepository(fakeInstance, httpClient, fakeLogger)
+
+        repository.getItemHistory(itemId = 10)
+        val bookHistory = repository.getItemHistory(itemId = 10, altIt = 1)
+
+        assertEquals(1, (bookHistory as NetworkResult.Success).data.size)
+        assertEquals(2, repository.observeItemHistory(10).first().size)
+    }
+
+    private fun historyItemJson(
+        id: Int,
+        bookId: Long,
+    ) = """
+        {
+            "id": $id,
+            "eventType": "grabbed",
+            "date": "2026-01-01T00:00:00Z",
+            "quality": {"quality": {"id": 1, "name": "EPUB"}, "revision": {"version": 1, "real": 0, "isRepack": false}},
+            "authorId": 10,
+            "bookId": $bookId
+        }
+    """.trimIndent()
 }

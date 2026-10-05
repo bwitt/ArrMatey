@@ -284,9 +284,12 @@ class LibraryRepository(
         return client
             .getItemHistory(itemId, page, pageSize, altIt)
             .onSuccess { history ->
-                val currentCache = _historyCache.value.toMutableMap()
-                currentCache[itemId] = history
-                _historyCache.value = currentCache
+                // altIt narrows to a sub-item (e.g. one book); don't overwrite the parent's cached history.
+                if (altIt == null) {
+                    val currentCache = _historyCache.value.toMutableMap()
+                    currentCache[itemId] = history
+                    _historyCache.value = currentCache
+                }
                 _historyStatus.value = OperationStatus.Success()
             }.onError { code, message, cause ->
                 _historyStatus.value = OperationStatus.Error(code, message, cause)
