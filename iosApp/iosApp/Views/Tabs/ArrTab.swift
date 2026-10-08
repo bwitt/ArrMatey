@@ -35,10 +35,11 @@ struct ArrTab: View {
     }
     
     
-    init(type: InstanceType, viewModel: ArrMediaViewModelS) {
+    init(type: InstanceType, types: [InstanceType]? = nil, viewModel: ArrMediaViewModelS) {
         self.type = type
         self.arrMediaViewModel = viewModel
-        _instancesViewModel = StateObject(wrappedValue: InstancesViewModelS(type: type))
+        let resolvedTypes = types ?? [type]
+        _instancesViewModel = StateObject(wrappedValue: InstancesViewModelS(types: resolvedTypes))
     }
     
     var body: some View {
@@ -126,8 +127,9 @@ struct ArrTab: View {
                 ToolbarItem(placement: .topBarLeading) {
                     InstancePickerMenu(
                         instances: instanceState.instances,
+                        selectedInstanceId: instanceState.selectedInstance?.id,
                         onChangeInstance: { instancesViewModel.setInstanceActive($0) },
-                        onAddNewInstance: { navigation.goToNewInstance(of: type) }
+                        onAddNewInstance: { navigation.goToNewInstance(of: instanceState.selectedInstance?.type ?? type) }
                     )
                     .menuIndicator(.hidden)
                 }
@@ -137,9 +139,10 @@ struct ArrTab: View {
     
     @ToolbarContentBuilder
     private var toolbarViewOptions: some ToolbarContent {
+        let currentType = instanceState.selectedInstance?.type ?? type
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button(action: {
-                navigation.go(to: .search(query: "", type: type, instanceId: instanceState.selectedInstance?.id), of: type)
+                navigation.go(to: .search(query: "", type: currentType, instanceId: instanceState.selectedInstance?.id), of: currentType)
             }) {
                 Image(systemName: "plus")
                     .imageScale(.medium)
@@ -153,7 +156,7 @@ struct ArrTab: View {
                 }
 
                 FilterByPickerMenu(
-                    type: type,
+                    type: currentType,
                     filterBy: preferences.filterBy,
                     customFilters: arrMediaViewModel.instanceData?.customFilters ?? [],
                     selectedCustomFilterId: preferences.customFilterId?.int64Value,
@@ -166,7 +169,7 @@ struct ArrTab: View {
                     .menuIndicator(.hidden)
                 
                 SortByPickerMenu(
-                    type: type,
+                    type: currentType,
                     sortBy: preferences.sortBy,
                     sortOrder: preferences.sortOrder,
                     changeSortBy: { newValue in

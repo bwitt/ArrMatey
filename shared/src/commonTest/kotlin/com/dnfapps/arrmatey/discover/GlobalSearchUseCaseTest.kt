@@ -67,15 +67,23 @@ class GlobalSearchUseCaseTest {
 
         override fun observeInstancesByType(type: InstanceType): Flow<List<Instance>> = MutableStateFlow(instances.value.filter { it.type == type })
 
+        override fun observeInstancesByTypes(types: List<InstanceType>): Flow<List<Instance>> = MutableStateFlow(instances.value.filter { it.type in types })
+
         override suspend fun getAllInstances(): List<Instance> = instances.value
 
         override suspend fun getInstanceById(id: Long): Instance? = instances.value.find { it.id == id }
 
         override fun observeSelectedInstance(type: InstanceType): Flow<Instance?> = MutableStateFlow(instances.value.find { it.type == type && it.selected })
 
+        override fun observeSelectedInstanceByTypes(types: List<InstanceType>): Flow<Instance?> = MutableStateFlow(instances.value.find { it.type in types && it.selected })
+
         override suspend fun getInstancesOfType(type: InstanceType): List<Instance> = instances.value.filter { it.type == type }
 
+        override suspend fun getInstancesOfTypes(types: List<InstanceType>): List<Instance> = instances.value.filter { it.type in types }
+
         override suspend fun unselectAllOf(type: InstanceType) {}
+
+        override suspend fun unselectAllOfTypes(types: List<InstanceType>) {}
 
         override suspend fun selectInstance(id: Long) {}
 
@@ -94,6 +102,8 @@ class GlobalSearchUseCaseTest {
         ): Long? = null
 
         override suspend fun ensureFirstSelectedIfNone(type: InstanceType) {}
+
+        override suspend fun ensureFirstSelectedIfNone(types: List<InstanceType>) {}
     }
 
     private class FakeDownloadClientDao : DownloadClientDao {
@@ -188,6 +198,15 @@ class GlobalSearchUseCaseTest {
         url = "http://localhost:5055",
         apiKey = EncryptedString("key"),
         type = InstanceType.Seerr,
+        enabled = true,
+    )
+
+    private fun chaptarrInstance(id: Long) = Instance(
+        id = id,
+        label = "Chaptarr $id",
+        url = "http://localhost:8787",
+        apiKey = EncryptedString("key"),
+        type = InstanceType.Chaptarr,
         enabled = true,
     )
 
@@ -449,6 +468,57 @@ class GlobalSearchUseCaseTest {
 
         // Ktor cancels the engine call asynchronously, so join() can return before the engine sees it.
         withTimeout(5.seconds) { requestCancelled.await() }
+        manager.cleanup()
+    }
+
+    @Test
+    fun testChaptarrSearchResultsIncludedInUniversalSearch() = runBlocking {
+        val fakeDao = FakeInstanceDao(listOf(chaptarrInstance(10)))
+        val instanceRepo = InstanceRepository(fakeDao)
+
+        val chaptarrLookupJson =
+            """
+                [
+                    {
+                        "authorName": "Brandon Sanderson",
+                        "foreignAuthorId": "38550",
+                        "monitored": true,
+                        "ratings": {
+                            "votes": 500,
+                            "value": 4.8
+                        }
+                    }
+                ]
+            """.trimIndent()
+
+        val mockFactory =
+            MockHttpClientFactory(json) { instance ->
+                MockEngine { request ->
+                    val path = request.url.encodedPath
+                    val content =
+                        when {
+                            instance.type == InstanceType.Chaptarr && path.contains("author/lookup") -> chaptarrLookupJson
+                            else -> "[]"
+                        }
+                    respond(content, HttpStatusCode.OK, headersOf("Content-Type", "application/json"))
+                }
+            }
+
+        val manager = InstanceManager(instanceRepo, mockFactory, fakeMigrationUseCase, logger)
+        manager.awaitRepos(1)
+
+        val useCase = GlobalSearchUseCase(manager)
+        val emissions = useCase("Sanderson").toList()
+
+        assertTrue(emissions.isNotEmpty())
+        val finalResult = emissions.last()
+
+        val chaptarrResult = finalResult.firstOrNull { it.title == "Brandon Sanderson" }
+        assertTrue(chaptarrResult != null, "Brandon Sanderson result should be present")
+        assertEquals(InstanceType.Chaptarr, chaptarrResult.instanceType)
+        assertTrue(chaptarrResult is SearchResult.ArrMediaResult)
+        assertEquals(10L, chaptarrResult.instanceId)
+
         manager.cleanup()
     }
 }

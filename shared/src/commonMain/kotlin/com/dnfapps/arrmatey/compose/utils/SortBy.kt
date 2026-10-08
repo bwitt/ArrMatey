@@ -89,7 +89,9 @@ enum class SortBy(
             InstanceType.Sonarr -> sonarrOps
             InstanceType.Radarr -> radarrOps
             InstanceType.Lidarr -> lidarrOps
-            InstanceType.Bookshelf -> readarrOps
+            InstanceType.Bookshelf,
+            InstanceType.Chaptarr,
+            -> readarrOps
             InstanceType.Prowlarr -> prowlarrOps
             else -> emptyList()
         }
@@ -97,6 +99,12 @@ enum class SortBy(
         fun lookupEntries() = listOf(Relevance, Year, Rating)
 
         fun downloadClientEntries() = listOf(Title, Added, Size, Progress, DownloadSpeed, UploadSpeed, Eta)
+
+        fun defaultFor(type: InstanceType?): SortBy = when (type) {
+            InstanceType.Bookshelf, InstanceType.Chaptarr -> TitleLastFirst
+            InstanceType.Prowlarr -> Name
+            else -> Title
+        }
     }
 }
 

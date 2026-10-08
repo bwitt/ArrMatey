@@ -10,6 +10,7 @@ import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.arrmatey.navigation.MediaScreen
 import com.dnfapps.arrmatey.navigation.Navigator
 import com.dnfapps.arrmatey.navigation.navigationManager
+import com.dnfapps.arrmatey.navigation.replaceDetails
 import com.dnfapps.arrmatey.navigation.toAlbumRelease
 import com.dnfapps.arrmatey.navigation.toArrDetailsOrPreview
 import com.dnfapps.arrmatey.navigation.toAudiobookRelease
@@ -179,6 +180,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
         BookDetailsScreen(
             book = params.book,
             author = params.author,
+            instanceId = effectiveInstanceId,
             isExpanded = isExpanded,
             wideRailIsVisible = wideRailIsVisible,
             onBack = { navigation.popBackStack() },
@@ -221,7 +223,7 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
             onItemClick = { result ->
                 when (result) {
                     is SearchResult.ArrMediaResult -> {
-                        navigation.toArrDetailsOrPreview(result.media, result.instanceType)
+                        navigation.toArrDetailsOrPreview(result.media, result.instanceType, result.instanceId)
                     }
                     is SearchResult.SeerrMediaResult -> {
                         navigation.toDetails(tmdbId = result.result.id, requestType = result.result.mediaType)
@@ -242,7 +244,9 @@ fun EntryProviderScope<NavKey>.mediaNavEntries(
                 isExpanded = isExpanded,
                 wideRailIsVisible = wideRailIsVisible,
                 onBack = { navigation.popBackStack() },
-                onItemAdded = { navigation.toDetails(it) },
+                onItemAdded = { id, instType, instId ->
+                    navigation.replaceDetails(id = id, type = instType, instanceId = instId)
+                },
             )
         }
     }

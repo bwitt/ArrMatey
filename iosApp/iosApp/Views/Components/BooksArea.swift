@@ -18,21 +18,85 @@ struct BooksArea: View {
     let onToggleMonitor: (Book) -> Void
     let onToggleSeriesMonitor: ([Book]) -> Void
     let onAutomaticSearch: (Int64) -> Void
+    var queueItems: [QueueItem] = []
+    var selectedMediaTypeFilter: BookMediaFilterBy = .all
+    var onSelectMediaTypeFilter: ((BookMediaFilterBy) -> Void)? = nil
+    var onEditAuthor: (() -> Void)? = nil
 
     @EnvironmentObject private var navigation: NavigationManager
 
     @State private var selectedTab: Int = 0
 
+    private var isChaptarr: Bool {
+        author.isChaptarr || books.contains(where: { $0.mediaType != nil })
+    }
+
+    private var hasMixedMediaTypes: Bool {
+        author.hasMixedMediaTypes(books: books)
+    }
+
+    private var hasAudiobooksConfigured: Bool {
+        author.hasAudiobookConfigured
+    }
+
+    private var hasEbooksConfigured: Bool {
+        author.hasEbookConfigured
+    }
+
+
+    private var ebookCount: Int {
+        books.filter { $0.mediaType == nil || $0.mediaType == .ebook }.count
+    }
+
+    private var audiobookCount: Int {
+        books.filter { $0.mediaType == .audiobook }.count
+    }
+
+    private var filteredBooks: [Book] {
+        guard hasMixedMediaTypes && selectedMediaTypeFilter != .all else { return books }
+        if selectedMediaTypeFilter == .audiobook {
+            return books.filter { $0.mediaType == .audiobook }
+        } else {
+            return books.filter { $0.mediaType == nil || $0.mediaType == .ebook }
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Picker("", selection: $selectedTab) {
-                Text(MR.strings().books_area_books_tab.formatted(args: [books.count])).tag(0)
+                Text(MR.strings().books_area_books_tab.formatted(args: [filteredBooks.count])).tag(0)
                 Text(MR.strings().books_area_series_tab.formatted(args: [series.count])).tag(1)
             }
             .pickerStyle(.segmented)
             .labelsHidden()
 
-            if selectedTab == 0 {
+            if hasMixedMediaTypes && selectedTab == 0 {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        mediaTypeFilterChip(
+                            title: "\(BookMediaFilterBy.all.resource.localized()) (\(books.count))",
+                            isSelected: selectedMediaTypeFilter == .all,
+                            action: { onSelectMediaTypeFilter?(.all) }
+                        )
+                        mediaTypeFilterChip(
+                            title: "\(BookMediaFilterBy.ebook.resource.localized()) (\(ebookCount))",
+                            isSelected: selectedMediaTypeFilter == .ebook,
+                            action: { onSelectMediaTypeFilter?(.ebook) }
+                        )
+                        mediaTypeFilterChip(
+                            title: "\(BookMediaFilterBy.audiobook.resource.localized()) (\(audiobookCount))",
+                            isSelected: selectedMediaTypeFilter == .audiobook,
+                            action: { onSelectMediaTypeFilter?(.audiobook) }
+                        )
+                    }
+                }
+            }
+
+            if selectedMediaTypeFilter == .audiobook && !hasAudiobooksConfigured {
+                unconfiguredTypeNotice(message: MR.strings().no_audiobook_root_folder_configured.localized())
+            } else if selectedMediaTypeFilter == .ebook && !hasEbooksConfigured {
+                unconfiguredTypeNotice(message: MR.strings().no_ebook_root_folder_configured.localized())
+            } else if selectedTab == 0 {
                 booksView
             } else {
                 seriesView
@@ -40,13 +104,53 @@ struct BooksArea: View {
         }
     }
 
+    private func unconfiguredTypeNotice(message: String) -> some View {
+        Button(action: onEditAuthor ?? {}) {
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: "info.circle")
+                    .foregroundColor(.themePrimary)
+                Text(message)
+                    .font(.system(size: 14))
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.leading)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.secondary)
+            }
+            .padding(12)
+            .background(Color(uiColor: .secondarySystemBackground))
+            .cornerRadius(12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func mediaTypeFilterChip(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(isSelected ? Color.themePrimary.opacity(0.15) : Color(uiColor: .tertiarySystemFill))
+                .foregroundColor(isSelected ? .themePrimary : .primary)
+                .clipShape(Capsule())
+                .overlay(
+                    Capsule()
+                        .stroke(isSelected ? Color.themePrimary.opacity(0.3) : Color.clear, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
     private var booksView: some View {
         VStack(spacing: 0) {
-            ForEach(books, id: \.id) { book in
+            ForEach(filteredBooks, id: \.id) { book in
+                let activeQueueItem = queueItems.compactMap { $0 as? ReadarrQueueItem }.first(where: { $0.bookId?.int64Value == book.id || $0.book?.id == book.id })
                 BookRow(
                     book: book,
                     instanceId: instanceId,
                     bookFile: files.first(where: { $0.bookId?.int64Value == book.id }),
+                    activeQueueItem: activeQueueItem,
                     onAutomaticSearch: onAutomaticSearch,
                     onToggleMonitor: onToggleMonitor,
                     searchInProgress: searchIds.contains(book.id),
@@ -67,7 +171,7 @@ struct BooksArea: View {
         VStack(spacing: 12) {
             ForEach(series, id: \.id) { bookSeries in
                 let seriesBooks = bookSeries.links.compactMap { link in
-                    books.first(where: { $0.id == link.bookId?.int64Value })
+                    filteredBooks.first(where: { $0.id == link.bookId?.int64Value })
                 }
 
                 SeriesSection(
@@ -79,7 +183,8 @@ struct BooksArea: View {
                     onToggleMonitor: onToggleMonitor,
                     onToggleSeriesMonitor: onToggleSeriesMonitor,
                     onAutomaticSearch: onAutomaticSearch,
-                    searchIds: searchIds
+                    searchIds: searchIds,
+                    queueItems: queueItems
                 )
             }
         }
@@ -90,6 +195,7 @@ struct BookRow: View {
     let book: Book
     var instanceId: Int64? = nil
     let bookFile: BookFile?
+    var activeQueueItem: QueueItem? = nil
     let onAutomaticSearch: (Int64) -> Void
     let onToggleMonitor: (Book) -> Void
     let searchInProgress: Bool
@@ -100,7 +206,7 @@ struct BookRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 0) {
                     if let pos = seriesPosition {
                         Text("\(pos). ")
@@ -109,7 +215,25 @@ struct BookRow: View {
                     Text(book.title)
                 }
 
-                HStack {
+                if !book.narratorNames.isEmpty {
+                    Text(MR.strings().narrated_by.formatted(args: [book.narratorNames.joined(separator: ", ")]))
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .italic()
+                }
+
+                HStack(spacing: 4) {
+                    if let mediaType = book.mediaType {
+                        let isAudiobook = mediaType == .audiobook
+                        Text(mediaType.resource.localized())
+                            .font(.system(size: 11, weight: .semibold))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(isAudiobook ? Color.themePrimary.opacity(0.15) : Color.themeSecondary.opacity(0.15))
+                            .foregroundColor(isAudiobook ? .themePrimary : .themeSecondary)
+                            .cornerRadius(4)
+                    }
+
                     let status = getStatus()
                     Text(status.text)
                         .font(.system(size: 14))
@@ -157,10 +281,12 @@ struct BookRow: View {
     }
 
     private func getStatus() -> (text: String, color: Color) {
+        if let progress = activeQueueItem?.progressLabel {
+            return (progress, .purple)
+        }
         if let quality = bookFile?.fileQualityName {
             return (quality, .themeTertiary)
         }
-        // Simplified status check for now
         return (MR.strings().missing.localized(), .red)
     }
 }
@@ -175,6 +301,7 @@ struct SeriesSection: View {
     let onToggleSeriesMonitor: ([Book]) -> Void
     let onAutomaticSearch: (Int64) -> Void
     let searchIds: Set<Int64>
+    var queueItems: [QueueItem] = []
 
     @State private var expanded: Bool = true
     @EnvironmentObject private var navigation: NavigationManager
@@ -209,10 +336,12 @@ struct SeriesSection: View {
                 VStack(spacing: 0) {
                     ForEach(bookSeries.links.sorted(by: { ($0.position ?? "") < ($1.position ?? "") }), id: \.bookId) { (link: BookSeriesLink) in
                         if let book = seriesBooks.first(where: { $0.id == link.bookId?.int64Value }) {
+                            let activeQueueItem = queueItems.compactMap { $0 as? ReadarrQueueItem }.first(where: { $0.bookId?.int64Value == book.id || $0.book?.id == book.id })
                             BookRow(
                                 book: book,
                                 instanceId: instanceId,
                                 bookFile: files.first(where: { $0.bookId?.int64Value == book.id }),
+                                activeQueueItem: activeQueueItem,
                                 onAutomaticSearch: onAutomaticSearch,
                                 onToggleMonitor: onToggleMonitor,
                                 searchInProgress: searchIds.contains(book.id),

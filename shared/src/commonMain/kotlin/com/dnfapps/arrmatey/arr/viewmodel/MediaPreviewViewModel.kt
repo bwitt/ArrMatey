@@ -5,7 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
 import com.dnfapps.arrmatey.arr.api.model.ArrSeries
+import com.dnfapps.arrmatey.arr.api.model.Author
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
+import com.dnfapps.arrmatey.arr.api.model.QualityProfile
+import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
+import com.dnfapps.arrmatey.arr.api.model.Tag
 import com.dnfapps.arrmatey.arr.state.MediaPreviewUiState
 import com.dnfapps.arrmatey.arr.usecase.AddMediaItemUseCase
 import com.dnfapps.arrmatey.arr.usecase.GetAudiobookMetadataUseCase
@@ -20,6 +25,7 @@ import com.dnfapps.arrmatey.instances.usecase.ObserveInstancePreferencesUseCase
 import com.dnfapps.arrmatey.instances.usecase.ObserveScopedReposByTypeUseCase
 import com.dnfapps.arrmatey.instances.usecase.UpdateInstancePreferencesUseCase
 import com.dnfapps.arrmatey.model.OperationStatus
+import com.dnfapps.networking.NetworkResult
 import dev.shivathapaa.logger.api.Logger
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -56,31 +62,22 @@ class MediaPreviewViewModel(
     private val _selectedInstanceId = MutableStateFlow<Long?>(null)
     val selectedInstanceId: StateFlow<Long?> = _selectedInstanceId.asStateFlow()
 
-    private val allArrReposFlow: Flow<List<ArrInstanceRepository>> =
-        observeScopedReposByTypeUseCase(instanceType)
-            .map { it.filterIsInstance<ArrInstanceRepository>() }
-
     private val _instancePresencesMap = MutableStateFlow<Map<Long, ArrMedia?>>(emptyMap())
 
-    init {
-        viewModelScope.launch {
-            allArrReposFlow.collectLatest { repos ->
-                val query = preview.title ?: ""
-                val resolvedTvdbLookupId = (preview as? ArrSeries)?.tvdbId
-                val resolvedLookupId = (preview as? ArrMovie)?.tmdbId
-
-                val updatedMap =
-                    GetInstancePresencesUseCase().fetchMissingPresences(
-                        repositories = repos,
-                        query = query,
-                        resolvedTvdbLookupId = resolvedTvdbLookupId,
-                        resolvedLookupId = resolvedLookupId,
-                        existingPresences = _instancePresencesMap.value,
-                    )
-                _instancePresencesMap.value = updatedMap
+    private val allArrReposFlow: Flow<List<ArrInstanceRepository>> =
+        if (instanceType == InstanceType.Bookshelf || instanceType == InstanceType.Chaptarr || preview is Author) {
+            combine(
+                observeScopedReposByTypeUseCase(InstanceType.Bookshelf),
+                observeScopedReposByTypeUseCase(InstanceType.Chaptarr),
+            ) { bookshelfRepos, chaptarrRepos ->
+                (bookshelfRepos + chaptarrRepos).filterIsInstance<ArrInstanceRepository>()
             }
+        } else {
+            observeScopedReposByTypeUseCase(instanceType)
+                .map { it.filterIsInstance<ArrInstanceRepository>() }
         }
-    }
+
+    private val _detailedMedia = MutableStateFlow<ArrMedia>(preview)
 
     private val defaultSelectedArrRepoFlow: Flow<ArrInstanceRepository?> =
         getArrInstanceRepositoryUseCase.observeSelected(instanceType)
@@ -127,6 +124,52 @@ class MediaPreviewViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = null,
             )
+
+    init {
+        viewModelScope.launch {
+            allArrReposFlow.collectLatest { repos ->
+                val query = preview.title ?: ""
+                val resolvedTvdbLookupId = (preview as? ArrSeries)?.tvdbId
+                val resolvedLookupId = (preview as? ArrMovie)?.tmdbId
+
+                val updatedMap =
+                    GetInstancePresencesUseCase().fetchMissingPresences(
+                        repositories = repos,
+                        query = query,
+                        resolvedTvdbLookupId = resolvedTvdbLookupId,
+                        resolvedLookupId = resolvedLookupId,
+                        existingPresences = _instancePresencesMap.value,
+                    )
+                _instancePresencesMap.value = updatedMap
+            }
+        }
+        viewModelScope.launch {
+            selectedRepository.filterNotNull().collectLatest { repository ->
+                if ((instanceType == InstanceType.Chaptarr || instanceType == InstanceType.Bookshelf) && preview is Author) {
+                    val foreignId = preview.foreignAuthorId
+                    if (!foreignId.isNullOrBlank() && (preview.images.isEmpty() || preview.overview.isNullOrBlank())) {
+                        val queries = listOf(
+                            "author:$foreignId",
+                            if (foreignId.startsWith("gr:")) "author:${foreignId.removePrefix("gr:")}" else "author:gr:$foreignId",
+                            foreignId,
+                        ).distinct()
+                        for (q in queries) {
+                            val res = repository.directLookup(q)
+                            if (res is NetworkResult.Success && res.data.isNotEmpty()) {
+                                val fullAuthor = res.data.filterIsInstance<Author>()
+                                    .firstOrNull { it.images.isNotEmpty() || !it.overview.isNullOrBlank() }
+                                    ?: res.data.filterIsInstance<Author>().firstOrNull()
+                                if (fullAuthor != null) {
+                                    _detailedMedia.value = fullAuthor
+                                    break
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     private val metadataResponse =
         selectedRepository
@@ -209,10 +252,11 @@ class MediaPreviewViewModel(
                 combine(
                     combine(
                         repository.qualityProfiles,
+                        repository.metadataProfiles,
                         repository.rootFolders,
                         repository.tags,
-                    ) { qualityProfiles, rootFolders, tags ->
-                        Triple(qualityProfiles, rootFolders, tags)
+                    ) { qualityProfiles, metadataProfiles, rootFolders, tags ->
+                        listOf(qualityProfiles, metadataProfiles, rootFolders, tags)
                     },
                     combine(
                         mergedAddItemStatus,
@@ -228,11 +272,15 @@ class MediaPreviewViewModel(
                     ) { prefs, instances, selected ->
                         Triple(prefs, instances, selected)
                     },
-                ) { (qualityProfiles, rootFolders, tags), (addItemStatus, lastAddedItemId, previewPath), (prefs, instances, selected) ->
+                    _detailedMedia,
+                ) { metaList, (addItemStatus, lastAddedItemId, previewPath), (prefs, instances, selected), detailedMedia ->
+                    @Suppress("UNCHECKED_CAST")
                     MediaPreviewUiState(
-                        qualityProfiles = qualityProfiles,
-                        rootFolders = rootFolders,
-                        tags = tags,
+                        media = detailedMedia,
+                        qualityProfiles = metaList[0] as List<QualityProfile>,
+                        metadataProfiles = metaList[1] as List<MetadataProfile>,
+                        rootFolders = metaList[2] as List<RootFolder>,
+                        tags = metaList[3] as List<Tag>,
                         addItemStatus = addItemStatus,
                         lastAddedItemId = lastAddedItemId,
                         relativePath = previewPath,
@@ -244,7 +292,7 @@ class MediaPreviewViewModel(
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.Lazily,
-                initialValue = MediaPreviewUiState(),
+                initialValue = MediaPreviewUiState(media = preview),
             )
 
     fun addItem(

@@ -34,6 +34,7 @@ struct UnifiedMediaDetailsScreen: View {
 
     @State private var toastMessage: String? = nil
     @State private var selectedTab: DetailsTab = .overview
+    @State private var selectedBookMediaFilter: BookMediaFilterBy = .all
     @State private var previousHasSeasonsOrFiles: Bool? = nil
 
     private typealias DetailsTab = UnifiedMediaDetailsTab
@@ -48,6 +49,8 @@ struct UnifiedMediaDetailsScreen: View {
             return MR.strings().seasons_header.localized()
         case .lidarr:
             return MR.strings().albums_header.localized()
+        case .bookshelf, .chaptarr:
+            return MR.strings().books.localized()
         default:
             return MR.strings().files.localized()
         }
@@ -106,7 +109,8 @@ struct UnifiedMediaDetailsScreen: View {
             moveFilesItem: $moveFilesItem,
             editAlbum: $editAlbum,
             selectedQueueItem: $selectedQueueItem,
-            selectedTracearrSession: $selectedTracearrSession
+            selectedTracearrSession: $selectedTracearrSession,
+            initialBookMediaType: selectedBookMediaFilter == .ebook ? .ebook : (selectedBookMediaFilter == .audiobook ? .audiobook : nil)
         ))
         .modifier(UnifiedMediaDetailsArrAlertsModifier(
             viewModel: viewModel,
@@ -367,7 +371,10 @@ extension UnifiedMediaDetailsScreen {
                     let route: MediaRoute = .seriesReleases(seriesId: sId, seasonNumber: seasonNum, episodeId: epId, instanceId: instId)
                     navigationManager.go(to: route, of: .sonarr)
                 }
-            }
+            },
+            selectedBookMediaFilter: selectedBookMediaFilter,
+            onSelectBookMediaTypeFilter: { selectedBookMediaFilter = $0 },
+            onEditAuthor: { showEditSheet = true }
         )
     }
 }
@@ -403,7 +410,7 @@ extension UnifiedMediaDetailsScreen {
                             showSeriesMonitoringSheet = true
                         } else if viewModel.resolvedInstanceType == .lidarr {
                             showArtistMonitoringSheet = true
-                        } else if viewModel.resolvedInstanceType == .bookshelf {
+                        } else if viewModel.resolvedInstanceType == .bookshelf || viewModel.resolvedInstanceType == .chaptarr {
                             showBookMonitoringSheet = true
                         }
                     }

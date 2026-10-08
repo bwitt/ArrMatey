@@ -86,12 +86,15 @@ import com.dnfapps.arrmatey.arr.api.model.Audiobook
 import com.dnfapps.arrmatey.arr.api.model.Author
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorOptions
 import com.dnfapps.arrmatey.arr.api.model.AuthorMonitorType
+import com.dnfapps.arrmatey.arr.api.model.MetadataProfile
 import com.dnfapps.arrmatey.arr.api.model.MockMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
 import com.dnfapps.arrmatey.arr.api.model.RootFolder
 import com.dnfapps.arrmatey.arr.api.model.SearchAudiobook
 import com.dnfapps.arrmatey.arr.api.model.SeriesMonitorType
 import com.dnfapps.arrmatey.arr.api.model.Tag
+import com.dnfapps.arrmatey.arr.api.model.getChangedRootFolderPath
+import com.dnfapps.arrmatey.arr.api.model.hasRootFolderChanged
 import com.dnfapps.arrmatey.arr.state.ArrLibrary
 import com.dnfapps.arrmatey.arr.viewmodel.ArrMediaViewModel
 import com.dnfapps.arrmatey.arr.viewmodel.InstancesViewModel
@@ -134,12 +137,19 @@ import org.koin.core.parameter.parametersOf
 @Composable
 fun ArrLibraryScreen(
     type: InstanceType,
+    types: List<InstanceType> = listOf(type),
     isExpanded: Boolean = false,
     wideRailIsVisible: Boolean = false,
     onNavigateToSearch: (String, InstanceType, Long?) -> Unit,
     onNavigateToDetails: (ArrMedia, Long?) -> Unit,
-    arrMediaViewModel: ArrMediaViewModel = koinViewModel(key = "arrMedia_${type.name}", parameters = { parametersOf(type) }),
-    instancesViewModel: InstancesViewModel = koinViewModel(key = "instances_${type.name}", parameters = { parametersOf(type) }),
+    arrMediaViewModel: ArrMediaViewModel = koinViewModel(
+        key = "arrMedia_${types.joinToString("_") { it.name }}",
+        parameters = { parametersOf(types) },
+    ),
+    instancesViewModel: InstancesViewModel = koinViewModel(
+        key = "instances_${types.joinToString("_") { it.name }}",
+        parameters = { parametersOf(types) },
+    ),
     globalPreferencesStore: PreferencesStore = koinInject(),
 ) {
     val context = LocalContext.current
@@ -212,6 +222,7 @@ fun ArrLibraryScreen(
         arrMediaViewModel.updateSearchQuery(textFieldState.text.toString())
     }
 
+    val activeType = instancesState.selectedInstance?.type ?: type
     val showFab = !wideRailIsVisible && !isInSelectionMode && instancesState.selectedInstance != null
     val useFloatingNavigationBar by globalPreferencesStore.useFloatingNavigationBar.collectAsStateWithLifecycle(false)
 
@@ -220,7 +231,7 @@ fun ArrLibraryScreen(
         action =
         com.dnfapps.arrmatey.ui.components.appbar.FloatingBarAction(
             icon = { Icon(Icons.Default.Add, null) },
-            onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
+            onClick = { onNavigateToSearch("", activeType, instancesState.selectedInstance?.id) },
         ),
     )
 
@@ -234,7 +245,7 @@ fun ArrLibraryScreen(
                     exit = scaleOut(animationSpec = tween(200)) + fadeOut(animationSpec = tween(200)),
                 ) {
                     FloatingActionButton(
-                        onClick = { onNavigateToSearch("", type, instancesState.selectedInstance?.id) },
+                        onClick = { onNavigateToSearch("", activeType, instancesState.selectedInstance?.id) },
                     ) {
                         Icon(Icons.Default.Add, null)
                     }
@@ -290,8 +301,8 @@ fun ArrLibraryScreen(
                                 trigger = { onClick ->
                                     IconButton(onClick = onClick) {
                                         Image(
-                                            painter = painterResource(type.icon),
-                                            contentDescription = mokoString(type.resource),
+                                            painter = painterResource(activeType.icon),
+                                            contentDescription = mokoString(activeType.resource),
                                             modifier = Modifier.size(24.dp),
                                         )
                                     }
@@ -306,14 +317,14 @@ fun ArrLibraryScreen(
                         actions = {
                             if (!hideInstancePicker || instancesState.instances.size > 1) {
                                 InstancePicker(
-                                    type = type,
+                                    type = activeType,
                                     currentInstance = instancesState.selectedInstance,
                                     typeInstances = instancesState.instances,
                                     onInstanceSelected = { instancesViewModel.setInstanceActive(it) },
                                 )
                             }
                             LibraryFilterMenu(
-                                type = type,
+                                type = activeType,
                                 filterBy = preferences.filterBy,
                                 onFilterByChanged = { arrMediaViewModel.updateFilterBy(it) },
                                 customFilters = instanceData?.customFilters ?: emptyList(),
@@ -387,7 +398,7 @@ fun ArrLibraryScreen(
                                 EmptyLibraryView(modifier = Modifier.align(Alignment.Center))
                             } else if (items.isNotEmpty()) {
                                 MediaView(
-                                    type = type,
+                                    type = activeType,
                                     items = items,
                                     onItemClick = {
                                         onNavigateToDetails(it, instancesState.selectedInstance?.id)
@@ -401,8 +412,8 @@ fun ArrLibraryScreen(
                                     tags = instanceData?.tags ?: emptyList(),
                                 )
                             } else {
-                                EmptySearchResultsView(type, textFieldState.text.toString()) {
-                                    onNavigateToSearch(textFieldState.text.toString(), type, instancesState.selectedInstance?.id)
+                                EmptySearchResultsView(activeType, textFieldState.text.toString()) {
+                                    onNavigateToSearch(textFieldState.text.toString(), activeType, instancesState.selectedInstance?.id)
                                 }
                             }
                         }
@@ -415,7 +426,7 @@ fun ArrLibraryScreen(
             ArrViewCustomizationSheet(
                 onDismissRequest = { showViewCustomizationSheet = false },
                 preferences = preferences,
-                type = type,
+                type = activeType,
                 onViewTypeChanged = { arrMediaViewModel.updateViewType(it) },
                 onShowFullDetailsChanged = { arrMediaViewModel.updateShowFullDetails(it) },
                 onShowOverlayChanged = { arrMediaViewModel.updateShowOverlay(it) },
@@ -448,7 +459,7 @@ fun ArrLibraryScreen(
             ) {
                 SelectionBottomBar(
                     count = selectionCount,
-                    type = type,
+                    type = activeType,
                     hasBazarr = hasBazarr,
                     isMonitored = selectedItem?.monitored == true,
                     onEdit = {
@@ -481,11 +492,12 @@ fun ArrLibraryScreen(
             EditMediaSheet(
                 item = item,
                 qualityProfiles = data.qualityProfiles,
+                metadataProfiles = data.metadataProfiles,
                 rootFolders = data.rootFolders,
                 tags = data.tags,
                 editInProgress = editStatus is OperationStatus.InProgress,
                 onEditItem = {
-                    if (item.rootFolderPath != it.rootFolderPath) {
+                    if (item.hasRootFolderChanged(it)) {
                         moveFilesItem = it
                     } else {
                         arrMediaViewModel.editItem(it)
@@ -495,16 +507,17 @@ fun ArrLibraryScreen(
             )
         }
 
-        moveFilesItem?.let { item ->
+        moveFilesItem?.let { editedItem ->
+            val changedPath = showEditSheet?.getChangedRootFolderPath(editedItem) ?: editedItem.rootFolderPath ?: ""
             AlertDialog(
                 onDismissRequest = { moveFilesItem = null },
                 title = {
-                    Text(mokoString(MR.strings.move_files_confirm, item.rootFolderPath ?: ""))
+                    Text(mokoString(MR.strings.move_files_confirm, changedPath))
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            arrMediaViewModel.editItem(item, moveFiles = true)
+                            arrMediaViewModel.editItem(editedItem, moveFiles = true)
                             moveFilesItem = null
                         },
                     ) {
@@ -514,7 +527,7 @@ fun ArrLibraryScreen(
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            arrMediaViewModel.editItem(item)
+                            arrMediaViewModel.editItem(editedItem)
                             moveFilesItem = null
                         },
                     ) {
@@ -539,7 +552,7 @@ fun ArrLibraryScreen(
 
         if (showMonitorOptionsSheet) {
             MonitorOptionsSheet(
-                type = type,
+                type = activeType,
                 onDismissRequest = { showMonitorOptionsSheet = false },
                 onOptionSelected = {
                     arrMediaViewModel.updateMonitoringSelected(it)
@@ -751,6 +764,7 @@ internal fun ConfirmDeleteAlert(
 internal fun EditMediaSheet(
     item: ArrMedia,
     qualityProfiles: List<QualityProfile>,
+    metadataProfiles: List<MetadataProfile> = emptyList(),
     rootFolders: List<RootFolder>,
     tags: List<Tag>,
     editInProgress: Boolean,
@@ -792,6 +806,7 @@ internal fun EditMediaSheet(
             EditAuthorSheet(
                 item = item,
                 qualityProfiles = qualityProfiles,
+                metadataProfiles = metadataProfiles,
                 rootFolders = rootFolders,
                 tags = tags,
                 editInProgress = editInProgress,
@@ -820,7 +835,7 @@ internal fun MonitorOptionsSheet(
     onDismissRequest: () -> Unit,
     onOptionSelected: (Any) -> Unit,
 ) {
-    if (type == InstanceType.Bookshelf) {
+    if (type == InstanceType.Bookshelf || type == InstanceType.Chaptarr) {
         BookshelfMonitorOptionsSheet(onDismissRequest, onOptionSelected)
         return
     }
@@ -973,7 +988,7 @@ internal fun EmptySearchResultsView(
             InstanceType.Sonarr -> mokoString(MR.strings.type_series)
             InstanceType.Radarr -> mokoString(MR.strings.type_movie)
             InstanceType.Lidarr -> mokoString(MR.strings.type_artist)
-            InstanceType.Bookshelf -> mokoString(MR.strings.type_author)
+            InstanceType.Bookshelf, InstanceType.Chaptarr -> mokoString(MR.strings.type_author)
             else -> mokoString(MR.strings.unknown)
         }
     Column(

@@ -18,6 +18,7 @@ import com.dnfapps.arrmatey.arr.api.model.BookSeries
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryItem
 import com.dnfapps.arrmatey.arr.api.model.BookshelfHistoryResponse
 import com.dnfapps.arrmatey.arr.api.model.BookshelfRelease
+import com.dnfapps.arrmatey.arr.api.model.ChaptarrReleaseResponse
 import com.dnfapps.arrmatey.arr.api.model.CommandPayload
 import com.dnfapps.arrmatey.arr.api.model.CommandResponse
 import com.dnfapps.arrmatey.arr.api.model.HistoryItem
@@ -25,6 +26,7 @@ import com.dnfapps.arrmatey.arr.api.model.IdWrapper
 import com.dnfapps.arrmatey.arr.api.model.MonitoredResponse
 import com.dnfapps.arrmatey.arr.api.model.ReleaseParams
 import com.dnfapps.arrmatey.instances.model.Instance
+import com.dnfapps.arrmatey.instances.model.InstanceType
 import com.dnfapps.networking.NetworkResult
 import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
@@ -98,8 +100,14 @@ class BookshelfClient(
         if (params !is ReleaseParams.Book) {
             return NetworkResult.Error(message = "Non-bookshelf params type: $params")
         }
-        val params = mapOf("bookId" to params.mediaId)
-        return get("release", params)
+        val queryParams = mapOf("bookId" to params.mediaId)
+        return if (instance.type == InstanceType.Chaptarr) {
+            get<ChaptarrReleaseResponse>("release", queryParams).map { response ->
+                response.releases
+            }
+        } else {
+            get("release", queryParams)
+        }
     }
 
     override suspend fun getItemHistory(
@@ -127,7 +135,13 @@ class BookshelfClient(
             "pageSize" to pageSize,
         ),
     ).map { response ->
-        response.records.map { it.copy(instanceId = instance.id, instanceName = instance.label, instanceType = instance.type) }
+        response.records.map {
+            it.copy(
+                instanceId = instance.id,
+                instanceName = instance.label,
+                instanceType = instance.type,
+            )
+        }
     }
 
     suspend fun getAuthorSeries(id: Long): NetworkResult<List<BookSeries>> = get("series", mapOf("authorId" to id))
@@ -136,7 +150,7 @@ class BookshelfClient(
 
     suspend fun getBookFiles(bookId: Long): NetworkResult<List<BookFile>> = get("bookFile", mapOf("bookId" to bookId))
 
-    suspend fun getBooks(): NetworkResult<List<Book>> = get("book")
+    suspend fun getBooks(authorId: Long? = null): NetworkResult<List<Book>> = get("book", buildMap { authorId?.let { put("authorId", it) } })
 
     suspend fun updateBook(book: Book): NetworkResult<Book> = put("book/${book.id}", book)
 
@@ -177,6 +191,7 @@ class BookshelfClient(
                 ),
             )
         }
+
         is AuthorMonitorOptions -> {
             val body =
                 AuthorBulkEditBody(
@@ -186,6 +201,7 @@ class BookshelfClient(
                 )
             put("author/editor", body)
         }
+
         else -> NetworkResult.Error(message = "Invalid monitor options")
     }
 }

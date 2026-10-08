@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ArrMediaViewModel(
-    private val instanceType: InstanceType,
+    val instanceTypes: List<InstanceType>,
     private val getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
     private val getLibraryUseCase: GetLibraryUseCase,
     private val updatePreferencesUseCase: UpdateInstancePreferencesUseCase,
@@ -70,6 +70,41 @@ class ArrMediaViewModel(
     private val executeArrCommandUseCase: ExecuteArrCommandUseCase,
     getActivityTasksUseCase: GetActivityTasksUseCase,
 ) : ViewModel() {
+    constructor(
+        instanceType: InstanceType,
+        getArrInstanceRepositoryUseCase: GetArrInstanceRepositoryUseCase,
+        getLibraryUseCase: GetLibraryUseCase,
+        updatePreferencesUseCase: UpdateInstancePreferencesUseCase,
+        updateAllPreferencesUseCase: UpdateAllPreferencesUseCase,
+        instancePreferenceStoreRepository: InstancePreferenceStoreRepository,
+        toggleMonitorUseCase: ToggleMonitorUseCase,
+        performAutomaticSearchUseCase: PerformAutomaticSearchUseCase,
+        updateMediaUseCase: UpdateMediaUseCase,
+        deleteMediaUseCase: DeleteMediaUseCase,
+        performRefreshUseCase: PerformRefreshUseCase,
+        getBazarrInstanceRepositoryUseCase: GetBazarrInstanceRepositoryUseCase,
+        executeArrCommandUseCase: ExecuteArrCommandUseCase,
+        getActivityTasksUseCase: GetActivityTasksUseCase,
+    ) : this(
+        instanceTypes = listOf(instanceType),
+        getArrInstanceRepositoryUseCase = getArrInstanceRepositoryUseCase,
+        getLibraryUseCase = getLibraryUseCase,
+        updatePreferencesUseCase = updatePreferencesUseCase,
+        updateAllPreferencesUseCase = updateAllPreferencesUseCase,
+        instancePreferenceStoreRepository = instancePreferenceStoreRepository,
+        toggleMonitorUseCase = toggleMonitorUseCase,
+        performAutomaticSearchUseCase = performAutomaticSearchUseCase,
+        updateMediaUseCase = updateMediaUseCase,
+        deleteMediaUseCase = deleteMediaUseCase,
+        performRefreshUseCase = performRefreshUseCase,
+        getBazarrInstanceRepositoryUseCase = getBazarrInstanceRepositoryUseCase,
+        executeArrCommandUseCase = executeArrCommandUseCase,
+        getActivityTasksUseCase = getActivityTasksUseCase,
+    )
+
+    val instanceType: InstanceType
+        get() = currentRepository?.instance?.type ?: instanceTypes.firstOrNull() ?: InstanceType.Sonarr
+
     private val _addItemStatus = MutableStateFlow<OperationStatus>(OperationStatus.Idle)
     val addItemStatus: StateFlow<OperationStatus> = _addItemStatus.asStateFlow()
 
@@ -111,7 +146,7 @@ class ArrMediaViewModel(
 
     private val selectedRepository =
         getArrInstanceRepositoryUseCase
-            .observeSelected(instanceType)
+            .observeSelected(instanceTypes)
             .filterNotNull()
             .distinctUntilChanged { old, new ->
                 old.instance == new.instance
@@ -152,7 +187,8 @@ class ArrMediaViewModel(
         selectedRepository
             .filterNotNull()
             .flatMapLatest {
-                instancePreferenceStoreRepository.getInstancePreferences(it.instance.id).observePreferences()
+                updateAllPreferencesUseCase.syncGlobalPreferencesToInstance(it.instance.id)
+                instancePreferenceStoreRepository.getInstancePreferences(it.instance.id, SortBy.defaultFor(it.instance.type)).observePreferences()
             }.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
@@ -216,12 +252,14 @@ class ArrMediaViewModel(
             }.flatMapLatest { repository ->
                 combine(
                     repository.qualityProfiles,
+                    repository.metadataProfiles,
                     repository.rootFolders,
                     repository.tags,
                     repository.customFilters,
-                ) { profiles, folders, tags, filters ->
+                ) { profiles, metadataProfiles, folders, tags, filters ->
                     InstanceData(
                         qualityProfiles = profiles,
+                        metadataProfiles = metadataProfiles,
                         rootFolders = folders,
                         tags = tags,
                         customFilters = filters,

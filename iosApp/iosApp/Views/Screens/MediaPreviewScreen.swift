@@ -46,20 +46,24 @@ struct MediaPreviewScreen: View {
         viewModel.uiState.tags
     }
     
+    private var currentMedia: ArrMedia {
+        viewModel.uiState.media ?? media
+    }
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                MediaDetailsHeader(item: media, type: type)
+                MediaDetailsHeader(item: currentMedia, type: type)
                     .frame(height: 400)
 
                 VStack(alignment: .leading, spacing: 12) {
-                    if let airingString = makeAiringString(for: media) {
+                    if let airingString = makeAiringString(for: currentMedia) {
                         Text(airingString)
                             .font(.system(size: 20, weight: .medium))
                             .foregroundColor(.themePrimary)
                     }
 
-                    ItemDescriptionCard(overview: media.overview)
+                    ItemDescriptionCard(overview: currentMedia.overview)
                 }
                 .padding(.horizontal, 24)
             }
@@ -68,15 +72,26 @@ struct MediaPreviewScreen: View {
         .ignoresSafeArea(edges: .top)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button(MR.strings().add.localized(), systemImage: "plus") {
+                let isAdding = addItemStatus is OperationStatusInProgress
+                Button {
                     sheetPresented = true
+                } label: {
+                    if isAdding {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    } else {
+                        Image(systemName: "plus")
+                    }
                 }
+                .disabled(isAdding)
             }
         }
         .onChange(of: lastAddedItemId) { _, newValue in
             if let id = newValue {
                 sheetPresented = false
-                navigation.replaceCurrent(with: .details(id: id, type: type), for: type)
+                let targetType = viewModel.uiState.selectedInstance?.type ?? type
+                let targetInstId = viewModel.uiState.selectedInstance?.id
+                navigation.replaceCurrent(with: .details(arrId: id, instanceType: targetType, instanceId: targetInstId), for: targetType)
             }
         }
         .sheet(isPresented: $sheetPresented) {
@@ -86,7 +101,7 @@ struct MediaPreviewScreen: View {
     
     @ViewBuilder
     private func addMediaSheet() -> some View {
-        switch media {
+        switch currentMedia {
         case let series as ArrSeries:
             AddSeriesForm(
                 series: series,
@@ -149,6 +164,7 @@ struct MediaPreviewScreen: View {
                 author: author,
                 addItemStatus: addItemStatus,
                 qualityProfiles: qualityProfiles,
+                metadataProfiles: viewModel.uiState.metadataProfiles,
                 rootFolders: rootFolders,
                 tags: tags,
                 preferences: viewModel.uiState.preferences,

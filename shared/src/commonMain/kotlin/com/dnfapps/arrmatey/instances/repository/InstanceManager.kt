@@ -145,6 +145,8 @@ class InstanceManager(
         InstanceType.Bookshelf -> ReadarrRepository(instance, httpClient, logger)
 
         InstanceType.Listenarr -> ListenarrRepository(instance, httpClient, logger)
+
+        InstanceType.Chaptarr -> ReadarrRepository(instance, httpClient, logger)
     }
 
     fun getArrRepository(instanceId: Long): ArrInstanceRepository? = _instanceRepositories.value[instanceId] as? ArrInstanceRepository?
@@ -171,6 +173,25 @@ class InstanceManager(
 
     fun getSelectedArrRepository(type: InstanceType): Flow<ArrInstanceRepository?> = getSelectedArrRepositoryTyped<ArrInstanceRepository>(type)
 
+    fun getSelectedArrRepository(types: List<InstanceType>): Flow<ArrInstanceRepository?> = instanceRepository
+        .observeSelectedInstanceByTypes(types)
+        .flatMapLatest { instance ->
+            if (instance == null) {
+                _instanceRepositories.map { repos ->
+                    repos.values.filterIsInstance<ArrInstanceRepository>().firstOrNull { it.instance.type in types }
+                }
+            } else {
+                _instanceRepositories.map { repos ->
+                    val repo = repos[instance.id] as? ArrInstanceRepository
+                    if (repo != null && repo.instance.type in types) {
+                        repo
+                    } else {
+                        repos.values.filterIsInstance<ArrInstanceRepository>().firstOrNull { it.instance.type in types }
+                    }
+                }
+            }
+        }
+
     fun getSelectedSonarrRepository(): Flow<SonarrRepository?> = getSelectedArrRepositoryTyped<SonarrRepository>(InstanceType.Sonarr)
 
     fun getSelectedRadarrRepository(): Flow<RadarrRepository?> = getSelectedArrRepositoryTyped<RadarrRepository>(InstanceType.Radarr)
@@ -180,6 +201,8 @@ class InstanceManager(
     fun getSelectedReadarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Bookshelf)
 
     fun getSelectedListenarrRepository(): Flow<ListenarrRepository?> = getSelectedArrRepositoryTyped<ListenarrRepository>(InstanceType.Listenarr)
+
+    fun getSelectedChaptarrRepository(): Flow<ReadarrRepository?> = getSelectedArrRepositoryTyped<ReadarrRepository>(InstanceType.Chaptarr)
 
     private inline fun <reified T : ArrInstanceRepository> getSelectedArrRepositoryTyped(type: InstanceType): Flow<T?> = instanceRepository
         .observeSelectedInstance(type)
@@ -292,6 +315,7 @@ class InstanceManager(
                             InstanceType.Lidarr,
                             InstanceType.Bookshelf,
                             InstanceType.Listenarr,
+                            InstanceType.Chaptarr,
                         )
                 }.map { it.id }
                 .toSet()
@@ -338,8 +362,28 @@ class InstanceManager(
         }
     }
 
+    fun observeArrLibrariesByInstanceId(): Flow<Map<Long, List<ArrMedia>>> {
+        return _instanceRepositories.flatMapLatest { repos ->
+            val arrRepos = repos.values.filterIsInstance<ArrInstanceRepository>()
+            if (arrRepos.isEmpty()) return@flatMapLatest flowOf(emptyMap())
+            arrRepos.forEach { repo ->
+                if (repo.library.value == null) {
+                    scope.launch { repo.refreshLibrary() }
+                }
+            }
+            val libraries = arrRepos.map { it.library }
+            combine(libraries) { results ->
+                arrRepos.indices.associate { index ->
+                    arrRepos[index].instance.id to (results[index]?.asSuccess()?.data ?: emptyList())
+                }
+            }
+        }
+    }
+
     fun getRepositoriesByType(type: InstanceType): List<InstanceScopedRepository> = _instanceRepositories.value.values
         .filter { it.instance.type == type }
+
+    fun observeAllInstances(): Flow<List<Instance>> = instanceRepository.observeAllInstances()
 
     fun cleanup() {
         scope.cancel()

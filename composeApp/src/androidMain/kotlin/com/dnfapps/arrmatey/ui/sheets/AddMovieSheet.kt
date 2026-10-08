@@ -2,21 +2,14 @@ package com.dnfapps.arrmatey.ui.sheets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SegmentedButton
@@ -31,8 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.ArrMovie
@@ -48,8 +39,10 @@ import com.dnfapps.arrmatey.shared.MR
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
-import com.dnfapps.arrmatey.ui.components.MultiSelectDropdownPicker
-import com.dnfapps.arrmatey.utils.mokoPlural
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaActionButton
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaSheetHeader
+import com.dnfapps.arrmatey.ui.sheets.components.SearchOnAddCard
+import com.dnfapps.arrmatey.ui.sheets.components.TagsSelectionCard
 import com.dnfapps.arrmatey.utils.mokoString
 import kotlin.time.ExperimentalTime
 
@@ -159,20 +152,10 @@ fun AddMovieSheetContent(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column {
-                Text(
-                    text = mokoString(MR.strings.type_movie).uppercase(),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                )
-                Text(
-                    text = item.title ?: "",
-                    style = MaterialTheme.typography.headlineMediumEmphasized,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+            AddMediaSheetHeader(
+                type = mokoString(MR.strings.type_movie),
+                title = item.title ?: "",
+            )
 
             if (canSwitchToRequest && onSwitchToRequest != null) {
                 SingleChoiceSegmentedButtonRow(
@@ -215,18 +198,19 @@ fun AddMovieSheetContent(
             )
         }
 
-        Button(
+        AddMediaActionButton(
+            text = mokoString(MR.strings.save),
             onClick = {
                 val qp = qualityProfile
                 val rf = rootFolder
                 if (qp != null && rf != null) {
                     onUpdatePreferences(
-                        preferences.copy(
-                            addMovieMonitored = monitored,
-                            addMovieMinimumAvailability = minimumAvailability,
-                            addQualityProfileId = qp.id,
-                            addRootFolderPath = rf.path,
-                            addSearchOnAdd = searchOnAdd,
+                        preferences.copyWithMovieAddDefaults(
+                            monitored = monitored,
+                            minAvailability = minimumAvailability,
+                            qualityProfileId = qp.id,
+                            rootFolderPath = rf.path,
+                            searchOnAdd = searchOnAdd,
                         ),
                     )
                     val newItem =
@@ -240,20 +224,9 @@ fun AddMovieSheetContent(
                     onAddItem(newItem, searchOnAdd)
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !addInProgress && qualityProfile != null && rootFolder != null,
-        ) {
-            if (addInProgress) {
-                CircularProgressIndicator(Modifier.size(24.dp))
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(text = mokoString(MR.strings.save))
-            }
-        }
+            isLoading = addInProgress,
+            enabled = qualityProfile != null && rootFolder != null,
+        )
     }
 }
 
@@ -264,10 +237,10 @@ fun MovieAddConfigurationContent(
     onInstanceSelected: (Instance) -> Unit,
     qualityProfiles: List<QualityProfile>,
     qualityProfile: QualityProfile?,
-    onQualityProfileChange: (QualityProfile?) -> Unit,
+    onQualityProfileChange: (QualityProfile) -> Unit,
     rootFolders: List<RootFolder>,
     rootFolder: RootFolder?,
-    onRootFolderChange: (RootFolder?) -> Unit,
+    onRootFolderChange: (RootFolder) -> Unit,
     tags: List<Tag>,
     selectedTags: List<Int>,
     monitored: Boolean,
@@ -333,33 +306,15 @@ fun MovieAddConfigurationContent(
                 enabled = enabled,
             )
 
-            if (tags.isNotEmpty()) {
-                val mutableTags = selectedTags as? androidx.compose.runtime.snapshots.SnapshotStateList<Int>
-                MultiSelectDropdownPicker(
-                    options = tags.map { it.id },
-                    selectedOptions =
-                    mutableTags
-                        ?: androidx.compose.runtime.remember(
-                            selectedTags,
-                        ) { androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray()) },
-                    valueLabel = mokoPlural(MR.plurals.tag_count, selectedTags.size),
-                    onOptionSelected = { tag, isSelected ->
-                        if (mutableTags != null) {
-                            if (isSelected) {
-                                mutableTags.add(tag)
-                            } else {
-                                mutableTags.remove(tag)
-                            }
-                        }
-                    },
-                    getOptionLabel = { tag ->
-                        tags.firstOrNull { tag == it.id }?.label
-                            ?: mokoString(MR.strings.unknown)
-                    },
-                    label = { Text(mokoString(MR.strings.tags)) },
-                    enabled = enabled,
-                )
-            }
+            val mutableTags = (selectedTags as? androidx.compose.runtime.snapshots.SnapshotStateList<Int>)
+                ?: androidx.compose.runtime.remember(selectedTags) {
+                    androidx.compose.runtime.mutableStateListOf(*selectedTags.toTypedArray())
+                }
+            TagsSelectionCard(
+                tags = tags,
+                selectedTags = mutableTags,
+                enabled = enabled,
+            )
         }
 
         if (rootFolders.size > 1) {
@@ -380,17 +335,10 @@ fun MovieAddConfigurationContent(
             }
         }
 
-        ContainerCard(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-            shape = MaterialTheme.shapes.large,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            LabelledSwitch(
-                label = mokoString(MR.strings.search_on_add_label),
-                checked = searchOnAdd,
-                onCheckedChange = onSearchOnAddChange,
-                enabled = enabled,
-            )
-        }
+        SearchOnAddCard(
+            checked = searchOnAdd,
+            onCheckedChange = onSearchOnAddChange,
+            enabled = enabled,
+        )
     }
 }

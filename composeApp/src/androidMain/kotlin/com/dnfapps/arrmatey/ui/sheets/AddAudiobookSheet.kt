@@ -2,21 +2,14 @@ package com.dnfapps.arrmatey.ui.sheets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -27,8 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.QualityProfile
@@ -42,6 +33,9 @@ import com.dnfapps.arrmatey.ui.components.AMOutlinedTextField
 import com.dnfapps.arrmatey.ui.components.ContainerCard
 import com.dnfapps.arrmatey.ui.components.DropdownPicker
 import com.dnfapps.arrmatey.ui.components.LabelledSwitch
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaActionButton
+import com.dnfapps.arrmatey.ui.sheets.components.AddMediaSheetHeader
+import com.dnfapps.arrmatey.ui.sheets.components.SearchOnAddCard
 import com.dnfapps.arrmatey.utils.mokoString
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -105,20 +99,10 @@ fun AddAudiobookSheet(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Column {
-                    Text(
-                        text = mokoString(MR.strings.type_audiobook).uppercase(),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = item.title,
-                        style = MaterialTheme.typography.headlineMediumEmphasized,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                AddMediaSheetHeader(
+                    type = mokoString(MR.strings.type_audiobook),
+                    title = item.title,
+                )
 
                 if (instances.size > 1 && selectedInstance != null) {
                     DropdownPicker(
@@ -189,30 +173,24 @@ fun AddAudiobookSheet(
                     )
                 }
 
-                ContainerCard(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    LabelledSwitch(
-                        label = mokoString(MR.strings.search_on_add_label),
-                        checked = searchOnAdd,
-                        onCheckedChange = { searchOnAdd = it },
-                        enabled = !addInProgress,
-                    )
-                }
+                SearchOnAddCard(
+                    checked = searchOnAdd,
+                    onCheckedChange = { searchOnAdd = it },
+                    enabled = !addInProgress,
+                )
             }
 
-            Button(
+            AddMediaActionButton(
+                text = mokoString(MR.strings.save),
                 onClick = {
                     val rf = rootFolder
                     if (rf != null) {
                         onUpdatePreferences(
-                            preferences.copy(
-                                addAudiobookMonitored = monitored,
-                                addQualityProfileId = qualityProfile?.id,
-                                addRootFolderPath = rf.path,
-                                addSearchOnAdd = searchOnAdd,
+                            preferences.copyWithAudiobookAddDefaults(
+                                monitored = monitored,
+                                qualityProfileId = qualityProfile?.id,
+                                rootFolderPath = rf.path,
+                                searchOnAdd = searchOnAdd,
                             ),
                         )
                         val newItem =
@@ -225,20 +203,9 @@ fun AddAudiobookSheet(
                         onAddItem(newItem, searchOnAdd)
                     }
                 },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !addInProgress && rootFolder != null,
-            ) {
-                if (addInProgress) {
-                    CircularProgressIndicator(Modifier.size(24.dp))
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(text = mokoString(MR.strings.save))
-                }
-            }
+                isLoading = addInProgress,
+                enabled = rootFolder != null,
+            )
         }
     }
 }

@@ -58,7 +58,7 @@ class GetMediaDetailsUseCase(
                                 loadLidarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }
-                            InstanceType.Bookshelf -> {
+                            InstanceType.Bookshelf, InstanceType.Chaptarr -> {
                                 loadReadarrDetails(repository, mediaId, data)
                                     .collect { send(it) }
                             }
@@ -158,6 +158,7 @@ class GetMediaDetailsUseCase(
         author: ArrMedia,
     ): Flow<MediaDetailsUiState> = flow {
         coroutineScope {
+            launch { repository.getAuthorBooks(authorId) }
             launch { repository.getAuthorBookFiles(authorId) }
             launch { repository.getAuthorSeries(authorId) }
         }
