@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,16 +47,20 @@ fun DownloadedMediaItemView(
         shape = MaterialTheme.shapes.large,
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Box(
-                modifier =
-                Modifier
-                    .width(6.dp)
-                    .fillMaxHeight()
-                    .background(item.instanceType.associatedColor)
-                    .align(Alignment.CenterStart),
-            )
+                modifier = Modifier.matchParentSize(),
+            ) {
+                Box(
+                    modifier =
+                    Modifier
+                        .width(6.dp)
+                        .fillMaxHeight()
+                        .background(item.instanceType.associatedColor)
+                        .align(Alignment.CenterStart),
+                )
+            }
 
             Row(
                 modifier =
@@ -66,7 +69,7 @@ fun DownloadedMediaItemView(
                     .padding(start = 6.dp)
                     .padding(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalAlignment = Alignment.Top,
             ) {
                 val media = item.media
                 if (media != null) {
