@@ -3,6 +3,7 @@ package com.dnfapps.arrmatey.ui.components.downloads
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,9 +41,15 @@ fun DownloadTransferSpeedChips(
         Spacer(Modifier.width(18.dp))
         downloadClients.forEach { client ->
             val info = transferInfo.firstOrNull { it.client.id == client.id }
+            val showIp = client.type.supportsExternalIp && client.showExternalIpAddress
+            val externalIp = info?.externalIp
             FilterChip(
                 selected = downloadClients.size > 1 && selectedClientIds.contains(client.id),
-                onClick = { onToggleClientIdFilter(client.id) },
+                onClick = {
+                    if (downloadClients.size > 1) {
+                        onToggleClientIdFilter(client.id)
+                    }
+                },
                 leadingIcon = {
                     Image(
                         painter = painterResource(client.type.icon),
@@ -51,14 +58,24 @@ fun DownloadTransferSpeedChips(
                     )
                 },
                 label = {
-                    Text(
-                        text =
-                        "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
-                            "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    Column(
                         modifier = Modifier.padding(vertical = 2.dp),
-                    )
+                    ) {
+                        Text(
+                            text =
+                            "↓ ${(info?.downloadSpeed ?: 0).bytesAsFileSizeString()}/s  " +
+                                "↑ ${(info?.uploadSpeed ?: 0).bytesAsFileSizeString()}/s",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (showIp && !externalIp.isNullOrBlank()) {
+                            Text(
+                                text = externalIp,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
                 },
             )
         }
