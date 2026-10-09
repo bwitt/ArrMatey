@@ -52,8 +52,8 @@ fun ChaptarrAddAuthorForm(
     searchOnAdd: Boolean,
     onSearchOnAddChanged: (Boolean) -> Unit,
     monitorOptions: List<AuthorMonitorType>,
-    enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),

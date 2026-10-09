@@ -100,13 +100,13 @@ fun SeerrRequestSheetContent(
     requestInProgress: Boolean,
     onDismissRequest: () -> Unit,
     onSubmitRequest: (Long?, String?, Long?, List<Int>?, Long?) -> Unit,
+    modifier: Modifier = Modifier,
     canSwitchToAddDirectly: Boolean = false,
     instanceTypeName: String? = null,
     onSwitchToAddDirectly: (() -> Unit)? = null,
     canRequest4k: Boolean = false,
     is4k: Boolean = false,
     onIs4kChange: (Boolean) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     var selectedProfileId by remember { mutableStateOf<Long?>(null) }
     var selectedRootFolder by remember { mutableStateOf<String?>(null) }
@@ -258,11 +258,11 @@ fun SeerrRequestConfigurationContent(
     onSelectedUserIdChange: (Long?) -> Unit,
     selectedSeasons: Set<Int>,
     onSelectedSeasonsChange: (Set<Int>) -> Unit,
+    modifier: Modifier = Modifier,
     canRequest4k: Boolean = false,
     is4k: Boolean = false,
     onIs4kChange: (Boolean) -> Unit = {},
     enabled: Boolean = true,
-    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),

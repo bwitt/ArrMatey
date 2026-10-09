@@ -35,9 +35,9 @@ import com.dnfapps.arrmatey.utils.mokoString
 @Composable
 fun ReadyPage(
     instancesCount: Int,
-    downloadClientsCount: Int = 0,
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
+    downloadClientsCount: Int = 0,
 ) {
     val connectedText =
         when {
