@@ -141,8 +141,12 @@ package com.dnfapps.arrmatey.utils
 
 import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.reinterpret
+import platform.CoreFoundation.CFRelease
+import platform.CoreFoundation.CFRetain
 import platform.CoreFoundation.CFStringRef
 import platform.Foundation.CFBridgingRelease
+import platform.Foundation.CFBridgingRetain
 import platform.Foundation.NSArray
 import platform.Foundation.NSDictionary
 import platform.Foundation.NSString
@@ -164,14 +168,21 @@ class IOSNetworkUtils : NetworkUtils {
         for (i in 0UL until count) {
             val interfaceName = interfaces.objectAtIndex(i) as? NSString ?: continue
 
-            // Get network info for this interface
-            val networkInfoPtr = CNCopyCurrentNetworkInfo(interfaceName as CFStringRef) ?: continue
+            // CFBridgingRetain returns a +1 reference, so release it once the lookup returns.
+            val interfaceNameRef: CFStringRef = CFBridgingRetain(interfaceName)?.reinterpret() ?: continue
+            val networkInfoPtr =
+                try {
+                    CNCopyCurrentNetworkInfo(interfaceNameRef)
+                } finally {
+                    CFRelease(interfaceNameRef)
+                }
+            if (networkInfoPtr == null) continue
 
             // Convert to NSDictionary
             val networkInfo = CFBridgingRelease(networkInfoPtr) as? NSDictionary ?: continue
 
-            // Get SSID
-            val ssidKey = kCNNetworkInfoKeySSID as NSString
+            // The constant is unowned, so retain it to balance the bridging release.
+            val ssidKey = CFBridgingRelease(CFRetain(kCNNetworkInfoKeySSID)) as? NSString ?: continue
             val ssid = networkInfo.objectForKey(ssidKey) as? NSString
 
             if (ssid != null) {
