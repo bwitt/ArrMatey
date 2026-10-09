@@ -320,7 +320,7 @@ class UnifiedMediaDetailsViewModel(
             initialTmdbId = tmdbId,
             initialRequestType = resolvedRequestType,
         )
-        // No-op if already polling; restarts it if another screen's onCleared stopped it.
+        // No-op if already polling; restarts it after MainActivity paused it.
         activityQueueService.startPolling()
     }
 
