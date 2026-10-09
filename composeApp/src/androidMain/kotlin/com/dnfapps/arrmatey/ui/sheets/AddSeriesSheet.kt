@@ -110,13 +110,13 @@ fun AddSeriesSheetContent(
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
     instances: List<Instance> = emptyList(),
     selectedInstance: Instance? = null,
     onInstanceSelected: (Instance) -> Unit = {},
     canSwitchToRequest: Boolean = false,
     instanceTypeName: String? = null,
     onSwitchToRequest: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
 ) {
     var monitor by remember(preferences.addSeriesMonitor, selectedInstance?.id) { mutableStateOf(preferences.addSeriesMonitor) }
     var qualityProfile by remember(qualityProfiles, preferences.addQualityProfileId, selectedInstance?.id) {
@@ -258,8 +258,8 @@ fun SeriesAddConfigurationContent(
     onSeasonFoldersChange: (Boolean) -> Unit,
     searchOnAdd: Boolean,
     onSearchOnAddChange: (Boolean) -> Unit,
-    enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),

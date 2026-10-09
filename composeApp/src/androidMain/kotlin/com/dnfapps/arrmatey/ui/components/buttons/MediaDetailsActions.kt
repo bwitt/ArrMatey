@@ -57,10 +57,10 @@ fun MediaDetailsActions(
     onViewRequestClicked: (Long) -> Unit,
     onApproveRequestClicked: (Long) -> Unit,
     onDeclineRequestClicked: (Long) -> Unit,
+    modifier: Modifier = Modifier,
     onCancelRequestClicked: (Long) -> Unit = onDeclineRequestClicked,
     onRequestClicked: () -> Unit,
     onRequest4kClicked: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     if (
         buttonState.showWatchButton ||

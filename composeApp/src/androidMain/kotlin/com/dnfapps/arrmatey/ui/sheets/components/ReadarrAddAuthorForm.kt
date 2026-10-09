@@ -37,8 +37,8 @@ fun ReadarrAddAuthorForm(
     selectedTags: SnapshotStateList<Int>,
     searchOnAdd: Boolean,
     onSearchOnAddChanged: (Boolean) -> Unit,
-    enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),

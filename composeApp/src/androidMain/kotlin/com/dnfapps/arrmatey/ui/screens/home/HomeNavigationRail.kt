@@ -62,8 +62,8 @@ fun HomeNavigationRail(
     activityQueueIssuesCount: Int,
     onOpenDrawer: () -> Unit,
     onSelectTab: (TabItem) -> Unit,
-    onLongPressTab: () -> Unit = {},
     modifier: Modifier = Modifier,
+    onLongPressTab: () -> Unit = {},
 ) {
     val haptic = LocalHapticFeedback.current
     val handleLongPress = {

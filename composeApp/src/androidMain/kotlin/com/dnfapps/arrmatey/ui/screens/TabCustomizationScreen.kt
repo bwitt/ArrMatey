@@ -100,11 +100,11 @@ fun TabCustomizationContent(
     drawerTabs: List<TabItem>,
     hiddenTabs: List<TabItem>,
     updatePreferences: (TabPreferences) -> Unit,
+    modifier: Modifier = Modifier,
     useFloatingNavigationBar: Boolean = false,
     hideFloatingNavigationBarLabels: Boolean = false,
     onToggleUseFloatingNavigationBar: () -> Unit = {},
     onToggleHideFloatingNavigationBarLabels: () -> Unit = {},
-    modifier: Modifier = Modifier.fillMaxSize(),
     contentPadding: PaddingValues = PaddingValues(bottom = 16.dp + LocalFloatingBarBottomPadding.current),
 ) {
     fun moveVisible(
@@ -190,7 +190,7 @@ fun TabCustomizationContent(
     }
 
     LazyColumn(
-        modifier = modifier.padding(horizontal = 16.dp),
+        modifier = modifier.fillMaxSize().padding(horizontal = 16.dp),
         contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {

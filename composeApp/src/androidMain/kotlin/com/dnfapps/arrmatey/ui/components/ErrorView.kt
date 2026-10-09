@@ -35,11 +35,11 @@ import com.dnfapps.arrmatey.utils.mokoString
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ErrorView(
+    modifier: Modifier = Modifier,
     errorType: HttpErrorType = HttpErrorType.Unexpected,
     message: String,
     onOpenSettings: () -> Unit = {},
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier,
 ) {
     val icon =
         when (errorType) {

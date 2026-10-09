@@ -438,8 +438,8 @@ private fun InteractiveImportFileRow(
     instanceType: InstanceType?,
     onToggle: () -> Unit,
     onSelectMediaClick: () -> Unit,
-    onSelectEpisodeClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onSelectEpisodeClick: (() -> Unit)? = null,
 ) {
     ContainerCard(
         modifier = modifier.fillMaxWidth(),

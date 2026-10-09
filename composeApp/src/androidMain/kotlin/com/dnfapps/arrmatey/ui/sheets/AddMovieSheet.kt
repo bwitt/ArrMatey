@@ -109,13 +109,13 @@ fun AddMovieSheetContent(
     onUpdatePreferences: (InstancePreferences) -> Unit,
     onAddItem: (ArrMedia, Boolean) -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
     instances: List<Instance> = emptyList(),
     selectedInstance: Instance? = null,
     onInstanceSelected: (Instance) -> Unit = {},
     canSwitchToRequest: Boolean = false,
     instanceTypeName: String? = null,
     onSwitchToRequest: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
 ) {
     var monitored by remember(preferences.addMovieMonitored, selectedInstance?.id) { mutableStateOf(preferences.addMovieMonitored) }
     var minimumAvailability by remember(preferences.addMovieMinimumAvailability, selectedInstance?.id) {
@@ -249,8 +249,8 @@ fun MovieAddConfigurationContent(
     onMinimumAvailabilityChange: (MediaStatus) -> Unit,
     searchOnAdd: Boolean,
     onSearchOnAddChange: (Boolean) -> Unit,
-    enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),

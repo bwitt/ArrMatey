@@ -105,13 +105,13 @@ fun SeerrRequestSheetContent(
     requestInProgress: Boolean,
     onDismissRequest: () -> Unit,
     onSubmitRequest: (Long?, String?, Long?, List<Int>?, Long?) -> Unit,
+    modifier: Modifier = Modifier,
     canSwitchToAddDirectly: Boolean = false,
     instanceTypeName: String? = null,
     onSwitchToAddDirectly: (() -> Unit)? = null,
     canRequest4k: Boolean = false,
     is4k: Boolean = false,
     onIs4kChange: (Boolean) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     var selectedProfileId by remember { mutableStateOf<Long?>(null) }
     var selectedRootFolder by remember { mutableStateOf<String?>(null) }
@@ -292,6 +292,7 @@ fun SeerrRequestSheetContent(
 fun SeerrRequestConfigurationContent(
     details: RequestMediaDetails,
     serviceDetails: ServiceDetails?,
+    modifier: Modifier = Modifier,
     isAdmin: Boolean = false,
     canConfigureAdvanced: Boolean = isAdmin,
     canRequestForOtherUsers: Boolean = isAdmin,
@@ -308,7 +309,6 @@ fun SeerrRequestConfigurationContent(
     is4k: Boolean = false,
     onIs4kChange: (Boolean) -> Unit = {},
     enabled: Boolean = true,
-    modifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),

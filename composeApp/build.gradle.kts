@@ -114,8 +114,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
     lint {
-        // Renovate owns bumps, and NewerVersionAvailable hits the network every run.
-        disable += setOf("NewerVersionAvailable", "GradleDependency")
+        // Renovate owns bumps, and these hit the network every run.
+        disable += setOf("NewerVersionAvailable", "GradleDependency", "AndroidGradlePluginVersion")
+        warningsAsErrors = true
+        abortOnError = true
     }
     dependenciesInfo {
         // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
