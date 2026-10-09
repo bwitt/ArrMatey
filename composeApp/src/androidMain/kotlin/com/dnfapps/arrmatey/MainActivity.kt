@@ -13,7 +13,6 @@ import com.dnfapps.arrmatey.arr.service.ActivityQueueService
 import com.dnfapps.arrmatey.compose.TabItem
 import com.dnfapps.arrmatey.compose.TabManager
 import com.dnfapps.arrmatey.instances.model.InstanceType
-import com.dnfapps.arrmatey.instances.repository.InstanceManager
 import com.dnfapps.arrmatey.navigation.NavigationManager
 import com.dnfapps.arrmatey.navigation.toDetails
 import com.dnfapps.arrmatey.navigation.toSearch
@@ -145,7 +144,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        get<InstanceManager>().cleanup()
-        get<ActivityQueueService>().cleanup()
+        // Singletons outlive the Activity; just pause polling when the user leaves (not on rotation).
+        if (isFinishing) get<ActivityQueueService>().stopPolling()
     }
 }

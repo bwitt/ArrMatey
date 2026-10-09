@@ -408,11 +408,6 @@ class ActivityQueueViewModel(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        activityQueueService.stopPolling()
-    }
-
     private fun filterByInstance(
         items: List<QueueItem>,
         instanceId: Long?,
