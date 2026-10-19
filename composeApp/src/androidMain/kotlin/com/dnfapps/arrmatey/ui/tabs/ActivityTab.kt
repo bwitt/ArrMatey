@@ -54,6 +54,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.rememberNavEntryDecorators
 import com.dnfapps.arrmatey.ui.menu.ActivityFilterMenu
 import com.dnfapps.arrmatey.ui.sheets.ActivityCardCustomizationSheet
 import com.dnfapps.arrmatey.ui.sheets.ConfirmDeleteItemSheet
@@ -80,6 +81,7 @@ fun ActivityTab(
     NavDisplay(
         backStack = navigation.backStack,
         onBack = { navigation.popBackStack() },
+        entryDecorators = rememberNavEntryDecorators(),
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },

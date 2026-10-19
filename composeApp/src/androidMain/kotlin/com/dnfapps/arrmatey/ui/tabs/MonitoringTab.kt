@@ -15,6 +15,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.monitoringNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.rememberNavEntryDecorators
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -30,6 +31,7 @@ fun MonitoringTab(
     NavDisplay(
         backStack = navigation.backStack,
         onBack = { navigation.popBackStack() },
+        entryDecorators = rememberNavEntryDecorators(),
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },

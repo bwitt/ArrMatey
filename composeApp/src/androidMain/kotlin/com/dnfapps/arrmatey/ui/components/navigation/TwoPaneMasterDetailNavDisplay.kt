@@ -59,6 +59,7 @@ fun TwoPaneMasterDetailNavDisplay(
             NavDisplay(
                 backStack = if (showDetails) listOf(baseScreen) else navigation.backStack,
                 onBack = { navigation.popBackStack() },
+                entryDecorators = rememberNavEntryDecorators(),
                 transitionSpec = { forwardSlideTransform() },
                 popTransitionSpec = { popSlideTransform() },
                 predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
@@ -87,6 +88,7 @@ fun TwoPaneMasterDetailNavDisplay(
                         NavDisplay(
                             backStack = lastValidDetailBackStack.value,
                             onBack = { navigation.popBackStack() },
+                            entryDecorators = rememberNavEntryDecorators(),
                             transitionSpec = { forwardSlideTransform() },
                             popTransitionSpec = { popSlideTransform() },
                             predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },

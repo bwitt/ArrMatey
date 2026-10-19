@@ -17,6 +17,7 @@ import com.dnfapps.arrmatey.ui.components.navigation.forwardSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.mediaNavEntries
 import com.dnfapps.arrmatey.ui.components.navigation.popSlideTransform
 import com.dnfapps.arrmatey.ui.components.navigation.predictivePopSlideTransform
+import com.dnfapps.arrmatey.ui.components.navigation.rememberNavEntryDecorators
 import com.dnfapps.arrmatey.ui.screens.RequestsScreen
 import org.koin.compose.koinInject
 
@@ -32,6 +33,7 @@ fun SeerrTab(
     NavDisplay(
         backStack = navigation.backStack,
         onBack = { navigation.popBackStack() },
+        entryDecorators = rememberNavEntryDecorators(),
         transitionSpec = { forwardSlideTransform() },
         popTransitionSpec = { popSlideTransform() },
         predictivePopTransitionSpec = { _ -> predictivePopSlideTransform() },
