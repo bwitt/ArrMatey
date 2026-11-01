@@ -33,6 +33,7 @@ import com.dnfapps.arrmatey.seerr.usecase.SetRequestApprovalStatusUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitIssueUseCase
 import com.dnfapps.arrmatey.seerr.usecase.SubmitRequestUseCase
 import com.dnfapps.networking.onSuccess
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -184,82 +185,88 @@ class SeerrMediaDetailsViewModel(
         }
     }
 
+    private var loadJob: Job? = null
+
     private fun loadData(repository: SeerrInstanceRepository) {
-        viewModelScope.launch {
-            getSeerrMediaDetailsUseCase(tmdbId, mediaType, repository)
-                .collect { state ->
-                    _uiState.value = state
-                }
-        }
-        viewModelScope.launch {
-            repository.getRadarrServices()
-        }
-        viewModelScope.launch {
-            repository.getSonarrServices()
-        }
-        viewModelScope.launch {
-            repository.radarrServices.collect { _radarrServices.value = it }
-        }
-        viewModelScope.launch {
-            repository.sonarrServices.collect { _sonarrServices.value = it }
-        }
-        viewModelScope.launch {
-            repository.getLoggedInUser()
-        }
-        viewModelScope.launch {
-            repository.loggedInUser.collect { _currentUser.value = it }
-        }
-        viewModelScope.launch {
-            repository.getUsers()
-        }
-        viewModelScope.launch {
-            repository.users.collect { _users.value = it }
-        }
-        viewModelScope.launch {
-            combine(_uiState, _radarrServices, _sonarrServices) { state, radarr, sonarr ->
-                if (state is SeerrDetailsState.Success) {
-                    val request =
-                        state.item.mediaInfo
-                            ?.requests
-                            ?.firstOrNull { it.status == 1 }
-                    val serverId =
-                        request?.serverId ?: when (state.item.requestType) {
-                            RequestType.Movie -> radarr.find { it.isDefault }?.id
-                            RequestType.Tv -> sonarr.find { it.isDefault }?.id
-                            RequestType.Person -> null
+        loadJob?.cancel()
+        loadJob =
+            viewModelScope.launch {
+                launch {
+                    getSeerrMediaDetailsUseCase(tmdbId, mediaType, repository)
+                        .collect { state ->
+                            _uiState.value = state
                         }
-                    if (serverId != null) serverId to state.item.requestType else null
-                } else {
-                    null
                 }
-            }.filterNotNull()
-                .distinctUntilChanged()
-                .collectLatest { (serverId, type) ->
-                    val result =
-                        when (type) {
-                            RequestType.Movie -> repository.getRadarrDetails(serverId)
-                            RequestType.Tv -> repository.getSonarrDetails(serverId)
-                            RequestType.Person -> return@collectLatest
+                launch {
+                    repository.getRadarrServices()
+                }
+                launch {
+                    repository.getSonarrServices()
+                }
+                launch {
+                    repository.radarrServices.collect { _radarrServices.value = it }
+                }
+                launch {
+                    repository.sonarrServices.collect { _sonarrServices.value = it }
+                }
+                launch {
+                    repository.getLoggedInUser()
+                }
+                launch {
+                    repository.loggedInUser.collect { _currentUser.value = it }
+                }
+                launch {
+                    repository.getUsers()
+                }
+                launch {
+                    repository.users.collect { _users.value = it }
+                }
+                launch {
+                    combine(_uiState, _radarrServices, _sonarrServices) { state, radarr, sonarr ->
+                        if (state is SeerrDetailsState.Success) {
+                            val request =
+                                state.item.mediaInfo
+                                    ?.requests
+                                    ?.firstOrNull { it.status == 1 }
+                            val serverId =
+                                request?.serverId ?: when (state.item.requestType) {
+                                    RequestType.Movie -> radarr.find { it.isDefault }?.id
+                                    RequestType.Tv -> sonarr.find { it.isDefault }?.id
+                                    RequestType.Person -> null
+                                }
+                            if (serverId != null) serverId to state.item.requestType else null
+                        } else {
+                            null
                         }
-                    result.onSuccess { details ->
-                        _serviceDetails.value = details
+                    }.filterNotNull()
+                        .distinctUntilChanged()
+                        .collectLatest { (serverId, type) ->
+                            val result =
+                                when (type) {
+                                    RequestType.Movie -> repository.getRadarrDetails(serverId)
+                                    RequestType.Tv -> repository.getSonarrDetails(serverId)
+                                    RequestType.Person -> return@collectLatest
+                                }
+                            result.onSuccess { details ->
+                                _serviceDetails.value = details
+                            }
+                        }
+                }
+                launch {
+                    getSeerrMovieRatingsUseCase(tmdbId)
+                        .collect { rt -> _combinedRatings.value = rt }
+                }
+                launch {
+                    getSeerrTvRatingsUseCase(tmdbId)
+                        .collect { rt -> _rtRatings.value = rt }
+                }
+                if (mediaType == RequestType.Person) {
+                    launch {
+                        getPersonCreditsUseCase(tmdbId, repository)
+                            .onSuccess { _personCredits.value = it }
                     }
                 }
-        }
-        viewModelScope.launch {
-            getSeerrMovieRatingsUseCase(tmdbId)
-                .collect { rt -> _combinedRatings.value = rt }
-        }
-        viewModelScope.launch {
-            getSeerrTvRatingsUseCase(tmdbId)
-                .collect { rt -> _rtRatings.value = rt }
-        }
-        if (mediaType == RequestType.Person) {
-            viewModelScope.launch {
-                getPersonCreditsUseCase(tmdbId, repository)
-                    .onSuccess { _personCredits.value = it }
             }
-        }
     }
 
     fun refreshDetails() {

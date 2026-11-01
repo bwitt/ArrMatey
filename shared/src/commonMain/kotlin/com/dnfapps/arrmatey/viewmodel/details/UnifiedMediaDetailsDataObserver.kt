@@ -19,6 +19,8 @@ import com.dnfapps.arrmatey.seerr.api.model.MovieDetails
 import com.dnfapps.arrmatey.seerr.api.model.RequestType
 import com.dnfapps.arrmatey.seerr.api.model.TvDetails
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 
 class UnifiedMediaDetailsDataObserver(
     private val scope: CoroutineScope,
@@ -71,8 +74,15 @@ class UnifiedMediaDetailsDataObserver(
                 targetArrIdFor(old.first, old.fifth) == targetArrIdFor(new.first, new.fifth)
         }
 
+    private var observationJob: Job? = null
+
     fun observeData(uiStateFlow: MutableStateFlow<UnifiedMediaDetailsUiState>) {
-        scope.launch {
+        observationJob?.cancel()
+        val job = SupervisorJob(scope.coroutineContext[Job])
+        observationJob = job
+        val observeScope = scope + job
+
+        observeScope.launch {
             instanceHandler.instancePresencesMap.collect { map ->
                 val current = uiStateFlow.value as? UnifiedMediaDetailsUiState.Success ?: return@collect
                 val updatedPresences =
@@ -110,10 +120,11 @@ class UnifiedMediaDetailsDataObserver(
         seerrServiceHandler.observeSeerrRepo(
             seerrRepoFlow = instanceHandler.seerrRepositoryFlow,
             uiStateFlow = uiStateFlow,
+            observeScope = observeScope,
         )
 
         tracearrHandler.observeTracearrData(
-            scope = scope,
+            scope = observeScope,
             uiStateFlow = uiStateFlow,
             getTracearrInstanceRepositoryUseCase = getTracearrInstanceRepositoryUseCase,
             getPlaybackMonitoringRepositoryUseCase = getPlaybackMonitoringRepositoryUseCase,
@@ -122,7 +133,7 @@ class UnifiedMediaDetailsDataObserver(
             initialRequestType = resolvedRequestType,
         )
 
-        scope.launch {
+        observeScope.launch {
             dataFlow.collectLatest { (activeRepo, allRepos, seerrRepo, bazarrRepo, map) ->
                 val instances = allRepos.map { it.instance }
                 val filteredInstances =
@@ -173,6 +184,8 @@ class UnifiedMediaDetailsDataObserver(
                 val effectiveSeerrRepo = if (!combineMedia && targetArrId != null) null else seerrRepo
                 val effectiveArrRepo = if (!combineMedia && targetArrId == null && seerrRepo != null) null else activeRepo
 
+                var historyArrId: Long? = null
+                var historyJob: Job? = null
                 getUnifiedMediaDetailsUseCase(
                     arrId = targetArrId,
                     tmdbId = tmdbId,
@@ -185,22 +198,26 @@ class UnifiedMediaDetailsDataObserver(
                 ).collect { rawState ->
                     if (rawState is UnifiedMediaDetailsUiState.Success) {
                         val effectiveArrId = rawState.arrMedia?.id
-                        if (effectiveArrId != null && effectiveArrId != 0L && activeRepo != null) {
-                            launch {
-                                if (activeRepo is SonarrRepository) {
-                                    activeRepo.getSeriesHistory(effectiveArrId)
-                                } else {
-                                    activeRepo.getItemHistory(effectiveArrId)
-                                }
-                            }
-                            launch {
-                                activeRepo.observeItemHistory(effectiveArrId).collect { history ->
-                                    val current = uiStateFlow.value as? UnifiedMediaDetailsUiState.Success ?: return@collect
-                                    if (current.history != history) {
-                                        uiStateFlow.value = current.copy(history = history)
+                        // Success re-emits on every cache update; only start one history observer per item.
+                        if (effectiveArrId != null && effectiveArrId != 0L && activeRepo != null && effectiveArrId != historyArrId) {
+                            historyArrId = effectiveArrId
+                            historyJob?.cancel()
+                            historyJob =
+                                launch {
+                                    launch {
+                                        if (activeRepo is SonarrRepository) {
+                                            activeRepo.getSeriesHistory(effectiveArrId)
+                                        } else {
+                                            activeRepo.getItemHistory(effectiveArrId)
+                                        }
+                                    }
+                                    activeRepo.observeItemHistory(effectiveArrId).collect { history ->
+                                        val current = uiStateFlow.value as? UnifiedMediaDetailsUiState.Success ?: return@collect
+                                        if (current.history != history) {
+                                            uiStateFlow.value = current.copy(history = history)
+                                        }
                                     }
                                 }
-                            }
                         }
 
                         onIsMonitoredUpdated(rawState.arrMedia?.monitored ?: false)

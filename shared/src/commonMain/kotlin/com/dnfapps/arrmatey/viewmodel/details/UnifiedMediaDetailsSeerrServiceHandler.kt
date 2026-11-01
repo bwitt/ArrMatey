@@ -101,8 +101,9 @@ class UnifiedMediaDetailsSeerrServiceHandler(
     fun observeSeerrRepo(
         seerrRepoFlow: Flow<SeerrInstanceRepository?>,
         uiStateFlow: Flow<UnifiedMediaDetailsUiState>,
+        observeScope: CoroutineScope = scope,
     ) {
-        scope.launch {
+        observeScope.launch {
             seerrRepoFlow.collectLatest { seerrRepo ->
                 if (seerrRepo != null) {
                     launch {
