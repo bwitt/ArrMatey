@@ -10,6 +10,10 @@ import SwiftUI
 class BazarrDetailsViewModelS: ObservableObject {
     private let viewModel: BazarrDetailsViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var uiState: BazarrDetails = BazarrDetails(details: nil, episodes: [])
     @Published private(set) var operationState: OperationStatus = OperationStatusIdle()
 

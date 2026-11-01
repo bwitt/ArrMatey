@@ -12,6 +12,10 @@ import SwiftUI
 class CustomWebpageConfigurationViewModelS: ObservableObject {
     private let viewModel: CustomWebpageConfigurationViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var webpages: [CustomWebpage] = []
     @Published private(set) var uiState: CustomWebpageUiState = CustomWebpageUiState()
 

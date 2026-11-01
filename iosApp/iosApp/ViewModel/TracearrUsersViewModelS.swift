@@ -5,6 +5,10 @@ import SwiftUI
 class TracearrUsersViewModelS: ObservableObject {
     private let viewModel: TracearrUsersViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var state: TracearrUsersState = TracearrUsersState.Initial()
     @Published private(set) var isRefreshing: Bool = false
     @Published var searchQuery: String = "" {

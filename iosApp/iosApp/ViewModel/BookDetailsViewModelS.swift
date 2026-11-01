@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class BookDetailsViewModelS: ObservableObject {
     private let viewModel: BookDetailsViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var book: Book
     @Published private(set) var bookFiles: [BookFile] = []

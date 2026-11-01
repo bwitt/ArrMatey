@@ -10,6 +10,10 @@ import SwiftUI
 class BazarrViewModelS: ObservableObject {
     private let viewModel: BazarrViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var uiState: BazarrLibrary = BazarrLibraryInitial()
     @Published private(set) var selectedSection: BazarrSection = BazarrSection.series
     @Published var searchQuery: String = ""

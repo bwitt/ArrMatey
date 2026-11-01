@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class EditInstanceViewModelS: ObservableObject {
     private let viewModel: EditInstanceViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var uiState: AddInstanceUiState
     @Published private(set) var instance: Instance? = nil

@@ -5,6 +5,10 @@ import SwiftUI
 class MonitoringViewModelS: ObservableObject {
     private let viewModel: MonitoringViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var state: MonitoringState = MonitoringStateInitial()
     @Published private(set) var selectedSession: PlaybackStreamSession? = nil
     @Published private(set) var isRefreshing: Bool = false

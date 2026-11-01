@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class CalendarViewModelS: ObservableObject {
     private let viewModel: CalendarViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     private let preferencesStore: PreferencesStore
     
     @Published private(set) var calendarState: CalendarState = CalendarState()

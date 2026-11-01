@@ -12,6 +12,10 @@ import SwiftUI
 class MoreScreenViewModelS: ObservableObject {
     private let viewModel: MoreScreenViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var instances: [Instance] = []
     @Published private(set) var arrInstances: [Instance] = []
     @Published private(set) var selectedCustomizationInstance: Instance? = nil

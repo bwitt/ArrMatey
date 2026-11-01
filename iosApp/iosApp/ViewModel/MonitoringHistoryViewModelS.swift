@@ -5,6 +5,10 @@ import SwiftUI
 class MonitoringHistoryViewModelS: ObservableObject {
     private let viewModel: MonitoringHistoryViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var state: MonitoringHistoryState = MonitoringHistoryStateInitial()
     @Published private(set) var selectedSession: PlaybackStreamSession? = nil
     @Published private(set) var isRefreshing: Bool = false

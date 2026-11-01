@@ -10,6 +10,10 @@ import SwiftUI
 class BazarrSubtitleSearchViewModelS: ObservableObject {
     private let viewModel: BazarrSubtitleSearchViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var searchState: SubtitleSearchState = SubtitleSearchStateLoading()
     @Published private(set) var downloadStates: [String: OperationStatus] = [:]
 

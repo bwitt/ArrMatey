@@ -32,6 +32,7 @@ class ActivityQueueService(
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var pollingJob: Job? = null
     private var refreshJob: Job? = null
+    private var attachedViewModelCount = 0
 
     init {
         scope.launch {
@@ -129,6 +130,20 @@ class ActivityQueueService(
     fun stopPolling() {
         pollingJob?.cancel()
         pollingJob = null
+    }
+
+    internal val isPollingActive: Boolean
+        get() = pollingJob?.isActive == true
+
+    // Called from ViewModel init/onCleared on the main thread.
+    fun attachViewModel() {
+        attachedViewModelCount++
+        startPolling()
+    }
+
+    fun detachViewModel() {
+        attachedViewModelCount = (attachedViewModelCount - 1).coerceAtLeast(0)
+        if (attachedViewModelCount == 0) stopPolling()
     }
 
     fun removeTaskLocally(taskId: Int, instanceId: Long? = null) {

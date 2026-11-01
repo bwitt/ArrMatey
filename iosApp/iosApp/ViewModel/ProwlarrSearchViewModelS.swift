@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class ProwlarrSearchViewModelS: ObservableObject {
     private let viewModel: ProwlarrSearchViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var searchResults: ProwlarrSearchState = ProwlarrSearchStateInitial()
     @Published private(set) var searchQuery: String = ""

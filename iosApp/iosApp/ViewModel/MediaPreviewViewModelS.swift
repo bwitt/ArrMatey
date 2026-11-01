@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class MediaPreviewViewModelS: ObservableObject {
     private let viewModel: MediaPreviewViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var uiState: MediaPreviewUiState = MediaPreviewUiState()
     

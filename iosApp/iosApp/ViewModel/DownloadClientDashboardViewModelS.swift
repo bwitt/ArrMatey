@@ -9,6 +9,10 @@ import SwiftUI
 @MainActor
 class DownloadClientDashboardViewModelS: ObservableObject {
     private let viewModel: DownloadClientDashboardViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var state: DownloadClientDashboardUiState = DownloadClientDashboardUiStateInitial()
     @Published private(set) var isRefreshing: Bool = false

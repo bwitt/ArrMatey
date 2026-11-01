@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class ArrSearchViewModelS: ObservableObject {
     private let viewModel: ArrSearchViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var uiState: ArrLibrary = ArrLibraryInitial()
     @Published private(set) var sortBy: SortBy = .relevance

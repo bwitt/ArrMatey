@@ -5,6 +5,10 @@ import SwiftUI
 class TautulliUsersViewModelS: ObservableObject {
     private let viewModel: TautulliUsersViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var state: TautulliUsersState = TautulliUsersState.Initial()
     @Published private(set) var isRefreshing: Bool = false
     @Published var searchQuery: String = ""

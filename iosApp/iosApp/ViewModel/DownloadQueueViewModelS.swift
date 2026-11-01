@@ -10,6 +10,10 @@ import SwiftUI
 class DownloadQueueViewModelS: ObservableObject {
     private let viewModel: DownloadQueueViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var filterState: DownloadQueueFilterState = DownloadQueueFilterState()
     @Published private(set) var sortState: DownloadQueueSortState = DownloadQueueSortState()
     @Published private(set) var downloadQueueState: DownloadQueueBundle = DownloadQueueBundle()

@@ -12,6 +12,10 @@ import SwiftUI
 class BackupViewModelS: ObservableObject {
     private let viewModel: BackupViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published var exportState = ExportUiState()
     @Published var importState = ImportUiState()
 

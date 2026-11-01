@@ -10,6 +10,10 @@ import SwiftUI
 class BazarrMediaSubtitlesViewModelS: ObservableObject {
     private let viewModel: BazarrMediaSubtitlesViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var state: BazarrSubtitlesUiState = BazarrSubtitlesUiStateLoading()
     @Published private(set) var operationState: OperationStatus = OperationStatusIdle()
 

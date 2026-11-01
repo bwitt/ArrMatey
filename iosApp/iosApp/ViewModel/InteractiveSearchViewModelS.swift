@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class InteractiveSearchViewModelS: ObservableObject {
     private let viewModel: InteractiveSearchViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var releaseUiState: ReleaseLibrary = ReleaseLibraryInitial()
     @Published private(set) var downloadReleaseState: DownloadState = DownloadStateInitial()

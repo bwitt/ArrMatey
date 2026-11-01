@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class DownloadClientsViewModelS: ObservableObject {
     private let viewModel: DownloadClientsViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var downloadClientsState: DownloadClientsState = DownloadClientsState()
     @Published private(set) var connectionStates: [Int64:OperationStatus] = [:]

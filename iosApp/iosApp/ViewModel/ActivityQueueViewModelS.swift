@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class ActivityQueueViewModelS: ObservableObject {
     private let viewModel: ActivityQueueViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     private let preferencesStore: PreferencesStore
 
     @Published private(set) var queueItems: [QueueItem] = []

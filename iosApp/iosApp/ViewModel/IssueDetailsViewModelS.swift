@@ -9,6 +9,10 @@ import SwiftUI
 @MainActor
 class IssueDetailsViewModelS: ObservableObject {
     private let viewModel: IssueDetailsViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var uiState: IssueDetailsUiState
     

@@ -12,6 +12,10 @@ import SwiftUI
 class DashboardViewModelS: ObservableObject {
     private let viewModel: CombinedDashboardViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var isRefreshing: Bool = false
     @Published private(set) var state: CombinedDashboardState = CombinedDashboardStateInitial()
     @Published private(set) var isEditing: Bool = false

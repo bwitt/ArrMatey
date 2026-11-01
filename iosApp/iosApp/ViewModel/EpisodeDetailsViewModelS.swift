@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class EpisodeDetailsViewModelS: ObservableObject {
     private let viewModel: EpisodeDetailsViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var episode: Episode
     @Published private(set) var history: HistoryState = HistoryStateInitial()

@@ -9,6 +9,10 @@ import SwiftUI
 @MainActor
 class SeerrMediaDetailsViewModelS: ObservableObject {
     private let viewModel: SeerrMediaDetailsViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var uiState: SeerrDetailsState = SeerrDetailsStateInitial()
     @Published private(set) var buttonState: MediaButtonState = MediaButtonState()

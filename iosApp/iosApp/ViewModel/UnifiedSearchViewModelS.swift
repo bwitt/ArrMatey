@@ -12,6 +12,10 @@ import SwiftUI
 class UnifiedSearchViewModelS: ObservableObject {
     private let viewModel: UnifiedSearchViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var searchState: [SearchResult] = []
     @Published private(set) var filteredSearchState: [SearchResult] = []
     @Published private(set) var availableTypeFilters: [InstanceType] = []

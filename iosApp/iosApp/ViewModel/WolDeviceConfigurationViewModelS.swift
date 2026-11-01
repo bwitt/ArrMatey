@@ -10,6 +10,10 @@ import SwiftUI
 class WolDeviceConfigurationViewModelS: ObservableObject {
     private let viewModel: WolDeviceConfigurationViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var uiState: WolDeviceConfigurationUiState = WolDeviceConfigurationUiState(
         id: nil,
         name: "",

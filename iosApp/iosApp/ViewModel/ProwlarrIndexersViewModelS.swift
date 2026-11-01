@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class ProwlarrIndexersViewModelS: ObservableObject {
     private let viewModel: ProwlarrIndexersViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var indexers: ProwlarrIndexersState = ProwlarrIndexersStateInitial()
     @Published private(set) var indexerSortState: IndexersSortingState = IndexersSortingState()

@@ -12,6 +12,10 @@ import Combine
 @MainActor
 class ArrMediaViewModelS: ObservableObject {
     private let viewModel: ArrMediaViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var uiState: ArrLibrary = ArrLibraryInitial()
     @Published private(set) var instanceData: InstanceData?

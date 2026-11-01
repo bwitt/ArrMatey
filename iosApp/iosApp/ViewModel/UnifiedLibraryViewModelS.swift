@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class UnifiedLibraryViewModelS: ObservableObject {
     private let viewModel: UnifiedLibraryViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var arrInstances: [Instance] = []
     @Published private(set) var selectedInstance: Instance? = nil

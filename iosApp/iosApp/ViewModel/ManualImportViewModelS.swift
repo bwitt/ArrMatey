@@ -10,6 +10,10 @@ import SwiftUI
 class ManualImportViewModelS: ObservableObject {
     private let viewModel: ManualImportViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var isLoading: Bool = true
     @Published private(set) var isWorking: Bool = false
     @Published private(set) var error: String? = nil

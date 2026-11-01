@@ -1,5 +1,7 @@
 package com.dnfapps.arrmatey.di
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelStore
 import com.dnfapps.arrmatey.arr.api.client.GenericClient
 import com.dnfapps.arrmatey.arr.api.model.ArrMedia
 import com.dnfapps.arrmatey.arr.api.model.Book
@@ -202,4 +204,9 @@ object KoinBridge : KoinComponent {
     fun getInstanceRepository(): InstanceRepository = getKoin().get()
 
     fun getInstanceManager(): InstanceManager = getKoin().get()
+
+    // ViewModel.clear() is internal; a throwaway store is the public way to trigger onCleared.
+    fun releaseViewModel(viewModel: ViewModel) {
+        ViewModelStore().apply { put(viewModel.hashCode().toString(), viewModel) }.clear()
+    }
 }

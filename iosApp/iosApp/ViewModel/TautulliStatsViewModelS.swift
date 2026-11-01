@@ -5,6 +5,10 @@ import SwiftUI
 class TautulliStatsViewModelS: ObservableObject {
     private let viewModel: TautulliStatsViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var state: TautulliStatsState = TautulliStatsStateInitial()
     @Published private(set) var isRefreshing: Bool = false
     @Published private(set) var timeRange: Int32 = 30

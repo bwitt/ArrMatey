@@ -10,6 +10,10 @@ import SwiftUI
 class RequestsViewModelS: ObservableObject {
     private let viewModel: RequestsViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var requestsState = PagedData<MediaRequestPackage>()
     @Published private(set) var issuesState = PagedData<MediaIssuePackage>()
     @Published private(set) var selectedFilter: RequestState = .pending

@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class ArrInstanceDashboardViewModelS: ObservableObject {
     private let viewModel: ArrInstanceDashboardViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var state: ArrDashboardState = ArrDashboardStateInitial()
     @Published private(set) var isRefreshing: Bool = false

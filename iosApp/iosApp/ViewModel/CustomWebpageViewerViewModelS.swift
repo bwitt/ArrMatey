@@ -11,6 +11,10 @@ import SwiftUI
 @MainActor
 class CustomWebpageViewerViewModelS: ObservableObject {
     private let viewModel: CustomWebpageViewerViewModel
+
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
     
     @Published private(set) var webpage: CustomWebpage? = nil
     

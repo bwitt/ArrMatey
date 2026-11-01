@@ -10,6 +10,10 @@ import SwiftUI
 class DiscoverViewModelS: ObservableObject {
     private let viewModel: DiscoverViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var trendingState = PagedData<DiscoverResult>()
     @Published private(set) var moviesState = PagedData<DiscoverResult>()
     @Published private(set) var tvState = PagedData<DiscoverResult>()

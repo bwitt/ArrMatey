@@ -5,6 +5,10 @@ import SwiftUI
 class TracearrHistoryViewModelS: ObservableObject {
     private let viewModel: TracearrHistoryViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var state: TracearrHistoryState = TracearrHistoryStateInitial()
     @Published private(set) var selectedSession: TracearrStreamSession? = nil
     @Published private(set) var isRefreshing: Bool = false

@@ -10,6 +10,10 @@ import SwiftUI
 class UnifiedMediaDetailsViewModelS: ObservableObject {
     private let viewModel: UnifiedMediaDetailsViewModel
 
+    deinit {
+        KoinBridge.shared.releaseViewModel(viewModel: viewModel)
+    }
+
     @Published private(set) var uiState: UnifiedMediaDetailsUiState = UnifiedMediaDetailsUiStateInitial()
     @Published private(set) var isRefreshing: Bool = false
     @Published private(set) var isAddOrRequestInProgress: Bool = false

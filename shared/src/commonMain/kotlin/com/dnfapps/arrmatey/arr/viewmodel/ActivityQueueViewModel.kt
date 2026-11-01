@@ -518,7 +518,7 @@ class ActivityQueueViewModel(
         )
 
     init {
-        startPolling()
+        activityQueueService.attachViewModel()
         refresh()
         viewModelScope.launch {
             instanceManager.instanceRepositories
@@ -1004,7 +1004,7 @@ class ActivityQueueViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        activityQueueService.stopPolling()
+        activityQueueService.detachViewModel()
     }
 
     private fun filterByInstance(
