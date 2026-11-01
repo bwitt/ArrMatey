@@ -1,9 +1,6 @@
 package com.dnfapps.arrmatey.ui.screens
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.ReleaseNotesSheet
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
 import com.dnfapps.arrmatey.entensions.PaddingValues
+import com.dnfapps.arrmatey.entensions.openAppSettings
 import com.dnfapps.arrmatey.entensions.openLink
 import com.dnfapps.arrmatey.isDebug
 import com.dnfapps.arrmatey.model.IconSource
@@ -174,13 +172,7 @@ fun SettingsScreen(
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         Button(
-                            onClick = {
-                                val intent =
-                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                        data = Uri.fromParts("package", context.packageName, null)
-                                    }
-                                context.startActivity(intent)
-                            },
+                            onClick = { context.openAppSettings() },
                             modifier = Modifier.align(Alignment.End),
                             colors =
                             ButtonDefaults.buttonColors(

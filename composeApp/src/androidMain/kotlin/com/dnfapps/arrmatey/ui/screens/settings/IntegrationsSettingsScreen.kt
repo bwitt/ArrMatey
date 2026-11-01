@@ -3,7 +3,6 @@ package com.dnfapps.arrmatey.ui.screens.settings
 import android.content.Intent
 import android.content.pm.verify.domain.DomainVerificationManager
 import android.content.pm.verify.domain.DomainVerificationUserState
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.dnfapps.arrmatey.arr.viewmodel.MoreScreenViewModel
+import com.dnfapps.arrmatey.entensions.openAppSettings
+import com.dnfapps.arrmatey.entensions.tryStartActivity
 import com.dnfapps.arrmatey.model.IconSource
 import com.dnfapps.arrmatey.model.SettingItem
 import com.dnfapps.arrmatey.model.SmartAddSeerrAction
@@ -189,18 +190,15 @@ fun IntegrationsSettingsScreen(
                         icon = IconSource.Vector(Icons.Default.Link),
                         title = mokoString(MR.strings.tmdb_links),
                         onClick = {
-                            val intent =
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    Intent(
-                                        Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
-                                        "package:${context.packageName}".toUri(),
+                            val openByDefault =
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                                    context.tryStartActivity(
+                                        Intent(
+                                            Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS,
+                                            "package:${context.packageName}".toUri(),
+                                        ),
                                     )
-                                } else {
-                                    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                                        data = Uri.fromParts("package", context.packageName, null)
-                                    }
-                                }
-                            context.startActivity(intent)
+                            if (!openByDefault) context.openAppSettings()
                         },
                         trailingContent = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

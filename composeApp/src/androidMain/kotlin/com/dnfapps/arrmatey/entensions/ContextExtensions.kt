@@ -1,11 +1,17 @@
 package com.dnfapps.arrmatey.entensions
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
+import com.dnfapps.arrmatey.shared.*
+import com.dnfapps.arrmatey.shared.MR
+import dev.icerock.moko.resources.desc.Resource
+import dev.icerock.moko.resources.desc.StringDesc
 
 fun Context.openLink(url: String) {
     val uri = url.toUri()
@@ -23,7 +29,7 @@ fun Context.openLink(url: String) {
             Intent(Intent.ACTION_VIEW, uri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-        startActivity(intent)
+        startActivityOrNotify(intent)
     }
 }
 
@@ -33,5 +39,18 @@ fun Context.openAppSettings() {
             data = Uri.fromParts("package", packageName, null)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+    startActivityOrNotify(intent)
+}
+
+fun Context.tryStartActivity(intent: Intent): Boolean = try {
     startActivity(intent)
+    true
+} catch (e: ActivityNotFoundException) {
+    false
+}
+
+fun Context.startActivityOrNotify(intent: Intent) {
+    if (!tryStartActivity(intent)) {
+        Toast.makeText(this, StringDesc.Resource(MR.strings.no_app_to_open).toString(this), Toast.LENGTH_SHORT).show()
+    }
 }
