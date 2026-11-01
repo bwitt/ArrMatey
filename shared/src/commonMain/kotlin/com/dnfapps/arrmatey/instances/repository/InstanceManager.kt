@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class InstanceManager(
@@ -38,6 +40,9 @@ class InstanceManager(
     private val _instanceRepositories =
         MutableStateFlow<Map<Long, InstanceScopedRepository>>(emptyMap())
     val instanceRepositories: StateFlow<Map<Long, InstanceScopedRepository>> = _instanceRepositories
+
+    private val repositoriesMutex = Mutex()
+    private val httpClients = mutableMapOf<Long, HttpClient>()
 
     init {
         scope.launch {
@@ -63,22 +68,32 @@ class InstanceManager(
         }
     }
 
-    private fun updateRepositories(instances: List<Instance>) {
+    private suspend fun updateRepositories(instances: List<Instance>) = repositoriesMutex.withLock {
         val currentRepos = _instanceRepositories.value.toMutableMap()
         val instanceIds = instances.map { it.id }.toSet()
+        val retiredClients = mutableListOf<HttpClient>()
 
         currentRepos.keys
             .filterNot { it in instanceIds }
             .forEach { instanceId ->
                 currentRepos.remove(instanceId)
+                httpClients.remove(instanceId)?.let(retiredClients::add)
             }
 
         instances.forEach { instance ->
             val existingRepo = currentRepos[instance.id]
             if (existingRepo == null || existingRepo.instance != instance) {
                 try {
-                    val httpClient = httpClientFactory.create(instance)
+                    // Switching the selected instance only flips `selected`, so keep the live client for stale holders.
+                    val reusableClient =
+                        httpClients[instance.id]?.takeIf {
+                            existingRepo?.instance?.copy(selected = instance.selected) == instance
+                        }
+                    val httpClient = reusableClient ?: httpClientFactory.create(instance)
                     val newRepo = createScopedRepository(instance, httpClient, logger)
+                    if (reusableClient == null) {
+                        httpClients.put(instance.id, httpClient)?.let(retiredClients::add)
+                    }
                     currentRepos[instance.id] = newRepo
                     refreshRepositoryStatus(newRepo)
                 } catch (e: Exception) {
@@ -88,6 +103,7 @@ class InstanceManager(
         }
 
         _instanceRepositories.value = currentRepos
+        retiredClients.forEach { it.close() }
     }
 
     private fun refreshRepositoryStatus(repository: InstanceScopedRepository) {
@@ -127,12 +143,17 @@ class InstanceManager(
         _instanceRepositories.value[instanceId]?.let { return it }
 
         val instance = instanceRepository.getInstanceById(instanceId) ?: return null
-        val httpClient = httpClientFactory.create(instance)
-        val repo = createScopedRepository(instance, httpClient, logger)
+        return repositoriesMutex.withLock {
+            _instanceRepositories.value[instanceId]?.let { return@withLock it }
 
-        _instanceRepositories.value += (instanceId to repo)
-        refreshRepositoryStatus(repo)
-        return repo
+            val httpClient = httpClientFactory.create(instance)
+            val repo = createScopedRepository(instance, httpClient, logger)
+            httpClients.put(instanceId, httpClient)?.close()
+
+            _instanceRepositories.value += (instanceId to repo)
+            refreshRepositoryStatus(repo)
+            repo
+        }
     }
 
     private fun createScopedRepository(
@@ -444,5 +465,7 @@ class InstanceManager(
 
     fun cleanup() {
         scope.cancel()
+        httpClients.values.forEach { it.close() }
+        httpClients.clear()
     }
 }
