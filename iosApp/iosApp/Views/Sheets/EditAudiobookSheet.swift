@@ -32,9 +32,10 @@ struct EditAudiobookSheet: View {
         self._monitored = State(initialValue: item.monitored)
         self._selectedQualityProfileId = State(initialValue: Int32(item.qualityProfileId))
         
-        let folder = rootFolders.first(where: { item.path?.hasPrefix($0.path) == true }) ?? rootFolders.first!
-        self._selectedRootFolderPath = State(initialValue: folder.path)
-        self._relativePath = State(initialValue: item.path?.replacingOccurrences(of: folder.path, with: "").trimmingCharacters(in: .init(charactersIn: "/")) ?? "")
+        let folderPath = (rootFolders.first(where: { item.path?.hasPrefix($0.path) == true }) ?? rootFolders.first)?.path ?? ""
+        let relative = folderPath.isEmpty ? item.path : item.path?.replacingOccurrences(of: folderPath, with: "")
+        self._selectedRootFolderPath = State(initialValue: folderPath)
+        self._relativePath = State(initialValue: relative?.trimmingCharacters(in: .init(charactersIn: "/")) ?? "")
     }
     
     var body: some View {

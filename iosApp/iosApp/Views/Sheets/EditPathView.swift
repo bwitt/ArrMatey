@@ -13,13 +13,13 @@ struct EditPathView: View {
     let onEdit: (ArrMedia, Bool) -> Void
     @Environment(\.dismiss) private var dismiss
     
-    @State private var selectedRootFolder: RootFolder
+    @State private var selectedRootFolder: RootFolder?
     @State private var moveFiles = false
     
     private let initialRootFolder: RootFolder?
     
     private var isPathChanged: Bool {
-        selectedRootFolder.path != initialRootFolder?.path
+        selectedRootFolder?.path != initialRootFolder?.path
     }
     
     init(item: ArrMedia, rootFolders: [RootFolder], onEdit: @escaping (ArrMedia, Bool) -> Void) {
@@ -28,20 +28,21 @@ struct EditPathView: View {
         self.onEdit = onEdit
         
         let initialRF = item.findCurrentRoot(rootFolders: rootFolders)
-        let effectiveRF = initialRF ?? rootFolders.first
         
         self.initialRootFolder = initialRF
-        self._selectedRootFolder = State(initialValue: effectiveRF ?? rootFolders.first!)
+        self._selectedRootFolder = State(initialValue: initialRF ?? rootFolders.first)
     }
     
     var body: some View {
         NavigationStack {
             Form {
                 Section(MR.strings().edit_path.localized()) {
-                    Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
-                        ForEach(rootFolders, id: \.id) { folder in
-                            Text("\(folder.path) (\(folder.freeSpace.bytesAsFileSizeString()))")
-                                .tag(folder)
+                    if !rootFolders.isEmpty {
+                        Picker(MR.strings().root_folder.localized(), selection: $selectedRootFolder) {
+                            ForEach(rootFolders, id: \.id) { folder in
+                                Text("\(folder.path) (\(folder.freeSpace.bytesAsFileSizeString()))")
+                                    .tag(folder as RootFolder?)
+                            }
                         }
                     }
                 }
@@ -49,6 +50,11 @@ struct EditPathView: View {
                 Section {
                     Toggle(MR.strings().move_files.localized(), isOn: $moveFiles)
                         .disabled(!isPathChanged)
+                }
+            }
+            .onChange(of: rootFolders) { _, folders in
+                if selectedRootFolder == nil {
+                    selectedRootFolder = item.findCurrentRoot(rootFolders: folders) ?? folders.first
                 }
             }
             .navigationTitle(MR.strings().edit_path.localized())
@@ -70,7 +76,7 @@ struct EditPathView: View {
     }
     
     private func save() {
-        let rf = selectedRootFolder.path
+        guard let rf = selectedRootFolder?.path else { return }
         let updatedItem = item.withNewRoot(rootFolderPath: rf, currentRootFolderPath: initialRootFolder?.path)
         onEdit(updatedItem, moveFiles)
         dismiss()
