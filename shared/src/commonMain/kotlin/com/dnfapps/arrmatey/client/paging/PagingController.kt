@@ -3,6 +3,8 @@ package com.dnfapps.arrmatey.client.paging
 import com.dnfapps.networking.ErrorType
 import com.dnfapps.networking.NetworkException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,16 +20,21 @@ class PagingController<T : Any>(
     val state: StateFlow<PagedData<T>> = _state.asStateFlow()
 
     private var pagingSource: PagingSource<T>? = null
+    private var loadJob: Job? = null
 
     fun loadInitialPage() {
         if (_state.value.isLoading) return
-        pagingSource = sourceFactory()
-        scope.launch {
-            _state.update {
-                PagedData(isLoading = true, error = null)
-            }
-
-            when (val result = pagingSource?.load(1)) {
+        // An in-flight next page belongs to the old source and must not land on the refreshed list.
+        loadJob?.cancel()
+        val source = sourceFactory()
+        pagingSource = source
+        _state.update {
+            PagedData(isLoading = true, error = null)
+        }
+        loadJob = scope.launch {
+            val result = source.load(1)
+            ensureActive()
+            when (result) {
                 is LoadResult.Page -> {
                     val data = result.data
                     val items = if (keySelector != null) data.distinctBy(keySelector) else data
@@ -50,14 +57,6 @@ class PagingController<T : Any>(
                         )
                     }
                 }
-                null -> {
-                    _state.update {
-                        PagedData(
-                            isLoading = false,
-                            error = "Failed to create paging source",
-                        )
-                    }
-                }
             }
         }
     }
@@ -66,13 +65,15 @@ class PagingController<T : Any>(
         val currentState = _state.value
 
         if (!currentState.canLoadMore) return
+        val source = pagingSource ?: return
 
-        scope.launch {
-            _state.update { it.copy(isLoadingMore = true, error = null) }
+        _state.update { it.copy(isLoadingMore = true, error = null) }
+        val nextPage = currentState.currentPage + 1
 
-            val nextPage = currentState.currentPage + 1
-
-            when (val result = pagingSource?.load(nextPage)) {
+        loadJob = scope.launch {
+            val result = source.load(nextPage)
+            ensureActive()
+            when (result) {
                 is LoadResult.Page -> {
                     val data = result.data
                     _state.update {
@@ -93,11 +94,6 @@ class PagingController<T : Any>(
                             isLoadingMore = false,
                             error = formatError(result.throwable, isLoadingMore = true),
                         )
-                    }
-                }
-                null -> {
-                    _state.update {
-                        it.copy(isLoadingMore = false)
                     }
                 }
             }
